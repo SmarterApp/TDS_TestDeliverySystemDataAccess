@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="ProctorPackage">
+	<xs:complexType>
+  	<xs:sequence>
+    	<xs:element name="Proctor">
+      	<xs:complexType>
+        	<xs:sequence>
+          	<xs:element name="Tests">
+            	<xs:complexType>
+              	<xs:sequence>
+                	<xs:element maxOccurs="unbounded" name="Test">
+                  	<xs:complexType>
+                    	<xs:sequence>
+                      	<xs:element name="SubjectCode">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:minLength value="1"/>
+                            	<xs:maxLength value="3"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+						<xs:element name="TestId">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="32"/>
+                            	<xs:pattern value="[a-fA-F0-9]+"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="TestName">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="200"/>
+                            	<xs:pattern value="[a-zA-Z0-9-]+"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+						<xs:element name="TestType">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                               <xs:maxLength value="20"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                        <xs:element name="Category" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:maxLength value="20"/>
+                               <xs:pattern value="[a-zA-Z0-9-]+"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                      	<xs:element name="MaxOpps">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:int">
+                            	<xs:totalDigits value="3"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="WindowOpps">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:int">
+                            	<xs:totalDigits value="3"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="DelayRule">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:int">
+                            	<xs:totalDigits value="3"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="WindowStart">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:date">
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                    	</xs:sequence>
+                  	</xs:complexType>
+                	</xs:element>
+              	</xs:sequence>
+            	</xs:complexType>
+          	</xs:element>
+        	</xs:sequence>
+      	</xs:complexType>
+    	</xs:element>
+  	</xs:sequence>
+            <xs:attribute name="version" type="xs:string" use="required" fixed="1.0"/>
+	</xs:complexType>
+  </xs:element>
+</xs:schema>

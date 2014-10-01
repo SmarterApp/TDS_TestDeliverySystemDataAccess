@@ -1,0 +1,84 @@
+insert into tdscore_load_configs.dbo.TDS_Application select * from tdscore_dev_configs2012_sandbox.dbo.TDS_Application ;
+insert into tdscore_load_configs.dbo.TDS_ApplicationSettings select * from tdscore_dev_configs2012_sandbox.dbo.TDS_ApplicationSettings where environment='development';
+insert into tdscore_load_configs.dbo.TDS_BrowserWhiteList select * from tdscore_dev_configs2012_sandbox.dbo.TDS_BrowserWhiteList where environment='development';
+insert into tdscore_load_configs.dbo.TDS_ClientAccommodationType select * from tdscore_dev_configs2012_sandbox.dbo.TDS_ClientAccommodationType where clientname='SBAC' ;
+insert into tdscore_load_configs.dbo.TDS_ClientAccommodationValue select * from tdscore_dev_configs2012_sandbox.dbo.TDS_ClientAccommodationValue where clientname='SBAC';
+insert into tdscore_load_configs.dbo.TDS_ConfigType select * from tdscore_dev_configs2012_sandbox.dbo.TDS_ConfigType ;
+
+SET IDENTITY_INSERT tdscore_load_configs.dbo.TDS_CoreMessageObject ON;
+insert into tdscore_load_configs.dbo.TDS_CoreMessageObject(_key, context,contexttype, messageid,ownerapp, appkey,[message],paralabels,fromclient,datealtered, nodes, ismessageshowtouser) 
+select _key, context,contexttype, messageid,ownerapp, appkey,[message],paralabels,fromclient,datealtered, nodes, ismessageshowtouser from tdscore_dev_configs2012_sandbox.dbo.TDS_CoreMessageObject ;
+SET IDENTITY_INSERT tdscore_load_configs.dbo.TDS_CoreMessageObject OFF;
+
+insert into tdscore_load_configs.dbo.TDS_CoreMessageUser select * from tdscore_dev_configs2012_sandbox.dbo.TDS_CoreMessageUser;
+
+insert into tdscore_load_configs.dbo.TDS_TesteeAttribute select * from tdscore_dev_configs2012_sandbox.dbo.TDS_TesteeAttribute ;
+insert into tdscore_load_configs.dbo.TDS_FieldtestPriority select * from tdscore_dev_configs2012_sandbox.dbo.TDS_FieldtestPriority ;
+
+insert into tdscore_load_configs.dbo.TDS_Role select * from tdscore_dev_configs2012_sandbox.dbo.TDS_Role;
+insert into tdscore_load_configs.dbo.TDS_SystemFlags select * from tdscore_dev_configs2012_sandbox.dbo.TDS_SystemFlags ;
+
+insert into tdscore_load_configs.dbo.TDS_TesteeRelationshipAttribute select * from tdscore_dev_configs2012_sandbox.dbo.TDS_TesteeRelationshipAttribute ;
+insert into tdscore_load_configs.dbo.TDS_TestProperties select * from tdscore_dev_configs2012_sandbox.dbo.TDS_TestProperties ;
+insert into tdscore_load_configs.dbo.TDS_TestTool select * from tdscore_dev_configs2012_sandbox.dbo.TDS_TestTool ;
+insert into tdscore_load_configs.dbo.TDS_TestToolRule select * from tdscore_dev_configs2012_sandbox.dbo.TDS_TestToolRule;
+insert into tdscore_load_configs.dbo.TDS_TestToolType select * from tdscore_dev_configs2012_sandbox.dbo.TDS_TestToolType ;
+
+insert into tdscore_load_configs.dbo.Client select * from tdscore_dev_configs2012_sandbox.dbo.Client where name = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_AccommodationFamily select * from tdscore_dev_configs2012_sandbox.dbo.Client_AccommodationFamily where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Accommodations select * from tdscore_dev_configs2012_sandbox.dbo.Client_Accommodations where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_AllowIPs select * from tdscore_dev_configs2012_sandbox.dbo.Client_AllowIPs where clientname = 'SBAC' and environment='development';
+insert into tdscore_load_configs.dbo.Client_Externs select * from tdscore_dev_configs2012_sandbox.dbo.Client_Externs where clientname = 'SBAC'and environment='development';
+
+insert into tdscore_load_configs.dbo.Client_TesteeAttribute select * from tdscore_dev_configs2012_sandbox.dbo.Client_TesteeAttribute where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_FieldtestPriority select * from tdscore_dev_configs2012_sandbox.dbo.Client_FieldtestPriority where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_ForbiddenAppsExcludeSchools select * from tdscore_dev_configs2012_sandbox.dbo.Client_ForbiddenAppsExcludeSchools where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_ForbiddenAppsList select * from tdscore_dev_configs2012_sandbox.dbo.Client_ForbiddenAppsList where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Grade select * from tdscore_dev_configs2012_sandbox.dbo.Client_Grade where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Language select * from tdscore_dev_configs2012_sandbox.dbo.Client_Language where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_MessageTranslation select * from tdscore_dev_configs2012_sandbox.dbo.Client_MessageTranslation where client = 'SBAC';
+
+insert into tdscore_load_configs.dbo.Client_MessageTranslation select * from tdscore_dev_configs2012_sandbox.dbo.Client_MessageTranslation where client = 'AIR';
+insert into tdscore_load_configs.dbo.Client_MessageTranslationAudit select * from tdscore_dev_configs2012_sandbox.dbo.Client_MessageTranslationAudit where client = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_PilotSchools select * from tdscore_dev_configs2012_sandbox.dbo.Client_PilotSchools where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_RTSRoles select * from tdscore_dev_configs2012_sandbox.dbo.Client_RTSRoles where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_SegmentProperties select * from tdscore_dev_configs2012_sandbox.dbo.Client_SegmentProperties where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Server select * from tdscore_dev_configs2012_sandbox.dbo.Client_Server where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Subject select * from tdscore_dev_configs2012_sandbox.dbo.Client_Subject where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_SystemFlags select * from tdscore_dev_configs2012_sandbox.dbo.Client_SystemFlags where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TDS_RTSAttribute select * from tdscore_dev_configs2012_sandbox.dbo.Client_TDS_RTSAttribute where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TDS_RTSAttributeValues select * from tdscore_dev_configs2012_sandbox.dbo.Client_TDS_RTSAttributeValues where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Test_ItemConstraint select * from tdscore_dev_configs2012_sandbox.dbo.Client_Test_ItemConstraint where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Test_Itemtypes select * from tdscore_dev_configs2012_sandbox.dbo.Client_Test_Itemtypes where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TesteeRelationshipAttribute select * from tdscore_dev_configs2012_sandbox.dbo.Client_TesteeRelationshipAttribute where clientname = 'SBAC';
+
+insert into tdscore_load_configs.dbo.Client_TestEligibility select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestEligibility where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestformProperties select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestformProperties where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestGrades select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestGrades where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_Testkey select * from tdscore_dev_configs2012_sandbox.dbo.Client_Testkey where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestMode select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestMode where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestPrerequisite select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestPrerequisite where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestProperties select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestProperties where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestRTSSpecs select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestRTSSpecs where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestscoreFeatures select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestscoreFeatures where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestToolRule select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestToolRule where clientname = 'SBAC';
+
+insert into tdscore_load_configs.dbo.Client_TimeWindow select * from tdscore_dev_configs2012_sandbox.dbo.Client_TimeWindow where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestWindow select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestWindow where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_TestToolType select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestToolType where clientname = 'SBAC';
+
+insert into tdscore_load_configs.dbo.Client_TestTool select * from tdscore_dev_configs2012_sandbox.dbo.Client_TestTool where clientname = 'SBAC';
+
+insert into tdscore_load_configs.dbo.Client_TimeLimits select * from tdscore_dev_configs2012_sandbox.dbo.Client_TimeLimits where clientname = 'SBAC' and (environment is null or environment='development');
+insert into tdscore_load_configs.dbo.Client_ToolDependencies select * from tdscore_dev_configs2012_sandbox.dbo.Client_ToolDependencies where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_ToolUsage select * from tdscore_dev_configs2012_sandbox.dbo.Client_ToolUsage where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.Client_VoicePack select * from tdscore_dev_configs2012_sandbox.dbo.Client_VoicePack where clientname = 'SBAC';
+
+insert into tdscore_load_configs.dbo.GEO_Database select * from tdscore_dev_configs2012_sandbox.dbo.GEO_Database ;
+insert into tdscore_load_configs.dbo.GEO_ClientApplication select * from tdscore_dev_configs2012_sandbox.dbo.GEO_ClientApplication where clientname = 'SBAC' and environment='development';
+
+insert into tdscore_load_configs.dbo.RTS_Role select * from tdscore_dev_configs2012_sandbox.dbo.RTS_Role where clientname = 'SBAC';
+insert into tdscore_load_configs.dbo.StatusCodes select * from tdscore_dev_configs2012_sandbox.dbo.StatusCodes ;
+insert into tdscore_load_configs.dbo.System_ApplicationSettings select * from tdscore_dev_configs2012_sandbox.dbo.System_ApplicationSettings where clientname = 'SBAC'and environment='development';
+insert into tdscore_load_configs.dbo.System_BrowserWhiteList select * from tdscore_dev_configs2012_sandbox.dbo.System_BrowserWhiteList where clientname = 'SBAC'and environment='development';
+insert into tdscore_load_configs.dbo.System_NetworkDiagnostics select * from tdscore_dev_configs2012_sandbox.dbo.System_NetworkDiagnostics where clientname = 'SBAC';
