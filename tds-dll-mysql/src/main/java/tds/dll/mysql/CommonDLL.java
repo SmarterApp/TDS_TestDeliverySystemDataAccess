@@ -2873,7 +2873,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     for (int cnt = 0; cnt < gLockRetryAttemptMax; cnt++) {
       applock = getAppLockInternal (connection, resourcename, lockmode, cnt);
       if (applock == null || applock != 1) {
-        _logger.error (String.format ("Failed getAppLock, attempt %d, cumulative wait %d millisec", cnt+1,cumulativeSleep));
+        _logger.info (String.format ("Failed getAppLock, attempt %d, cumulative wait %d millisec", cnt+1,cumulativeSleep));
         try {
           Thread.sleep (currentSleep);
         } catch (InterruptedException e) {

@@ -1,4 +1,4 @@
-# Welcome to the TDSDLLDev Application
+# Welcome to the TDSDLLDev Modules
 
 The TDSDLLDev is group of shared modules which can be used by other projects to access and manipulate databases. TDSDLLDev contains business level logic of database reads and updates most commonly perfomed by stored procedures.
 
@@ -9,7 +9,7 @@ This project is licensed under the [AIR Open Source License v1.0](http://www.sma
 ## Getting Involved ##
 We would be happy to receive feedback on its capabilities, problems, or future enhancements:
 
-* For general questions or discussions, please use the [Forum](forum_link_here).
+* For general questions or discussions, please use the [Forum](http://forum.opentestsystem.org/viewforum.php?f=9).
 * Use the **Issues** link to file bugs or enhancement requests.
 * Feel free to **Fork** this project and develop your changes!
 

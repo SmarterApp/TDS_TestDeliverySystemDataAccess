@@ -9,6 +9,7 @@
 package tds.dll.mysql;
 
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -943,10 +944,10 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   private int create (SQLConnection connection, EntityType entityType, Long key, String clientName, InputStream packageStream, String version, TestType testType) throws ReturnStatusException {
     String SQL_INSERT = null;
     if (entityType == EntityType.PROCTOR) {
-       SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) values (?, ?, ?, ?, now(), ?)";
-    } else {
-       SQL_INSERT = "insert into r_studentpackage (StudentKey, ClientName, Package, Version, DateCreated) values (?, ?, ?, ?, now())";
-    }
+          SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) select ?, ?, ?, ?, now(), ? from dual";
+      } else {
+          SQL_INSERT = "insert into r_studentpackage (StudentKey, ClientName, Package, Version, DateCreated) select ?, ?, ?, ?, now() from dual";
+      }
     try (PreparedStatement preparedStatement = connection.prepareStatement (SQL_INSERT)) {
       preparedStatement.setLong (1, key);
       preparedStatement.setString (2, clientName);
@@ -958,7 +959,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       preparedStatement.execute ();
       return 1;
     } catch (SQLException e) {
-       _logger.error (e.getMessage (), e);
+       _logger.error (e.getMessage ()+"; SQLState: "+e.getSQLState (), e);
        throw new ReturnStatusException ("could not create " + entityType.getValue () +  ": "  + e.getMessage ());
     }
   }
@@ -978,8 +979,12 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   private int createAndUpdateIsCurrent (SQLConnection connection, EntityType entityType, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
     int insertCount = 0;
     boolean isCurrent = false;
+    boolean preExistingAutoCommitMode = true;
+    int transactionIsolation = 0;
     try {
-      boolean preExistingAutoCommitMode = connection.getAutoCommit ();
+      preExistingAutoCommitMode = connection.getAutoCommit ();
+      transactionIsolation = connection.getTransactionIsolation ();
+      connection.setTransactionIsolation (Connection.TRANSACTION_READ_COMMITTED);
       connection.setAutoCommit (false);
       updateIsCurrent (connection, entityType, key, clientName, isCurrent);
       if (entityType == EntityType.STUDENT) {
@@ -988,8 +993,8 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
         insertCount = createProctor (connection, key, clientName, xmlPackage, testType);
       }
       connection.commit ();
-      connection.setAutoCommit (preExistingAutoCommitMode);
     } catch (ReturnStatusException e) {
+      _logger.error ("Rolling back the transaction.......",e);
       try {
         connection.rollback ();
       } catch (SQLException se) {
@@ -997,12 +1002,20 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       }
       throw e;
     } catch (Exception e) {
+      _logger.error ("Rolling back the transaction.......",e);
       try {
         connection.rollback ();
       } catch (SQLException se) {
         _logger.error (String.format ("Problem rolling back transaction: %s", se.getMessage ()));
       }
       return 0;
+    } finally {
+      try {
+        connection.setAutoCommit (preExistingAutoCommitMode);
+        connection.setTransactionIsolation (transactionIsolation);
+      } catch (SQLException se) {
+        _logger.error (String.format ("Problem setting auto commit to preExistingAutoCommitMode : %s", se.getMessage ()));
+      }
     }
     return insertCount;
   }

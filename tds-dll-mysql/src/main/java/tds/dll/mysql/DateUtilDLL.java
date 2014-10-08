@@ -56,7 +56,7 @@ public class DateUtilDLL extends AbstractDateUtilDll
       }
 
     } catch (SQLException exp) {
-      _logger.error (exp.getMessage ());
+      _logger.error (exp.getMessage (),exp);
       throw exp;
     }
     return _now;
