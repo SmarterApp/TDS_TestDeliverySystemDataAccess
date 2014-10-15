@@ -14,7 +14,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 begin
 
 	insert into computationruleparameters(_key, computationrule, parametername, parameterposition, indextype, `type`)
-	select l.parameterid
+	select distinct l.parameterid
 		 , cr.rulename
 		 , l.parametername
 		 , l.position

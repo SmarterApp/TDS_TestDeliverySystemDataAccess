@@ -1,3 +1,5 @@
+drop table if exists `__appmessages`;
+drop table if exists `__appmessagecontexts`;
 drop table if exists `_messageid`;
 drop table if exists `tds_testeerelationshipattribute`;
 drop table if exists `tds_testeeattribute`;

@@ -13,6 +13,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 )
 begin
     
+	delete from `loader_performancelevels` where _fk_package = v_packagekey;
 	delete from `loader_itemscoredimension` where _fk_package = v_packagekey;
 	delete from `loader_testblueprint` where _fk_package = v_packagekey; 
 	delete from `loader_testformgroupitems` where _fk_package = v_packagekey;
@@ -25,7 +26,6 @@ begin
 	delete from `loader_testitempoolproperties` where _fk_package = v_packagekey;
 	delete from `loader_testpackageproperties` where _fk_package = v_packagekey;
 	delete from `loader_testpassages` where _fk_package = v_packagekey;
-	delete from `loader_testpoolproperties` where _fk_package = v_packagekey;
 
 	delete from `loader_setofitemstrands` where _fk_package = v_packagekey;
 

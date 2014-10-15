@@ -8,9 +8,8 @@
  ******************************************************************************/
 package tds.dll.mysql;
 
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -1796,7 +1795,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    */
   public SingleDataResultSet TDSCONFIGS_TDS_GetMessages_SP (SQLConnection connection, String systemID, String client, String language, String contextList, Character delimiter)
       throws ReturnStatusException {
-
+    long startTime = System.currentTimeMillis ();
     Integer keys = null;
     Long numKeys = null;
     String default1 = null;
@@ -1804,11 +1803,24 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     SingleDataResultSet result = null;
     int insertedCnt = 0;
     
+    final String cmd1 = "select   M.msgkey, M.msgSource, M.MessageID, M.ContextType, M.Context, M.Appkey, M.ParaLabels, M.Message, "
+        + " M.Grade, M.Subject, M.Language"
+        + " from ${ConfigDB}.__appmessagecontexts A, ${ConfigDB}.__appmessages M "
+        + " where A.clientname = ${client} and A.systemid = ${systemid} and "
+        + " A.language = ${language} and A.contextlist = ${contextlist} and "
+        + " A._key = M._fk_AppMessageContext";
+    String finalcmd = fixDataBaseNames (cmd1);
+    SqlParametersMaps par1 = new SqlParametersMaps ().put ("client", client).put ("systemid", systemID).put ("language", language).put ("contextlist", contextList);
+    result = executeStatement (connection, finalcmd, par1, false).getResultSets ().next ();
+    if (result.getCount () > 0) {
+      _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP Total Optimized Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
+      return result;
+    }
+    _logger.info (String.format ("TDSCONFIGS_TDS_GetMessages_SP using old version"));
     DataBaseTable msgKeysTable = getDataBaseTable ("msgKeys").addColumn ("mkey", SQL_TYPE_To_JAVA_TYPE.BIGINT);
     connection.createTemporaryTable (msgKeysTable);
     Map<String, String> unquotedParms1 = new HashMap<> ();
     unquotedParms1.put ("msgKeysTableName", msgKeysTable.getTableName ());
-
     final String SQL_QUERY1 = "select defaultLanguage as default1, internationalize as inter from ${ConfigDB}.client where name = ${client} ;";
     SqlParametersMaps parms1 = new SqlParametersMaps ().put ("client", client);
     String finalQuery = fixDataBaseNames (SQL_QUERY1);
@@ -1832,7 +1844,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     SqlParametersMaps parms2 = new SqlParametersMaps ().put ("systemID", systemID);
     finalQuery = fixDataBaseNames (SQL_INSERT1);
     keys = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms7), parms2, false).getUpdateCount ();
-
     DataBaseTable msgsTable = getDataBaseTable ("msgs").addColumn ("msgkey", SQL_TYPE_To_JAVA_TYPE.BIGINT).addColumn ("msgSource", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
         .addColumn ("MessageID", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("ContextType", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("Context", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
         .addColumn ("AppKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("Language", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 30).addColumn ("Grade", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 25)
@@ -1841,13 +1852,11 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     Map<String, String> unquotedParms2 = new HashMap<> ();
     unquotedParms2.put ("msgsTableName", msgsTable.getTableName ());
     unquotedParms2.put ("msgKeysTableName", msgKeysTable.getTableName ());
-
     // TODO Elena: added 'unique', just to test!!!
     final String SQL_INDEX1 = "create unique index _IX_MSGS on ${msgsTableName} (msgkey);";
     Map<String, String> unquotedParms3 = new HashMap<> ();
     unquotedParms3.put ("msgsTableName", msgsTable.getTableName ());
     executeStatement (connection, fixDataBaseNames (SQL_INDEX1, unquotedParms3), null, false).getUpdateCount ();
-    
     // -- prefer messages in the requested language from the given client
     final String SQL_INSERT2 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
         + " select K.mkey, ${client}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O, "
@@ -1855,7 +1864,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     finalQuery = fixDataBaseNames (SQL_INSERT2);
     SqlParametersMaps parms3 = new SqlParametersMaps ().put ("client", client).put ("language", language);
     insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms3, false).getUpdateCount ();
-
     if (DbComparator.notEqual ("ENU", language)) {
       final String SQL_INSERT3 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
           + " select K.mkey, ${client}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O,"
@@ -1882,7 +1890,218 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
       finalQuery = fixDataBaseNames (SQL_INSERT4);
       SqlParametersMaps parms5 = new SqlParametersMaps ().put ("opclient", opclient).put ("language", language);
       insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms5, false).getUpdateCount ();
+      
+      
+      if (DbComparator.notEqual ("ENU", language)) {
+        final String SQL_INSERT5 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
+            + " select K.mkey, ${opclient}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O,"
+            + " ${ConfigDB}.client_messagetranslation T, ${msgKeysTableName} K  where T._fk_CoreMessageObject = mkey and O._key = mkey and T.Language = ${ENU}"
+            + " and T.client = ${opclient};";
+        finalQuery = fixDataBaseNames (SQL_INSERT5);
+        SqlParametersMaps parms6 = new SqlParametersMaps ().put ("opclient", opclient).put ("ENU", "ENU");
+        insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms6, false).getUpdateCount ();
+      }
+    }
+    final String SQL_QUERY2 = "select count(distinct msgkey) as numkeys from ${msgsTableName} where grade = ${--ANY--} and subject = ${--ANY--};";
+    SqlParametersMaps parms7 = new SqlParametersMaps ().put ("--ANY--", "--ANY--");
+    Map<String, String> unquotedParms4 = unquotedParms3;
+    result = executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms4), parms7, false).getResultSets ().next ();
+    record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+    if (record != null) {
+      numKeys = record.<Long> get ("numkeys");
+    }
+    if (DbComparator.greaterOrEqual (numKeys, keys)) {
+      final String SQL_QUERY3 = "select * from ${msgsTableName};";
+      Map<String, String> unquotedParms5 = unquotedParms3;
+      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms5), null, false).getResultSets ().next ();
+      populateAppMessages (connection, msgsTable, client, language, systemID, contextList, delimiter);
+      connection.dropTemporaryTable (msgsTable);
+      connection.dropTemporaryTable (msgKeysTable);
+      return result;
+    }
+    // -- finally fill in remaining messages directly from 'AIR' messages
+    // -- First, are there any translations standard for all AIR clients
+    final String SQL_INSERT6 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
+        + " select K.mkey, ${AIR}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O,"
+        + " ${ConfigDB}.client_messagetranslation T, ${msgKeysTableName} K  where T._fk_CoreMessageObject = mkey and O._key = mkey and T.Language = ${language}"
+        + " and T.client = ${AIR};";
+    finalQuery = fixDataBaseNames (SQL_INSERT6);
+    SqlParametersMaps parms8 = new SqlParametersMaps ().put ("language", language).put ("AIR", "AIR");
+    insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms8, false).getUpdateCount ();
+    // -- last resort is the core messages table
+    final String SQL_INSERT7 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language) "
+        + " select K.mkey, OwnerApp, MessageID, ContextType, Context, AppKey, ParaLabels, O.Message, ${--ANY--}, ${--ANY--}, ${ENU} from ${ConfigDB}.tds_coremessageobject O,"
+        + "  ${msgKeysTableName} K where O._key = mkey;";
+    finalQuery = fixDataBaseNames (SQL_INSERT7);
+    SqlParametersMaps parms9 = new SqlParametersMaps ().put ("--ANY--", "--ANY--").put ("ENU", "ENU");
+    insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms9, false).getUpdateCount ();
+    final String SQL_QUERY4 = "select * from ${msgsTableName} order by ContextType, Context;";
+    Map<String, String> unquotedParms6 = unquotedParms3;
+    result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms6), null, false).getResultSets ().next ();
+    populateAppMessages (connection, msgsTable, client, language, systemID, contextList,delimiter);
+    connection.dropTemporaryTable (msgsTable);
+    connection.dropTemporaryTable (msgKeysTable);
+    _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP Old Total Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
+    return result;
+  }
 
+  private void      populateAppMessages (SQLConnection connection, DataBaseTable msgsTable, String client, String language, 
+      String systemID, String contextList, Character delimiter) throws ReturnStatusException {
+    
+    int insertedCnt;
+    Integer transactionIsolation = null;
+    Boolean preexistingAutoCommitMode = null;
+    try {
+        transactionIsolation = connection.getTransactionIsolation ();
+        preexistingAutoCommitMode = connection.getAutoCommit ();
+        connection.setAutoCommit (false);
+        connection.setTransactionIsolation (Connection.TRANSACTION_READ_COMMITTED);
+        Long theKey = null;
+        String contextIndex = contextList.substring (0, 49);
+        final String cmd1 = "insert into ${ConfigDB}.__appmessagecontexts (clientname, systemID, language, contextList, dateGenerated, contextIndex, delim) "
+            + " values (${client}, ${systemID}, ${language}, ${contextList}, now(3), ${contextIndex}, ${delimiter})";
+        String finalcmd = fixDataBaseNames (cmd1);
+        SqlParametersMaps par1 = new SqlParametersMaps ().put ("client", client).put ("systemid", systemID).put ("language", language).
+            put ("contextlist", contextList).put ("contextIndex", contextIndex).put ("delimiter", delimiter.toString ());
+        insertedCnt = executeStatement (connection, finalcmd, par1, false).getUpdateCount ();
+        final String cmd2 = "select cast(LAST_INSERT_ID() as SIGNED) as theKey";
+        SingleDataResultSet result = executeStatement (connection, cmd2, null, false).getResultSets ().next ();
+        DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+        if (record != null) {
+          theKey = record.<Long> get ("theKey");
+        }
+        if (theKey == null) {
+          _logger.error (String.format ("Failed creating rec  in __appmessagecontexts for %s, %s, %s, %s", client, language, systemID, contextList));
+          throw new ReturnStatusException ("Failed creating rec  in __appmessagecontext");
+        }
+        final String cmd3 = "insert into ${ConfigDB}.__appmessages (_fk_AppMessageContext, msgkey, msgSource, MessageID,"
+              + " ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
+              + " select ${theKey}, msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language "
+              + " from ${msgsTableName}";
+        String finalQuery = fixDataBaseNames (cmd3);  
+        Map<String, String> unquotedParms3 = new HashMap<> ();
+        unquotedParms3.put ("msgsTableName", msgsTable.getTableName ());
+        SqlParametersMaps par3 = new SqlParametersMaps ().put ("thekey", theKey);
+        insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms3), par3, false).getUpdateCount ();
+        connection.commit ();
+        _logger.info (String.format("Inserted %d recs into _appmessages for %s, %s, %s, %s", insertedCnt, client, language, systemID, contextList ));
+    } catch (ReturnStatusException re) {
+        _logger.error ("Error while executing populateAppMessages..." ,re);
+        try {
+          connection.rollback ();
+        } catch (SQLException e) {
+          _logger.error (String.format ("Problem rolling back transaction: %s", e.getMessage ()));
+        }
+    } catch (SQLException se) {
+        _logger.error ("Error while executing populateAppMessages..." ,se);
+        try {
+          connection.rollback ();
+        } catch (SQLException e) {
+          _logger.error (String.format ("Problem rolling back transaction: %s", e.getMessage ()));
+        }
+      throw new ReturnStatusException (se);
+    } finally {
+      try {
+        if(preexistingAutoCommitMode!=null) {
+          connection.setAutoCommit (preexistingAutoCommitMode);
+        }
+        if(transactionIsolation!=null) {
+          connection.setTransactionIsolation (transactionIsolation);
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+      
+  }
+  
+ /* public SingleDataResultSet TDSCONFIGS_TDS_GetMessages_SP (SQLConnection connection, String systemID, String client, String language, String contextList, Character delimiter)
+      throws ReturnStatusException {
+    long startTime = System.currentTimeMillis ();
+    Integer keys = null;
+    Long numKeys = null;
+    String default1 = null;
+    Boolean inter = null;
+    SingleDataResultSet result = null;
+    int insertedCnt = 0;
+    
+    DataBaseTable msgKeysTable = getDataBaseTable ("msgKeys").addColumn ("mkey", SQL_TYPE_To_JAVA_TYPE.BIGINT);
+    connection.createTemporaryTable (msgKeysTable);
+    Map<String, String> unquotedParms1 = new HashMap<> ();
+    unquotedParms1.put ("msgKeysTableName", msgKeysTable.getTableName ());
+    final String SQL_QUERY1 = "select defaultLanguage as default1, internationalize as inter from ${ConfigDB}.client where name = ${client} ;";
+    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("client", client);
+    String finalQuery = fixDataBaseNames (SQL_QUERY1);
+    result = executeStatement (connection, finalQuery, parms1, false).getResultSets ().next ();
+    DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+    if (record != null) {
+      default1 = record.<String> get ("default1");
+      inter = record.<Boolean> get ("inter");
+    }
+    if (DbComparator.isEqual (inter, false)) {
+//    if (inter == false) {
+      language = default1;
+    }
+    DataBaseTable buildTable = _commonDll._BuildTable_FN (connection, "buildTableName", contextList, delimiter.toString ());
+    _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP buildTable Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
+    Map<String, String> unquotedParms7 = new HashMap<> ();
+    unquotedParms7.put ("buildTableName", buildTable.getTableName ());
+    unquotedParms7.put ("msgKeysTableName", msgKeysTable.getTableName ());
+    // -- First get the key to all message objects used by this system
+    final String SQL_INSERT1 = "insert into ${msgKeysTableName} (mkey)  select _fk_CoreMessageObject from ${ConfigDB}.tds_coremessageuser U, ${ConfigDB}.tds_coremessageobject O, "
+        + " ${buildTableName} T where U.systemID = ${systemID} and O._Key = U._fk_CoreMessageObject and O.Context = T.record;";
+    SqlParametersMaps parms2 = new SqlParametersMaps ().put ("systemID", systemID);
+    finalQuery = fixDataBaseNames (SQL_INSERT1);
+    keys = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms7), parms2, false).getUpdateCount ();
+    _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP inserting into  temp table Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
+    DataBaseTable msgsTable = getDataBaseTable ("msgs").addColumn ("msgkey", SQL_TYPE_To_JAVA_TYPE.BIGINT).addColumn ("msgSource", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
+        .addColumn ("MessageID", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("ContextType", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("Context", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
+        .addColumn ("AppKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("Language", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 30).addColumn ("Grade", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 25)
+        .addColumn ("Subject", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("ParaLabels", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("Message", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000);
+    connection.createTemporaryTable (msgsTable);
+    Map<String, String> unquotedParms2 = new HashMap<> ();
+    unquotedParms2.put ("msgsTableName", msgsTable.getTableName ());
+    unquotedParms2.put ("msgKeysTableName", msgKeysTable.getTableName ());
+    // TODO Elena: added 'unique', just to test!!!
+    final String SQL_INDEX1 = "create unique index _IX_MSGS on ${msgsTableName} (msgkey);";
+    Map<String, String> unquotedParms3 = new HashMap<> ();
+    unquotedParms3.put ("msgsTableName", msgsTable.getTableName ());
+    executeStatement (connection, fixDataBaseNames (SQL_INDEX1, unquotedParms3), null, false).getUpdateCount ();
+    // -- prefer messages in the requested language from the given client
+    final String SQL_INSERT2 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
+        + " select K.mkey, ${client}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O, "
+        + " ${ConfigDB}.client_messagetranslation T, ${msgKeysTableName} K  where T._fk_CoreMessageObject = mkey and O._key = mkey and T.Language = ${language} and T.client = ${client};";
+    finalQuery = fixDataBaseNames (SQL_INSERT2);
+    SqlParametersMaps parms3 = new SqlParametersMaps ().put ("client", client).put ("language", language);
+    insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms3, false).getUpdateCount ();
+    if (DbComparator.notEqual ("ENU", language)) {
+      final String SQL_INSERT3 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
+          + " select K.mkey, ${client}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O,"
+          + " ${ConfigDB}.client_messagetranslation T, ${msgKeysTableName} K where T._fk_CoreMessageObject = mkey and O._key = mkey and T.Language = ${ENU} "
+          + " and T.client = ${client};";
+      finalQuery = fixDataBaseNames (SQL_INSERT3);
+      SqlParametersMaps parms4 = new SqlParametersMaps ().put ("client", client).put ("ENU", "ENU");
+      insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms4, false).getUpdateCount ();
+    }
+
+    // -- If this is a practice test 'client' (e.g. Oregon_PT), then fill in
+    // like above from the true client (Oregon)
+    String clientSuffix = null;
+    if (client.length () >= 3) {
+      clientSuffix = client.substring (client.length () - 3);
+    }
+    if (clientSuffix != null && "_PT".equalsIgnoreCase (clientSuffix)) {
+      String opclient = client.substring (0, client.length () - 3);
+
+      final String SQL_INSERT4 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
+          + " select K.mkey, ${opclient}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O,"
+          + " ${ConfigDB}.client_messagetranslation T, ${msgKeysTableName} K  where T._fk_CoreMessageObject = mkey and O._key = mkey and T.Language = ${language}"
+          + " and T.client = ${opclient};";
+      finalQuery = fixDataBaseNames (SQL_INSERT4);
+      SqlParametersMaps parms5 = new SqlParametersMaps ().put ("opclient", opclient).put ("language", language);
+      insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms5, false).getUpdateCount ();
+      
+      
       if (DbComparator.notEqual ("ENU", language)) {
         final String SQL_INSERT5 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language)"
             + " select K.mkey, ${opclient}, MessageID, ContextType, Context, AppKey, ParaLabels, T.Message, Grade, Subject, language from ${ConfigDB}.tds_coremessageobject O,"
@@ -1918,7 +2137,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     finalQuery = fixDataBaseNames (SQL_INSERT6);
     SqlParametersMaps parms8 = new SqlParametersMaps ().put ("language", language).put ("AIR", "AIR");
     insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms8, false).getUpdateCount ();
-
+    _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP insert 3 Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
     // -- last resort is the core messages table
     final String SQL_INSERT7 = "insert IGNORE into ${msgsTableName} (msgkey, msgSource, MessageID, ContextType, Context, Appkey, ParaLabels, Message, Grade, Subject, Language) "
         + " select K.mkey, OwnerApp, MessageID, ContextType, Context, AppKey, ParaLabels, O.Message, ${--ANY--}, ${--ANY--}, ${ENU} from ${ConfigDB}.tds_coremessageobject O,"
@@ -1926,15 +2145,15 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     finalQuery = fixDataBaseNames (SQL_INSERT7);
     SqlParametersMaps parms9 = new SqlParametersMaps ().put ("--ANY--", "--ANY--").put ("ENU", "ENU");
     insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms9, false).getUpdateCount ();
-
+    _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP insert 4 Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
     final String SQL_QUERY4 = "select * from ${msgsTableName} order by ContextType, Context;";
     Map<String, String> unquotedParms6 = unquotedParms3;
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms6), null, false).getResultSets ().next ();
-
     connection.dropTemporaryTable (msgsTable);
     connection.dropTemporaryTable (msgKeysTable);
+    _logger.info ("<<<<<<<< TDSCONFIGS_TDS_GetMessages_SP Total Execution time : "+(System.currentTimeMillis ()-startTime) +" ms, Thread: " + Thread.currentThread ().getId ());
     return result;
-  }
+  }*/
 
   public SingleDataResultSet AppMessagesByContext_SP (SQLConnection connection, String systemID, String client, String language, String contextList) throws ReturnStatusException {
     return AppMessagesByContext_SP (connection, systemID, client, language, contextList, ',');

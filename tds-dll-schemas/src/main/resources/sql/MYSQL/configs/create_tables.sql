@@ -1,4 +1,30 @@
+create table __appmessagecontexts (
+	clientname varchar(100) not null,
+	systemid varchar(100) not null,
+	`language` varchar(30) null,
+	contextlist text null,
+	_key bigint auto_increment not null,
+	dategenerated datetime(3) null,
+	soundx char(4) null,
+	contextindex varchar(50) null,
+	delim char(1) null,
+	constraint pk_messagecontext primary key nonclustered (_key asc)
+) default charset = UTF8;
 
+create table __appmessages (
+	_fk_appmessagecontext bigint null,
+	msgkey bigint null,
+	msgsource varchar(100) null,
+	messageid int null,
+	contexttype varchar(50) null,
+	`context` varchar(100) null,
+	appkey varchar(255) null,
+	`language` varchar(30) null,
+	grade varchar(25) null,
+	`subject` varchar(50) null,
+	paralabels varchar(255) null,
+	message text null
+) default charset = UTF8;
 
 create table `client`  ( 
 	`name`            	varchar(100) not null,

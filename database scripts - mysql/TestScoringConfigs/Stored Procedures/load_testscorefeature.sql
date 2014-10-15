@@ -14,7 +14,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 begin
 
 	insert into testscorefeature(_key, clientname, testid, measureof, computationrule, computationorder)
-	select cr.ruleid
+	select distinct cr.ruleid
 		 , tp.publisher
 		 , tp.testname
 		 , cr.bpelementid

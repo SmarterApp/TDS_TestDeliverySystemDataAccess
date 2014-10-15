@@ -243,3 +243,12 @@ create table loader_conversiontuple (
   , invalue 			varchar(150)
   , outvalue			varchar(150)
 );
+
+drop table if exists loader_performancelevels;
+create table loader_performancelevels (
+	_fk_package 	varchar(350)
+  ,	bpelementid 	varchar(250)
+  , plevel 			int 
+  , scaledlo 		float
+  , scaledhi 		float
+);

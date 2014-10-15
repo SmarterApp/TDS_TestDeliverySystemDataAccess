@@ -979,43 +979,21 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   private int createAndUpdateIsCurrent (SQLConnection connection, EntityType entityType, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
     int insertCount = 0;
     boolean isCurrent = false;
-    boolean preExistingAutoCommitMode = true;
-    int transactionIsolation = 0;
     try {
-      preExistingAutoCommitMode = connection.getAutoCommit ();
-      transactionIsolation = connection.getTransactionIsolation ();
-      connection.setTransactionIsolation (Connection.TRANSACTION_READ_COMMITTED);
-      connection.setAutoCommit (false);
       updateIsCurrent (connection, entityType, key, clientName, isCurrent);
+    } catch (ReturnStatusException e) {
+      _logger.error (e.getMessage (), e);
+      throw new ReturnStatusException ("Could not update current package record " + e.getMessage ());
+    }
+    try {
       if (entityType == EntityType.STUDENT) {
         insertCount = createStudent (connection, key, clientName, xmlPackage, null);
       } else {
         insertCount = createProctor (connection, key, clientName, xmlPackage, testType);
       }
-      connection.commit ();
     } catch (ReturnStatusException e) {
-      _logger.error ("Rolling back the transaction.......",e);
-      try {
-        connection.rollback ();
-      } catch (SQLException se) {
-        _logger.error (String.format ("Problem rolling back transaction: %s", se.getMessage ()));
-      }
-      throw e;
-    } catch (Exception e) {
-      _logger.error ("Rolling back the transaction.......",e);
-      try {
-        connection.rollback ();
-      } catch (SQLException se) {
-        _logger.error (String.format ("Problem rolling back transaction: %s", se.getMessage ()));
-      }
-      return 0;
-    } finally {
-      try {
-        connection.setAutoCommit (preExistingAutoCommitMode);
-        connection.setTransactionIsolation (transactionIsolation);
-      } catch (SQLException se) {
-        _logger.error (String.format ("Problem setting auto commit to preExistingAutoCommitMode : %s", se.getMessage ()));
-      }
+      _logger.error (e.getMessage (), e);
+      throw new ReturnStatusException ("Could not insert package " + e.getMessage ());
     }
     return insertCount;
   }

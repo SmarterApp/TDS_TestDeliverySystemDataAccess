@@ -66,8 +66,8 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   @Autowired
   private IReportingDLL       _reportingDll           = null;
 
-  private final static int    gLockRetryAttemptMax    = 25;
-  private final static int    gLockRetrySleepInterval = 10;
+  private final static int    gLockRetryAttemptMax    = 300;
+  private final static int    gLockRetrySleepInterval = 100;
 
   /**
    * @param connection
@@ -2749,6 +2749,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     // famLine = (family == null ? String.format ("%s", familyDelim) :
     // String.format ("%s%s", family, familyDelim));
 
+    // Just sanity check to avoid exception on checking splits.length
+    if (accoms == null)
+      accoms = "";
     String[] splits = _BuildTableAsArray (accoms, delim.toString (), -1);
     String cset1 = null;
     for (int i = 0; i < splits.length; i++) {
@@ -2867,6 +2870,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
    * @throws ReturnStatusException
    */
   public Integer getAppLock (SQLConnection connection, String resourcename, String lockmode) throws ReturnStatusException {
+    long startTime = System.currentTimeMillis ();
     Integer applock = null;
     Integer currentSleep = gLockRetrySleepInterval;
     Integer cumulativeSleep = 0;
@@ -2879,12 +2883,12 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         } catch (InterruptedException e) {
         }
         cumulativeSleep += currentSleep;
-        currentSleep = 2*currentSleep;
+        //currentSleep = 2*currentSleep;
       } else
         return applock;
     }
     if (applock == null || applock != 1) 
-      _logger.error (String.format ("Final failure to getAppLock after max attempts %d, cumulative wait %d millisec", gLockRetryAttemptMax,cumulativeSleep));
+      _logger.error (String.format ("Final failure to getAppLock after max attempts %d, cumulative wait %d millisec, Total Time %d ms", gLockRetryAttemptMax,cumulativeSleep,(System.currentTimeMillis ()-startTime)));
      
     return applock;
   }

@@ -15,7 +15,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 )
 proc: begin
 
-    declare errorexit condition for sqlstate '45000'; -- 45000 means "unhandled user-defined exception"
+	declare errorexit condition for sqlstate '45000'; -- 45000 means "unhandled user-defined exception"
 
 	-- declare variables
 	declare v_root    varchar(100);
@@ -29,17 +29,18 @@ proc: begin
 	declare v_testitempoolpath		 varchar(300);
 	declare v_testformpath			 varchar(300);
 	declare v_testscoringpath		 varchar(300);
+	declare v_testperformancelevelspath varchar(300);
 
 	declare v_testformcount int;
 
 	declare v_counter int default 1;
 
 	-- This path has been seperated from the subpaths declared below to ensure flexibility during testing
--- 	set v_root = 'testpackage/';
--- 	set v_path = 'testpackage/complete/';
+ 	set v_root = 'testpackage/';
+ 	set v_path = 'testpackage/scoring/';
 
- 	set v_root = 'testspecification/';
- 	set v_path = 'testspecification/scoring/';
+-- 	set v_root = 'testspecification/';
+-- 	set v_path = 'testspecification/scoring/';
  
 	set v_testkey = (extractvalue(v_xml, concat(v_root, 'identifier/attribute::uniqueid')));
 
@@ -101,10 +102,13 @@ proc: begin
 		set v_counter = v_counter + 1;
 	end while;
 
+	-- ** extract performancelevels attributes ** --
+	set v_testperformancelevelspath = concat(v_path, 'performancelevels/performancelevel');
+	call loader_testperformancelevels(v_testpackagekey, v_xml, v_testperformancelevelspath);
+
 	-- ** extract scoring attributes ** --
 	set v_testscoringpath = concat(v_path, 'scoringrules');
 	call loader_testscoringrules(v_testpackagekey, v_xml, v_testscoringpath);
-
 
 end $$
 

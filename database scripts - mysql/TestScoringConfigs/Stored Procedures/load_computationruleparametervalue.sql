@@ -14,7 +14,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 begin
 
 	insert into computationruleparametervalue(_fk_testscorefeature, _fk_parameter, `index`, `value`)
-	select l.ruleid
+	select distinct l.ruleid
 		 , l.parameterid
 		 , l.`index`
 		 , l.`value`

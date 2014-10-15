@@ -1,3 +1,8 @@
+alter table __appmessages 
+	add constraint fk_appmessagecontext 
+	foreign key (_fk_appmessagecontext)
+	references __appmessagecontexts (_key);
+
 alter table `system_browserwhitelist` 
    add constraint `tds_sys_browserwhitelist`
    foreign key (`_fk_tds_browserwhitelist`) 

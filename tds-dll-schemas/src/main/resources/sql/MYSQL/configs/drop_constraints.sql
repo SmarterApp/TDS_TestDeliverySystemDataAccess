@@ -1,3 +1,6 @@
+alter table `__appmessages`
+	drop foreign key `fk_appmessagecontext`;
+
 alter table `system_browserwhitelist` 
    drop foreign key `tds_sys_browserwhitelist`;
 

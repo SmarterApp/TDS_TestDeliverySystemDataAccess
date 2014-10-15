@@ -1,3 +1,6 @@
+create index ix_messagecontext 
+	on __appmessagecontexts (clientname asc, systemid asc, `language` asc, contextindex asc);
+
 create UNIQUE index `unq_sys_browserwhitelist` 
 	on `system_browserwhitelist`(`_fk_tds_browserwhitelist`, `clientname`, `context`, `contexttype`, `action`, `priority`, 
 `osmaxversion`, `osminversion`);

@@ -13,11 +13,13 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 )
 begin
 
+	drop temporary table if exists tmp_adminsubjects;
 	create temporary table tmp_adminsubjects (
 		elementtype			varchar(100)
 	  ,	adminsubjectkey		varchar(250)
 	);
 
+	drop temporary table if exists tmp_affinitygroup;
 	create temporary table tmp_affinitygroup (
 	  	_fk_adminsubject varchar(250)
 	  , groupid 		 varchar(100)
@@ -69,7 +71,7 @@ begin
 	-- delete and re-load all affinitygroup records for the given adminsubjectkey
 	delete
 	  from affinitygroup
-	 where groupid in (select distinct _fk_adminsubject from tmp_affinitygroup);  
+	 where _fk_adminsubject in (select distinct _fk_adminsubject from tmp_affinitygroup);  
 
 
 	insert into affinitygroup (_fk_adminsubject, groupid, minitems, maxitems, loadconfig, updateconfig)
@@ -78,8 +80,8 @@ begin
 
 
 	-- clean-up
-	drop temporary table if exists tmp_adminsubjects;
-	drop temporary table if exists tmp_affinitygroup;
+	drop temporary table tmp_adminsubjects;
+	drop temporary table tmp_affinitygroup;
 
 end $$
 

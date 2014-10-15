@@ -51,18 +51,19 @@ begin
 
 
 	/*** STEP 4: Process and load data into actual tables ***/	
-	call load_test(v_packagekey);
-	call load_testgrades(v_packagekey);
-	call load_testscorefeature(v_packagekey);
-	call load_computationruleparameter(v_packagekey);
-	call load_computationruleparametervalue(v_packagekey);
+	call load_test(v_testpackagekey);
+	call load_testgrades(v_testpackagekey);
+	call load_testscorefeature(v_testpackagekey);
+	call load_computationruleparameter(v_testpackagekey);
+	call load_computationruleparametervalue(v_testpackagekey);
 
-	call load_conversiontabledesc(v_packagekey);
-	call load_conversiontables(v_packagekey);
+	call load_conversiontabledesc(v_testpackagekey);
+	call load_conversiontables(v_testpackagekey);
 	
+	call load_performancelevels(v_testpackagekey);
 
 	/*** STEP 6: Clear loader_* tables ***/
-	call loader_clear(v_packagekey);
+	call loader_clear(v_testpackagekey);
 
 end $$
 
