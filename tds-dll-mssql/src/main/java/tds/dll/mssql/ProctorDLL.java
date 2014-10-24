@@ -64,6 +64,12 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     _rtsDll = rtsDll;
   }
 
+  @Override
+  public DataBaseTable TDS_GetMessages_SP (SQLConnection connection, String systemID, String client, String language, String contextList, Character delimiter) throws ReturnStatusException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   /**
    * @param connection
    * @param clientName
@@ -1737,10 +1743,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     result = executeStatement (connection, SQL_QUERY4, parms4, false).getResultSets ().next ();
 
     return result;
-  }
-
-  public SingleDataResultSet TDSCONFIGS_TDS_GetMessages_SP (SQLConnection connection, String systemID, String client, String language, String contextList) throws ReturnStatusException {
-    return TDSCONFIGS_TDS_GetMessages_SP (connection, systemID, client, language, contextList, ',');
   }
 
   /**

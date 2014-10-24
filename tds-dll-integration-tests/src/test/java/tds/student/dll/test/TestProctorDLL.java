@@ -1675,7 +1675,7 @@ public class TestProctorDLL
     Character delimiter = ',';
     try (SQLConnection connection = _connectionManager.getConnection ()) {
       Date start = new Date ();
-      SingleDataResultSet result = _dll.TDSCONFIGS_TDS_GetMessages_SP (connection, systemID, client, language, contextList, delimiter);
+      SingleDataResultSet result = _dll.AppMessagesByContext_SP (connection, systemID, client, language, contextList, delimiter);
       Date end = new Date ();
       long diff = end.getTime () - start.getTime ();
       System.out.println (String.format ("TDS_GetMessages latency: %d millisec", diff));
@@ -1739,7 +1739,7 @@ public class TestProctorDLL
     Character delimiter = ';';
     try (SQLConnection connection = _connectionManager.getConnection ()) {
       Date start = new Date ();
-      SingleDataResultSet result = _dll.TDSCONFIGS_TDS_GetMessages_SP (connection, systemID, client, language, contextList, delimiter);
+      SingleDataResultSet result = _dll.AppMessagesByContext_SP (connection, systemID, client, language, contextList, delimiter);
       Date end = new Date ();
       long diff = end.getTime () - start.getTime ();
       System.out.println (String.format ("TDS_GetMessages latency: %d millisec", diff));
@@ -1778,7 +1778,7 @@ public class TestProctorDLL
     String contextList = "testshell.aspx,Default.aspx,Opportunity.aspx";
     Character delimiter = ',';
     try (SQLConnection connection = _connectionManager.getConnection ()) {
-      SingleDataResultSet result = _dll.TDSCONFIGS_TDS_GetMessages_SP (connection, systemID, client, language, contextList, delimiter);
+      SingleDataResultSet result = _dll.AppMessagesByContext_SP (connection, systemID, client, language, contextList, delimiter);
       assertTrue (result.getCount () == 191);
       Iterator<DbResultRecord> records = result.getRecords ();
       while (records.hasNext ()) {

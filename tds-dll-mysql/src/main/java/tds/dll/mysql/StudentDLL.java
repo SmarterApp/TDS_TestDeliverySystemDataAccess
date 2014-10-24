@@ -6996,13 +6996,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       return _commonDll._ReturnError_SP (connection, clientname, "_OpenNewOpportunity", "There is no active testing window for this student at this time");
 
     _Ref<Long> newIdRef = new _Ref<> ();
-    _CreateClientReportingID_SP (connection, clientname, testoppkeyRef.get (), newIdRef);
-
-    if (newIdRef.get () == null) {
-
-      _commonDll._LogDBError_SP (connection, "_OpenNewOpportunity", "Unable to create a unique reporting ID", testee, testkey, opportunity, null);
-      return _commonDll._ReturnError_SP (connection, clientname, "_OpenNewOpportunity", "Unable to create a unique reporting ID");
-    }
+    //TODO Temporary Commented on 10.20.2014 per Larry's suggestion.
+//    _CreateClientReportingID_SP (connection, clientname, testoppkeyRef.get (), newIdRef);
+//
+//    if (newIdRef.get () == null) {
+//
+//      _commonDll._LogDBError_SP (connection, "_OpenNewOpportunity", "Unable to create a unique reporting ID", testee, testkey, opportunity, null);
+//      return _commonDll._ReturnError_SP (connection, clientname, "_OpenNewOpportunity", "Unable to create a unique reporting ID");
+//    }
 
     // -- version is irrespective of deleted status
     Integer version = null;
@@ -7532,10 +7533,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     Integer applock = -1;
     String resourcename = String.format ("guestsession %s", clientname);
-
+    boolean sessionKeyWasNull = false;
     try {
+      
       if (sessionKeyRef.get () == null) {
-
+        sessionKeyWasNull = true; 
         // MySql app lock returns 1 is success
         applock = _commonDll.getAppLock (connection, resourcename, "Exclusive");
 
@@ -7555,13 +7557,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         // _fk_Browser is a required field but is not used for proctorless
         // sessions, so we dummy it with the same GUID as session key
         final String SQL_QUERY3 = "insert into session (_key,  _fk_browser, SessionID, name, clientname, environment,  datecreated, serveraddress) "
-            + "  values (${sessionKey},  ${sessionKey}, ${sessionID}, 'TDS Session', ${clientname}, ${environ}, "
-            + " now(3), ${localhost})";
+            + "  select ${sessionKey},  ${sessionKey}, ${sessionID}, 'TDS Session', ${clientname}, ${environ}, "
+            + " now(3), ${localhost} from dual "
+            + " where not exists (select * from session where clientname = ${clientname} and sessionid = ${sessionID})";
         SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("sessionKey", sessionKeyRef.get ()).put ("sessionId", sessionIdRef.get ()).
             put ("clientname", clientname).put ("environ", environ).put ("localhost", _commonDll.getLocalhostName ());
         insertedCnt = executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
 
-        // _commonDll.releaseAppLock (connection, resourcename);
         applock = -1;
         connection.commit ();
         connection.setAutoCommit (preexistingAutoCommitMode);
@@ -7584,6 +7586,18 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       throw re;
     }
 
+    if (sessionKeyWasNull) {
+      final String SQL_QUERY4 = "select _Key as sessionKey from session where clientname = ${clientname} and sessionID = ${sessionID}";
+      SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("sessionId", sessionIdRef.get ());
+      SingleDataResultSet result4 = executeStatement (connection, SQL_QUERY4, parms4, false).getResultSets ().next ();
+      DbResultRecord record4 = (result.getCount () > 0 ? result.getRecords ().next () : null);
+      if (record != null) {
+        sessionKeyRef.set (record.<UUID> get ("sessionKey"));
+      }
+    }
+    if (sessionKeyRef.get () == null) {
+      throw new ReturnStatusException ("No sessionkey found in sessiontbl for " + clientname);
+    }
     final String SQL_QUERY4 = "insert into sessiontests (_fk_Session, _efk_AdminSubject, _efk_TestID) select ${sessionKey}, testkey, testID from ${testsTblName} "
         + " where not exists (select * from sessiontests where _fk_Session = ${sessionKey} and _efk_AdminSubject = testkey)";
     Map<String, String> unquotedParms4 = new HashMap<> ();

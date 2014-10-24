@@ -30,6 +30,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import tds.dll.api.ICommonDLL;
 import tds.dll.api.IReportingDLL;
@@ -50,7 +51,6 @@ import AIR.Common.DB.results.SingleDataResultSet;
 import AIR.Common.Helpers.CaseInsensitiveMap;
 import AIR.Common.Helpers._Ref;
 import AIR.Common.Sql.AbstractDateUtilDll;
-import TDS.Shared.Configuration.TDSSettingsNoWeb;
 import TDS.Shared.Exceptions.ReturnStatusException;
 
 public class CommonDLL extends AbstractDLL implements ICommonDLL
@@ -66,8 +66,17 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   @Autowired
   private IReportingDLL       _reportingDll           = null;
 
-  private final static int    gLockRetryAttemptMax    = 300;
-  private final static int    gLockRetrySleepInterval = 100;
+  @Value("${dbLockRetryAttemptMax:300}")
+  private int    gLockRetryAttemptMax;
+  
+  @Value("${dbLockRetrySleepInterval:100}")
+  private int    gLockRetrySleepInterval;
+  
+  @Value("${logLatencyInterval:59}")
+  private int gLogLatencyInterval;
+  
+  @Value("${logLatencyMaxTime:30000}")
+  private int gLogLatencyMaxTime;
 
   /**
    * @param connection
@@ -2199,31 +2208,46 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     // if(procname ==null)
     // procname = new Object(){}.getClass().getEnclosingMethod().getName();
 
-    if (clientname == null && testoppkey != null) {
-
-      final String SQL_QUERY1 = "select clientname from testopportunity where _Key = ${testoppkey}";
-      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("testoppkey", testoppkey);
-      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, true).getResultSets ().next ();
-
-      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-      if (record != null)
-        clientname = record.<String> get ("clientname");
-
-    } else if (clientname == null && sessionkey != null) {
-      final String SQL_QUERY2 = "select clientname from session where _Key = ${sessionkey}";
-      SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey);
-      SingleDataResultSet result = executeStatement (connection, SQL_QUERY2, parms2, true).getResultSets ().next ();
-
-      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-      if (record != null)
-        clientname = record.<String> get ("clientname");
-    }
-
     if (checkaudit == false || AuditProc_FN (connection, procname) == true) {
+      boolean logDBLatency = false;
       Date now = _dateUtil.getDateWRetStatus (connection);
-
       long duration = 0;
       duration = now.getTime () - starttime.getTime ();
+      if (duration < 0) {
+        duration = 0;
+      }
+      
+      Calendar nowCal = Calendar.getInstance ();
+      nowCal.setTime (now);
+      int currSeconds = nowCal.get (Calendar.SECOND);
+      if(currSeconds % gLogLatencyInterval ==0 || duration > gLogLatencyMaxTime) {
+        logDBLatency = true;
+      }
+      
+      if(!logDBLatency) {
+        return;
+      }
+      
+      if (clientname == null && testoppkey != null) {
+
+        final String SQL_QUERY1 = "select clientname from testopportunity where _Key = ${testoppkey}";
+        SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("testoppkey", testoppkey);
+        SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, true).getResultSets ().next ();
+
+        DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+        if (record != null)
+          clientname = record.<String> get ("clientname");
+
+      } else if (clientname == null && sessionkey != null) {
+        final String SQL_QUERY2 = "select clientname from session where _Key = ${sessionkey}";
+        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey);
+        SingleDataResultSet result = executeStatement (connection, SQL_QUERY2, parms2, true).getResultSets ().next ();
+
+        DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+        if (record != null)
+          clientname = record.<String> get ("clientname");
+      }
+      
       // String startStr = new SimpleDateFormat
       // (AbstractDateUtilDll.DB_DATETIME_FORMAT_MS_PRECISION).format
       // (starttime);
@@ -2232,8 +2256,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       // System.err.println ("Starttime: " + startStr);
       // System.err.println ("Now: " + nowStr);
       // System.err.println (String.format ("Duration: %d", duration ));
-      if (duration < 0)
-        duration = 0;
+      
       Date difftime = new Date (duration);
 
       // String sessionDB = getAppSettings ().get ("TDSSessionDBName");

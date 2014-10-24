@@ -356,8 +356,6 @@ public interface IProctorDLL
    */
   public SingleDataResultSet P_GetConfigs_SP (SQLConnection connection, String clientName) throws ReturnStatusException;
 
-  public SingleDataResultSet TDSCONFIGS_TDS_GetMessages_SP (SQLConnection connection, String systemID, String client, String language, String contextList) throws ReturnStatusException;
-
   /**
    * @param connection
    * @param systemID
@@ -418,4 +416,6 @@ public interface IProctorDLL
    */
   public SingleDataResultSet P_SetSessionDateVisited_SP (SQLConnection connection, UUID sessionKey, Long proctorKey, UUID browserKey) throws ReturnStatusException;
 
+  public DataBaseTable TDS_GetMessages_SP (SQLConnection connection, String systemID, String client, String language, String contextList, Character delimiter)
+      throws ReturnStatusException;
 }
