@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Educational Online Test Delivery System 
- * Copyright (c) 2014 American Institutes for Research
- *   
- * Distributed under the AIR Open Source License, Version 1.0 
- * See accompanying file AIR-License-1_0.txt or at
- * http://www.smarterapp.org/documents/American_Institutes_for_Research_Open_Source_Software_License.pdf
+ * Educational Online Test Delivery System Copyright (c) 2014 American
+ * Institutes for Research
+ * 
+ * Distributed under the AIR Open Source License, Version 1.0 See accompanying
+ * file AIR-License-1_0.txt or at http://www.smarterapp.org/documents/
+ * American_Institutes_for_Research_Open_Source_Software_License.pdf
  ******************************************************************************/
 package tds.dll.mysql;
 
@@ -55,28 +55,28 @@ import TDS.Shared.Exceptions.ReturnStatusException;
 
 public class CommonDLL extends AbstractDLL implements ICommonDLL
 {
-  private static Logger       _logger                 = LoggerFactory.getLogger (CommonDLL.class);
+  private static Logger       _logger       = LoggerFactory.getLogger (CommonDLL.class);
 
   @Autowired
-  private AbstractDateUtilDll _dateUtil               = null;
+  private AbstractDateUtilDll _dateUtil     = null;
 
   @Autowired
-  private IRtsDLL             _rtsDll                 = null;
+  private IRtsDLL             _rtsDll       = null;
 
   @Autowired
-  private IReportingDLL       _reportingDll           = null;
+  private IReportingDLL       _reportingDll = null;
 
-  @Value("${dbLockRetryAttemptMax:300}")
-  private int    gLockRetryAttemptMax;
-  
-  @Value("${dbLockRetrySleepInterval:100}")
-  private int    gLockRetrySleepInterval;
-  
-  @Value("${logLatencyInterval:59}")
-  private int gLogLatencyInterval;
-  
-  @Value("${logLatencyMaxTime:30000}")
-  private int gLogLatencyMaxTime;
+  @Value ("${dbLockRetryAttemptMax:300}")
+  private int                 gLockRetryAttemptMax;
+
+  @Value ("${dbLockRetrySleepInterval:100}")
+  private int                 gLockRetrySleepInterval;
+
+  @Value ("${logLatencyInterval:59}")
+  private int                 gLogLatencyInterval;
+
+  @Value ("${logLatencyMaxTime:30000}")
+  private int                 gLogLatencyMaxTime;
 
   /**
    * @param connection
@@ -107,13 +107,49 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   // Optimization attempt
   public MultiDataResultSet IB_GetTestAccommodations_SP (SQLConnection connection, String testKey) throws ReturnStatusException {
+    Date today = _dateUtil.getDateWRetStatus (connection);
+
+    SingleDataResultSet rs1 = null;
+    SingleDataResultSet rs2 = null;
+    Long cachekey = null;
+
+    final String cmd = "select _key as cachekey from ${ConfigDB}.__accommodationcache where "
+        + "testkey = ${testkey} and dategenerated is not null and clientname = '--NONE--'";
+    SqlParametersMaps parameters = (new SqlParametersMaps ()).put ("testkey", testKey);
+    SingleDataResultSet rs = executeStatement (connection, fixDataBaseNames (cmd), parameters, false).getResultSets ().next ();
+    DbResultRecord rec = (rs.getCount () > 0 ? rs.getRecords ().next () : null);
+    if (rec != null) {
+      cachekey = rec.<Long> get ("cachekey");
+    }
 
     List<SingleDataResultSet> resultsets = new ArrayList<SingleDataResultSet> ();
-    SingleDataResultSet rs1 = TestKeyAccommodationsAsSet (connection, testKey);
-    resultsets.add (rs1);
 
-    SingleDataResultSet rs2 = TestKeyAccommodationDependenciesAsSet (connection, testKey);
-    resultsets.add (rs2);
+    if (cachekey != null) {
+      final String cmd1 = "select * from ${ConfigDB}.__cachedaccommodations where _fk_AccommodationCache = ${cachekey}";
+      SqlParametersMaps parm1 = (new SqlParametersMaps ()).put ("cachekey", cachekey);
+      rs1 = executeStatement (connection, fixDataBaseNames (cmd1), parm1, false).getResultSets ().next ();
+      resultsets.add (rs1);
+
+      final String cmd2 = "select * from ${ConfigDB}.__cachedaccomdepends where _fk_AccommodationCache = ${cachekey}";
+      SqlParametersMaps parm2 = (new SqlParametersMaps ()).put ("cachekey", cachekey);
+      rs2 = executeStatement (connection, fixDataBaseNames (cmd2), parm2, false).getResultSets ().next ();
+      resultsets.add (rs2);
+
+    } else {
+
+      final String cmd3 = "insert into ${ConfigDB}.__accommodationcache (testkey, clientname, _date) " 
+        + " select ${testkey}, '--NONE--', now(3) from dual where not exists "
+        + "    (select * from ${ConfigDB}.__accommodationcache where testkey = ${testkey}) ";
+      SqlParametersMaps parm3 = (new SqlParametersMaps ()).put ("testkey", testKey); 
+      int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd3), parm3, false).getUpdateCount ();
+      
+      rs1 = TestKeyAccommodationsAsSet (connection, testKey);
+      resultsets.add (rs1);
+
+      rs2 = TestKeyAccommodationDependenciesAsSet (connection, testKey);
+      resultsets.add (rs2);
+    }
+    _LogDBLatency_SP (connection, "IB_GetTestAccommodations", today, 0L, true, null, null);
 
     return new MultiDataResultSet (resultsets);
   }
@@ -2216,18 +2252,18 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       if (duration < 0) {
         duration = 0;
       }
-      
+
       Calendar nowCal = Calendar.getInstance ();
       nowCal.setTime (now);
       int currSeconds = nowCal.get (Calendar.SECOND);
-      if(currSeconds % gLogLatencyInterval ==0 || duration > gLogLatencyMaxTime) {
+      if (currSeconds % gLogLatencyInterval == 0 || duration > gLogLatencyMaxTime) {
         logDBLatency = true;
       }
-      
-      if(!logDBLatency) {
+
+      if (!logDBLatency) {
         return;
       }
-      
+
       if (clientname == null && testoppkey != null) {
 
         final String SQL_QUERY1 = "select clientname from testopportunity where _Key = ${testoppkey}";
@@ -2247,7 +2283,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         if (record != null)
           clientname = record.<String> get ("clientname");
       }
-      
+
       // String startStr = new SimpleDateFormat
       // (AbstractDateUtilDll.DB_DATETIME_FORMAT_MS_PRECISION).format
       // (starttime);
@@ -2256,7 +2292,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       // System.err.println ("Starttime: " + startStr);
       // System.err.println ("Now: " + nowStr);
       // System.err.println (String.format ("Duration: %d", duration ));
-      
+
       Date difftime = new Date (duration);
 
       // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
@@ -2900,19 +2936,20 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     for (int cnt = 0; cnt < gLockRetryAttemptMax; cnt++) {
       applock = getAppLockInternal (connection, resourcename, lockmode, cnt);
       if (applock == null || applock != 1) {
-        _logger.info (String.format ("Failed getAppLock, attempt %d, cumulative wait %d millisec", cnt+1,cumulativeSleep));
+        _logger.info (String.format ("Failed getAppLock, attempt %d, cumulative wait %d millisec", cnt + 1, cumulativeSleep));
         try {
           Thread.sleep (currentSleep);
         } catch (InterruptedException e) {
         }
         cumulativeSleep += currentSleep;
-        //currentSleep = 2*currentSleep;
+        // currentSleep = 2*currentSleep;
       } else
         return applock;
     }
-    if (applock == null || applock != 1) 
-      _logger.error (String.format ("Final failure to getAppLock after max attempts %d, cumulative wait %d millisec, Total Time %d ms", gLockRetryAttemptMax,cumulativeSleep,(System.currentTimeMillis ()-startTime)));
-     
+    if (applock == null || applock != 1)
+      _logger.error (String.format ("Final failure to getAppLock after max attempts %d, cumulative wait %d millisec, Total Time %d ms", gLockRetryAttemptMax, cumulativeSleep,
+          (System.currentTimeMillis () - startTime)));
+
     return applock;
   }
 
@@ -3015,7 +3052,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     // -- indicates no applock obtained
     Integer applock = -1;
     String msg = null;
-    
+
     // on MySql getAppLock returns 1 if success
     applock = getAppLock (connection, resourcename, "Exclusive");
     if (applock == null || applock != 1) {
@@ -3024,7 +3061,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     try {
       boolean preexistingAutoCommitMode = connection.getAutoCommit ();
       connection.setAutoCommit (false);
-  
+
       final String SQL_QUERY1 = "select clientname from client_sessionid where clientname = ${clientname} and IdPrefix = ${prefix} limit 1";
       SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientName).put ("prefix", prefix);
       if (!exists (executeStatement (connection, SQL_QUERY1, parms1, false))) {
@@ -3051,7 +3088,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         int insertedCnt = executeStatement (connection, SQL_UPDATE, parms5, false).getUpdateCount ();
       }
       sessionId.set (String.format ("%s%s", prefix, suffix));
-      //releaseAppLock (connection, resourcename);
+      // releaseAppLock (connection, resourcename);
       connection.commit ();
       connection.setAutoCommit (preexistingAutoCommitMode);
       releaseAppLock (connection, resourcename);
@@ -3063,7 +3100,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     }
     // this will kick if we caught SQLException or ReturnStatusException
     // need to release app lock and rollback transaction
- 
+
     try {
       connection.rollback ();
     } catch (SQLException se) {
@@ -3071,7 +3108,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     }
     if (DbComparator.isEqual (applock, 1))
       releaseAppLock (connection, resourcename);
-    
+
     _LogDBError_SP (connection, "_CreateClientSessionID", msg, null, null, null, null, clientName, null);
   }
 
