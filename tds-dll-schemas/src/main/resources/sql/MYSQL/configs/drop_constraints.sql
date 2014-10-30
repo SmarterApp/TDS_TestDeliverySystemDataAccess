@@ -1,3 +1,9 @@
+alter table __cachedaccommodations
+	drop foreign key fk_accom_cache;
+
+alter table __cachedaccomdepends
+	drop foreign key fk_accdep_cache;
+
 alter table `__appmessages`
 	drop foreign key `fk_appmessagecontext`;
 

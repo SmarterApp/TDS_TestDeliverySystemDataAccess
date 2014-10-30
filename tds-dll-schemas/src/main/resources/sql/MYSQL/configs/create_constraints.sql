@@ -1,3 +1,17 @@
+alter table __cachedaccommodations
+	add constraint fk_accom_cache
+	foreign key(_fk_accommodationcache)
+	references __accommodationcache(_key)
+	on delete cascade 
+	on update cascade;
+
+alter table __cachedaccomdepends
+	add constraint fk_accdep_cache
+	foreign key(_fk_accommodationcache)
+	references __accommodationcache(_key)
+	on delete cascade 
+	on update cascade;
+
 alter table __appmessages 
 	add constraint fk_appmessagecontext 
 	foreign key (_fk_appmessagecontext)

@@ -1,3 +1,46 @@
+CREATE TABLE __accommodationcache ( 
+	_key         	bigint auto_increment,
+	testkey      	varchar(250) NOT NULL,
+	clientname   	varchar(100) NOT NULL,
+	_date        	datetime NOT NULL,
+	dategenerated	datetime NULL,
+	CONSTRAINT PK_AccomCache PRIMARY KEY CLUSTERED(_Key)
+) default charset = UTF8;
+
+CREATE TABLE __cachedaccommodations ( 
+	_fk_accommodationcache	bigint not null,
+	segment               	int null,
+	disableonguestsession 	bit null,
+	tooltypesortorder     	int null,
+	toolvaluesortorder    	int null,
+	typemode              	varchar(100) null,
+	toolmode              	varchar(100) null,
+	acctype               	varchar(200) null,
+	accvalue              	varchar(200) null,
+	acccode               	varchar(200) null,
+	isdefault             	bit null,
+	allowcombine          	bit null,
+	isfunctional          	bit null,
+	allowchange           	bit null,
+	isselectable          	bit null,
+	isvisible             	bit null,
+	studentcontrol        	bit null,
+	valcount              	int null,
+	dependsontooltype     	varchar(100) null 
+) default charset = UTF8;
+
+create table __cachedaccomdepends ( 
+	_fk_accommodationcache	bigint not null,
+	contexttype           	varchar(100) null,
+	`context`              	varchar(100) null,
+	testmode              	varchar(50) null,
+	iftype                	varchar(200) null,
+	ifvalue               	varchar(200) null,
+	thentype              	varchar(200) null,
+	thenvalue             	varchar(200) null,
+	isdefault             	bit null 
+) default charset = UTF8;
+
 create table __appmessagecontexts (
 	clientname varchar(100) not null,
 	systemid varchar(100) not null,

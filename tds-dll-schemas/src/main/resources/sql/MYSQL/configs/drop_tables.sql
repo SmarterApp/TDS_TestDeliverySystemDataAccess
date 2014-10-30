@@ -1,3 +1,6 @@
+drop table if exists `__accommodationcache`;
+drop table if exists `__cachedaccommodations`;
+drop table if exists `__cachedaccomdepends`;
 drop table if exists `__appmessages`;
 drop table if exists `__appmessagecontexts`;
 drop table if exists `_messageid`;

@@ -2394,53 +2394,56 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       return ReturnStatusReason ("success", null);
     }
 
-    Date starttime = _dateUtil.getDateWRetStatus (connection);
-
-    String currentRes = null;
-    try {
-      currentRes = _reportingDll.XML_GetOppXML_SP (connection, oppkey, false);
-    } catch (ReturnStatusException ex) {
-      // already logged
-      return _ReturnError_SP (connection, null, "SubmitQAReport", ex.getMessage (), null, oppkey, null, "failed");
-    }
-
-    try {
-
-      // String userdir = System.getProperty ("user.dir");
-      // file = userdir + "\\testlogs\\XML-Reports\\XML-Report";
-      // xmlFile = file + oppkey.toString ();
-      // xmlFile = xmlFile + ".xml";
-      String dir = getTdsSettings ().getTDSReportsRootDirectory ();
-      if (dir == null) {
-        throw new Exception ("No TDSReportingRootDirectory configured in property file!");
-      }
-      if (dir.endsWith ("/") || dir.endsWith ("\\"))
-        dir = dir.substring (0, dir.length () - 1);
-      xmlFile = String.format ("%s/%s.xml", dir, oppkey.toString ());
-      // Make sure that separator is specific per the current operating system
-      xmlFile = replaceSeparatorChar (xmlFile);
-
-      File logFile = new File (xmlFile);
-      if (!logFile.getParentFile ().exists ()) {
-        _logger.debug ("Creating directory: " + logFile.getParentFile ());
-
-        boolean result = logFile.getParentFile ().mkdirs ();
-        if (result) {
-          _logger.debug ("DIR: " + logFile.getParentFile () + "  created");
-        }
-      }
-      try (BufferedWriter writer = new BufferedWriter (new FileWriter (logFile))) {
-        writer.write (currentRes);
-      }
-
-    } catch (Exception w) {
-      String msg = String.format ("Unable to queue up XML report: %s", w.getMessage ());
-      _logger.error (msg);
-      return _ReturnError_SP (connection, null, "SubmitQAReport", msg, null, oppkey, null, "failed");
-    }
-
-    _LogDBLatency_SP (connection, "SubmitQAReport", starttime, null, true, null, oppkey);
-    return res; // i.e. null
+    //TODO: Elena just before we implement submitting to qa from background process
+    return ReturnStatusReason ("success", null);
+    
+//    Date starttime = _dateUtil.getDateWRetStatus (connection);
+//
+//    String currentRes = null;
+//    try {
+//      currentRes = _reportingDll.XML_GetOppXML_SP (connection, oppkey, false);
+//    } catch (ReturnStatusException ex) {
+//      // already logged
+//      return _ReturnError_SP (connection, null, "SubmitQAReport", ex.getMessage (), null, oppkey, null, "failed");
+//    }
+//
+//    try {
+//
+//      // String userdir = System.getProperty ("user.dir");
+//      // file = userdir + "\\testlogs\\XML-Reports\\XML-Report";
+//      // xmlFile = file + oppkey.toString ();
+//      // xmlFile = xmlFile + ".xml";
+//      String dir = getTdsSettings ().getTDSReportsRootDirectory ();
+//      if (dir == null) {
+//        throw new Exception ("No TDSReportingRootDirectory configured in property file!");
+//      }
+//      if (dir.endsWith ("/") || dir.endsWith ("\\"))
+//        dir = dir.substring (0, dir.length () - 1);
+//      xmlFile = String.format ("%s/%s.xml", dir, oppkey.toString ());
+//      // Make sure that separator is specific per the current operating system
+//      xmlFile = replaceSeparatorChar (xmlFile);
+//
+//      File logFile = new File (xmlFile);
+//      if (!logFile.getParentFile ().exists ()) {
+//        _logger.debug ("Creating directory: " + logFile.getParentFile ());
+//
+//        boolean result = logFile.getParentFile ().mkdirs ();
+//        if (result) {
+//          _logger.debug ("DIR: " + logFile.getParentFile () + "  created");
+//        }
+//      }
+//      try (BufferedWriter writer = new BufferedWriter (new FileWriter (logFile))) {
+//        writer.write (currentRes);
+//      }
+//
+//    } catch (Exception w) {
+//      String msg = String.format ("Unable to queue up XML report: %s", w.getMessage ());
+//      _logger.error (msg);
+//      return _ReturnError_SP (connection, null, "SubmitQAReport", msg, null, oppkey, null, "failed");
+//    }
+//
+//    _LogDBLatency_SP (connection, "SubmitQAReport", starttime, null, true, null, oppkey);
+//    return res; // i.e. null
   }
 
   public SingleDataResultSet ReturnStatusReason (String status, String reason, String context, UUID oppkey, Integer opportunity) throws ReturnStatusException {

@@ -1,3 +1,15 @@
+create index ix_accomcache
+	on __accommodationcache(testkey, clientname);
+
+create index ix_cachedaccoms
+	on __cachedaccommodations(_fk_accommodationcache);
+
+create index ix_accomcode
+	on __cachedaccommodations(_fk_accommodationcache, acccode, segment, isdefault);
+
+create index ix_cachedaccomdeps
+	on __cachedaccomdepends(_fk_accommodationcache);
+
 create index ix_messagecontext 
 	on __appmessagecontexts (clientname asc, systemid asc, `language` asc, contextindex asc);
 
