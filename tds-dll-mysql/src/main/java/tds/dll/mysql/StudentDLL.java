@@ -7049,10 +7049,28 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // -- insert the given accommodations or defaults
     _InitOpportunityAccommodations_SP (connection, testoppkeyRef.get (), guestAccommodations);
 
-    final String SQL_QUERY7 = "update testopportunity set status = ${status} where _key = ${testoppkey}";
-    SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("testoppkey", testoppkeyRef.get ()).put ("status", status);
-    int updatedCnt = executeStatement (connection, SQL_QUERY7, parms7, false).getUpdateCount ();
+    
+    Integer transactionIsolation = null;
+    try {
+      transactionIsolation = connection.getTransactionIsolation ();
+      connection.setTransactionIsolation (Connection.TRANSACTION_READ_COMMITTED);
 
+      final String SQL_QUERY7 = "update testopportunity set status = ${status} where _key = ${testoppkey}";
+      SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("testoppkey", testoppkeyRef.get ()).put ("status", status);
+      int updatedCnt = executeStatement (connection, SQL_QUERY7, parms7, false).getUpdateCount ();
+ 
+      
+    } catch (SQLException se) {
+       throw new ReturnStatusException (se);
+    } finally {
+      try {
+        if (transactionIsolation != null)
+          connection.setTransactionIsolation (transactionIsolation);
+
+      } catch (SQLException e) {
+        e.printStackTrace ();
+      }     
+    }
     if (auditProc) {
       // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
       String sessionDB = getTdsSettings ().getTDSSessionDBName ();

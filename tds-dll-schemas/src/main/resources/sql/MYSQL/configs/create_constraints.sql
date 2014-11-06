@@ -15,7 +15,8 @@ alter table __cachedaccomdepends
 alter table __appmessages 
 	add constraint fk_appmessagecontext 
 	foreign key (_fk_appmessagecontext)
-	references __appmessagecontexts (_key);
+	references __appmessagecontexts (_key)
+	on delete cascade;
 
 alter table `system_browserwhitelist` 
    add constraint `tds_sys_browserwhitelist`
