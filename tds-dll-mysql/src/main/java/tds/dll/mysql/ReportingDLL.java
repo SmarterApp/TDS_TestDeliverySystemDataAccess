@@ -22,12 +22,16 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
-import TDS.Shared.Exceptions.ReturnStatusException;
 import tds.dll.api.ICommonDLL;
 import tds.dll.api.IReportingDLL;
 import tds.dll.api.IRtsReportingDLL;
-import tds.dll.api.IStudentDLL;
 import AIR.Common.DB.AbstractDLL;
 import AIR.Common.DB.DataBaseTable;
 import AIR.Common.DB.SQLConnection;
@@ -35,7 +39,11 @@ import AIR.Common.DB.SQL_TYPE_To_JAVA_TYPE;
 import AIR.Common.DB.SqlParametersMaps;
 import AIR.Common.DB.results.DbResultRecord;
 import AIR.Common.DB.results.SingleDataResultSet;
+import AIR.Common.Helpers._Ref;
 import AIR.Common.Sql.AbstractDateUtilDll;
+import AIR.Common.Utilities.UrlEncoderDecoderUtils;
+import TDS.Shared.Exceptions.ReturnStatusException;
+import TDS.Shared.Web.client.ITdsRestClient;
 
 /**
  * @author akulakov
@@ -43,7 +51,7 @@ import AIR.Common.Sql.AbstractDateUtilDll;
  */
 public class ReportingDLL extends AbstractDLL implements IReportingDLL
 {
-  private static Logger       _logger    = LoggerFactory.getLogger (ReportingDLL.class);
+  private static Logger        _logger    = LoggerFactory.getLogger (ReportingDLL.class);
 
   @Autowired
   protected AbstractDateUtilDll _dateUtil  = null;
@@ -53,6 +61,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
  
   @Autowired
   protected IRtsReportingDLL 	_rtsReporting;
+    
+  @Autowired(required=false)
+  private ITdsRestClient 		_restClient;
   
   protected Object ls = System.getProperties().get("line.separator");
 
@@ -84,6 +95,16 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   protected final String FINAL = "FINAL";
   
   protected final String SPACE = " ";
+  
+  private String _tisUrl;
+  
+  private String _tisReplyCallbackUrl;
+
+  private long _tisWaitTime;
+  
+  private long _tisMaxWaitTime;
+  
+  
  //
   public String XML_GetOppXML_SP (SQLConnection connection, UUID oppkey, boolean debug) throws ReturnStatusException
   {
@@ -2001,4 +2022,119 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       return effectiveDate;
   
   }
+  
+public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws ReturnStatusException {
+    
+    final String cmd1 = "select _key, _fk_testopportunity as testopp, changestatus, dateentered  "
+      + " from qareportqueue where  datesent is null limit 1";
+    SingleDataResultSet res = executeStatement (connection, cmd1, null, false).getResultSets ().next ();
+
+    return res;
+  }
+  
+  public void deleteQaReportQueue (SQLConnection conn, Long key) throws ReturnStatusException {
+    final String cmd1 = "delete from qareportqueue where _key = ${key}";
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("key", key);
+    int deletedCnt = executeStatement (conn, cmd1, parms1, false).getUpdateCount ();
+  }
+  
+  public void QA_SendXML (SQLConnection connection, UUID oppkey, String changeStatus) throws ReturnStatusException {
+    Date starttime = _dateUtil.getDateWRetStatus (connection);
+    _Ref<String> errRef = new _Ref<> ();
+    // some checks that may fill out errRef
+    String status = null;
+
+    final String cmd1 = "select status from testopportunity where _key = ${oppkey}";
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
+    SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms1, false).getResultSets ().next ();
+    DbResultRecord rec1 = (rs1.getCount () > 0 ? rs1.getRecords ().next () : null);
+    if (rec1 != null) {
+      status = rec1.<String> get ("status");
+    }
+    if (status == null) {
+      errRef.set (String.format ("No such opportunity: %s", oppkey.toString ()));
+
+    } else if (status.equalsIgnoreCase ("submitted") || status.equalsIgnoreCase ("reported")) {
+      errRef.set ("Opportunity already submitted");
+
+    } else {
+
+      String xmlReport = XML_GetOppXML_SP (connection, oppkey, false);
+      if (xmlReport == null)
+        errRef.set (String.format ("No XML result for: %s", oppkey.toString ()));
+      else {
+        sendQAReportToTis(oppkey, xmlReport, errRef);
+      }
+      if (errRef.get () == null) {
+
+        final String cmd3 = "insert into ${ArchiveDB}.opportunityaudit "
+            + "(_fk_TestOpportunity,  AccessType, actor, comment, hostname,  dateaccessed, dbname) "
+            + " values ( ${oppkey},  'SEND XML', 'QA_SendXML', ${xmlreport}, ${localhost},  now(3), ${dbname})";
+
+        SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
+            put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ()).
+            put ("xmlreport", xmlReport);
+        int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd3), parms3, false).getUpdateCount ();
+ 
+        if (changeStatus != null)
+          // TODO Elena: change the last parameter to name of the deamon?
+          _commonDll.SetOpportunityStatus_SP (connection, oppkey, changeStatus, true, "TDS_XML_SERVICE");
+
+      }
+    }
+    if (errRef.get () != null)
+      _commonDll._LogDBError_SP (connection, "QA_SendXML", errRef.get (), null, null, null, oppkey);
+    _commonDll._LogDBLatency_SP (connection, "QA_SendXML", starttime, null, true, null, oppkey, null, null, null);
+  }
+  
+  private void sendQAReportToTis (UUID oppkey, String xmlReport, _Ref<String> errRef) {
+    boolean isSent = false;
+    long startSentTime = System.currentTimeMillis ();
+    while (!isSent) {
+      try {
+        String tisReplyCallbackUrl = UrlEncoderDecoderUtils.encode (_tisReplyCallbackUrl.replace ("{testopp}", oppkey.toString ()));
+        String tisUrl = _tisUrl.replace ("{testopp}", oppkey.toString ()).replace ("{replycallback}", tisReplyCallbackUrl);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);  
+        HttpEntity<String> entity = new HttpEntity<String>(xmlReport, headers);
+        ResponseEntity<String> response = _restClient.exchange (tisUrl, HttpMethod.PUT, entity, String.class);
+        isSent = true;
+        // TODO jmambo: set necessary response after requirements from TIS are completed
+        if (response.getStatusCode () != HttpStatus.OK) {
+          errRef.set (response.getBody ());
+        }
+      } catch (Exception e) {
+        _logger.error (e.getMessage (), e);
+        isSent = false;
+        try {
+          Thread.sleep (_tisWaitTime * 1000);
+        } catch (InterruptedException e1) {
+          _logger.error ("sendQAReportToTis sleep exception:  " + e1.getMessage (), e);
+          System.exit (1);
+        }
+        if (_tisMaxWaitTime > 0 && ((System.currentTimeMillis () - startSentTime) / 1000) > _tisMaxWaitTime) {
+          _logger.error ("sendQAReportToTis: No valid response received from TIS after " + (System.currentTimeMillis () - startSentTime) / 1000 + " seconds, exiting");
+          System.exit (1);
+        }
+      }
+    }
+  }
+
+
+  public void setTisUrl (String tisUrl) {
+    _tisUrl = tisUrl;
+  }
+
+  public void setTisReplyCallbackUrl (String tisReplyCallbackUrl) {
+    _tisReplyCallbackUrl = tisReplyCallbackUrl;
+  }
+
+  public void setTisWaitTime (long tisWaitTime) {
+    _tisWaitTime = tisWaitTime;
+  }
+
+  public void setTisMaxWaitTime (long tisMaxWaitTime) {
+    _tisMaxWaitTime = tisMaxWaitTime;
+  }
+ 
 }

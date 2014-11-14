@@ -9358,5 +9358,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // TODO Auto-generated method stub
     return 0;
   }
+
+  @Override
+  public void handleTISReply (SQLConnection connection, UUID oppkey, Boolean success, String errorMessage) throws ReturnStatusException {
+    // TODO Auto-generated method stub
+    
+  }
   
 }

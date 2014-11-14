@@ -182,6 +182,16 @@ create table `loadtest_testee`  (
     constraint `pk_loadtest_testee` primary key clustered(`testeekey`) 
 	) default charset = UTF8;
 
+create table `qareportqueue`  ( 
+     `_key`                    BIGINT NOT NULL AUTO_INCREMENT,
+     `_fk_testopportunity`     varbinary(16) not null,
+     `changestatus`            varchar(50) null,
+      `dateentered`            datetime(3) not null,
+      `datesent`               datetime(3)  null,
+      `processstate`           varchar(50) null,
+   constraint `pk_qareportqueue` primary key clustered(`_key`)
+  ) default charset = UTF8;
+
 create table `qc_validationexception`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
 	`validationtype`     	varchar(50) not null,

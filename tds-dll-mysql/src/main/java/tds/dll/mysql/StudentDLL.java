@@ -1011,6 +1011,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   }
 
   public void _ValidateTesteeAccessProc_SP (SQLConnection connection, UUID testoppkey, UUID session, UUID browserId, Boolean checkSession, _Ref<String> message) throws ReturnStatusException {
+    long startTime = System.currentTimeMillis ();
     Date now = _dateUtil.getDateWRetStatus (connection);
     if (testoppkey != null && session != null & browserId != null)
       _logger.info ("_ValidateTesteeAccessProc: opp " + testoppkey.toString () + " session " + session.toString () + " browser " + browserId.toString ());
@@ -1024,7 +1025,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (exists (executeStatement (connection, SQL_QUERY1, parameters, false))) {
       checkSession = false;
     }
-
+    _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 1: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     UUID sessionKey = null;
     UUID browserKey = null;
     final String SQL_QUERY2 = "SELECT _fk_Session as sessionKey,  _fk_browser as browserKey from testopportunity where _Key = ${testoppkey}";
@@ -1036,7 +1037,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       sessionKey = record.<UUID> get ("sessionKey");
       browserKey = record.<UUID> get ("browserKey");
     }
-
+    _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 1: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     if (DbComparator.notEqual (browserKey, browserId)) {
       if (browserId != null && browserKey != null)
         _logger.info ("browser key does not match " + browserId.toString () + " should be " + browserKey.toString ());
@@ -1080,7 +1081,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         proctor = record.<Long> get ("proctor");
         sessionBrowser = record.<UUID> get ("sessionBrowser");
       }
-
+      _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 3: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
       dateBegin = _commonDll.adjustDateMinutes (dateBegin, -5);
       if (DbComparator.notEqual (sessionStatus, "open") || DbComparator.lessThan (now, dateBegin) || DbComparator.greaterThan (now, dateEnd)) {
         // if ("open".equalsIgnoreCase (sessionStatus) == false || now.compareTo
@@ -1103,9 +1104,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       if (record != null) {
         checkin = record.<Integer> get ("checkin");
       }
-
+      _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 4: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
       dateVisited = _commonDll.adjustDateMinutes (dateVisited, checkin);
-
+      _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 5: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
       if (checkin != null && checkin > 0 && DbComparator.greaterThan (now, dateVisited)) {
 
         // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
@@ -1117,9 +1118,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
         MultiDataResultSet sets = executeStatement (connection, fixDataBaseNames (SQL_INSERT), parms, false);
         int insertCnt = sets.getUpdateCount ();
-
+        _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 6: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
         _commonDll.P_PauseSession_SP (connection, session, proctor, sessionBrowser);
         message.set ("The session is not available for testing, please check with your test administrator.");
+        _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 7 Total: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
         return;
       }
     }
@@ -1876,9 +1878,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
       Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
 
+	String scoreDimentions = buildScoreInfoNode(score, "overall", scoreStatus);
+	  
     return T_UpdateScoredResponse_common (connection, oppKey, session, browserId, itemId,
         page, position, dateCreated, responseSequence, score, response, isSelected,
-        isValid, scoreLatency, scoreStatus, scoreRationale, null, 1);
+        isValid, scoreLatency, scoreStatus, scoreRationale, scoreDimentions, 1);
   }
 
   public SingleDataResultSet T_UpdateScoredResponse2_SP (SQLConnection connection, UUID oppKey, UUID session,
@@ -3181,10 +3185,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       // record the cohort counts in this item group's items. Note that a single
       // item group may have items from different cohorts.
       final String SQL_UPDATE4 = "update ${cohortsTableName} set groupcount = (select count(*) from ${ItemBankDB}.tblsetofadminitems I, ${ItemBankDB}.tblitemprops P " +
-          " where I._fk_AdminSubject = ${testkey} and P._fk_AdminSubject = ${testKey} and I.groupkey = ${grpkey} and P.propname = ${Language} and P.propvalue = ${language} " +
+          " where I._fk_AdminSubject = ${testkey} and P._fk_AdminSubject = ${testKey} and I.groupkey = ${grpkey} and P.propname = ${Language} and P.propvalue = ${lang} " +
           " and P._fk_Item = I._fk_Item and P._fk_AdminSUbject = ${testkey} and I.testCohort = cohortIndex);";
       query = fixDataBaseNames (SQL_UPDATE4);
-      SqlParametersMaps parms14 = new SqlParametersMaps ().put ("testkey", testKey).put ("grpkey", grpkey).put ("Language", "Language").put ("language", language);
+      SqlParametersMaps parms14 = new SqlParametersMaps ().put ("testkey", testKey).put ("grpkey", grpkey).put ("Language", "Language").put ("lang", language);
       updateCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms14, false).getUpdateCount ();
 
       final String SQL_QUERY15 = "select  cohortindex from ${cohortsTableName} where groupcount > 0 and itemcount < targetcount limit 1";
@@ -4307,12 +4311,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       environment = record.<String> get ("environment");
     }
-
+    //AK: Executed statement contains: ... and P.propname = 'Language' and P.propvalue = 'Language' ... It means that keys "language" and "Language" are the same. I change "language" --> "lang"
     final String SQL_QUERY3 = "select count(*) as ftitems from ${ItemBankDB}.tblitemprops P, ${ItemBankDB}.tblsetofadminitems I where P._fk_AdminSUbject = ${testkey} " +
-        " and P.propname = ${Language} and P.propvalue = ${language} and I._fk_AdminSubject = ${testkey} and I.IsFieldTest = 1 and P._fk_Item = I._Fk_Item and " +
+        " and P.propname = ${Language} and P.propvalue = ${lang} and I._fk_AdminSubject = ${testkey} and I.IsFieldTest = 1 and P._fk_Item = I._Fk_Item and " +
         " I.isActive = 1 and P.isActive = 1";
     String query3 = fixDataBaseNames (SQL_QUERY3);
-    SqlParametersMaps parameterQuery3 = (new SqlParametersMaps ()).put ("language", language).put ("testkey", testKey).put ("Language", "Language");
+    SqlParametersMaps parameterQuery3 = (new SqlParametersMaps ()).put ("lang", language).put ("testkey", testKey).put ("Language", "Language");
     result = executeStatement (connection, query3, parameterQuery3, false).getResultSets ().next ();
     record = result.getCount () > 0 ? result.getRecords ().next () : null;
     if (record != null) {
@@ -6565,7 +6569,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         errmsg = "no error message logged";
 
       _commonDll._LogDBError_SP (connection, "_InitOpportunityAccommodations", errmsg, null, null, null, oppkey);
-      return null;
+      throw new ReturnStatusException (re);
+      //return null;
 
     } catch (SQLException se) {
       throw new ReturnStatusException (se);
@@ -11884,6 +11889,89 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return rs1;
   }
 
+  public void handleTISReply(SQLConnection connection, UUID oppkey, Boolean success, String errorMessage) throws ReturnStatusException {
+    Date starttime = _dateUtil.getDateWRetStatus (connection);
+    String err = null;
+    try {
+      final String cmd1 = "select _key from testopportunity where _key = ${oppkey}";
+      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
+      if (exists (executeStatement (connection, cmd1, parms1, false)) == false) {
+        err = String.format ("No test opportunity matches this key: %s", oppkey.toString ());
+      }
+
+      if (err == null) {
+        if (success)
+          QC_AcceptOpportunity_SP (connection, oppkey);
+        else {
+          final String cmd2 = "insert into ${ArchiveDB}.opportunityaudit (_fk_TestOpportunity, AccessType, Comment, dateaccessed, hostname, dbname) "
+              + " values (${oppkey}, 'rejected', ${errorMessage}, now(3), ${localhost}, ${dbname})";
+  
+          SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("errorMessage", errorMessage).
+              put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ());
+          int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd2), parms2, false).getUpdateCount ();
+        }
+      } else {
+        err = String.format ("%s, success %s, %s", err, success, errorMessage);
+        _commonDll._LogDBError_SP (connection, "handleTISReply", err, null, null, null, oppkey);
+      }
+    } catch (ReturnStatusException re) {
+        err = re.getMessage ();
+        _commonDll._LogDBError_SP (connection, "handleTISReply", err, null, null, null, oppkey);
+    }
+    _commonDll._LogDBLatency_SP (connection, "handleTISReply", starttime, null, true, null, oppkey, null, null, null);
+ 
+  }
+  
+  public void QC_AcceptOpportunity_SP (SQLConnection connection, UUID oppkey) throws ReturnStatusException {
+    
+    String status = null;
+    
+    final String cmd1 = "select status from testopportunity where _key = ${oppkey}";
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
+    SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms1, false).getResultSets ().next ();
+    DbResultRecord rec1 = (rs1.getCount () > 0 ?  rs1.getRecords ().next () : null);
+    if (rec1 != null) {
+      status = rec1.<String> get ("status");
+    }
+    
+    if (DbComparator.isEqual (status, "expired")) {
+      final String cmd2 = "update testopportunity set dateExpiredReported=now(3) where _key=${oppkey}";
+      SqlParametersMaps parms2 = parms1;
+      int updatedCnt = executeStatement (connection, cmd2, parms1, false).getUpdateCount ();
+     
+      final String cmd3 = "insert into ${ArchiveDB}.opportunityaudit "
+          + "(_fk_TestOpportunity, _fk_Session, AccessType, hostname, _fk_Browser, dateaccessed, dbname) "
+          + " select ${oppkey}, _fk_session, 'expiredReported', ${localhost}, _fk_Browser, now(3), ${dbname}" 
+          + " from testopportunity where _Key = ${oppkey}";
+      SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
+          put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ());
+      int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd3), parms3, false).getUpdateCount ();
+      return;
+    }
+    
+    if (DbComparator.notEqual (status, "submitted")) {
+      final String cmd4 = "insert into ${ArchiveDB}.opportunityaudit "
+          + "(_fk_TestOpportunity, _fk_Session, AccessType, hostname, _fk_Browser, dateaccessed, dbname) "
+          + " select ${oppkey}, _fk_session, 'QA Reported', ${localhost}, _fk_Browser, now(3), ${dbname}" 
+          + " from testopportunity where _Key = ${oppkey}";
+      SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
+          put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ());
+      int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd4), parms4, false).getUpdateCount (); 
+      return;
+    }
+    
+    SingleDataResultSet res5 = _commonDll.SetOpportunityStatus_SP (connection, oppkey, "reported", false );
+    if (res5 != null) {
+      DbResultRecord rec5 = res5.getRecords ().next ();
+      if (rec5 != null) {
+        String setStatus = rec5.<String> get ("status");
+        if (DbComparator.isEqual (setStatus, "failed")) {
+          _commonDll._LogDBError_SP (connection, "QC_AcceptOpportunity", "Unable to record 'QA reported' status", null, null, null, oppkey);
+        }
+      }
+    }
+  }
+  
   private String replaceSeparatorChar (String str) {
     return str.replace ('/', java.io.File.separatorChar).replace ('\\', java.io.File.separatorChar);
   }

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import AIR.Common.DB.DataBaseTable;
 import AIR.Common.DB.SQLConnection;
+import AIR.Common.DB.results.SingleDataResultSet;
 import TDS.Shared.Exceptions.ReturnStatusException;
 
 /**
@@ -171,5 +172,11 @@ public interface IReportingDLL
    * @throws ReturnStatusException
    */
   public String getEffectiveDate(SQLConnection connection, String client, String testid) throws ReturnStatusException;
+  
+  public void QA_SendXML (SQLConnection connection, UUID oppkey, String changeStatus) throws ReturnStatusException;
+  
+  public void deleteQaReportQueue (SQLConnection conn, Long key) throws ReturnStatusException;
+  
+  public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws ReturnStatusException;
   
 }

@@ -126,7 +126,7 @@ public class TestReportingDLL
    */
 // 0x301ECA7789F840D48D640098BB54659F
   
-  @Test
+  //@Test
   public final void test_XML_GetOppXML_New () throws Exception {
 	  SQLConnection connection = null;
 	  List<UUID> oppkeys = new ArrayList<UUID> (Arrays.asList (//
@@ -186,8 +186,31 @@ public class TestReportingDLL
 	    }
 
   }
+	/*
+	 To run following test it is needed 
+	 1. to put in C:\Users\akulakov file with name opentestsystem-test-override-properties.xml
+	 2. containing
+	 
+	 <?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+		<properties>    
 
-  //@Test
+		 	<entry key="EnableLoadData">false</entry>
+		 	<entry key="TDSSessionDBName">tdscore_dev_session2012_sandbox</entry>
+			<entry key="ItembankDBName">tdscore_dev_itembank2012_sandbox</entry>
+			<entry key="TDSArchiveDBName">tds_archive_</entry>
+			<entry key="TDSConfigsDBName">tdscore_dev_configs2012_sandbox</entry>
+		
+		   	<entry key="jdbc.url">jdbc:mysql://tds-db.dev.opentestsystem.org:3306/tdscore_dev_session2012_sandbox?useServerPrepStmts=false&amp;rewriteBatchedStatements=true</entry>
+			<entry key="jdbc.userName">dbsbac</entry>
+			<entry key="jdbc.password">osTyMhRM1C</entry>
+			<entry key="DBDialect">MYSQL</entry>
+					
+		</properties>			 
+	 */
+
+
+  @Test
   public final void test_XML_GetOppXML_Results () throws Exception {
     SQLConnection connection = null;
     List<UUID> oppkeys = new ArrayList<UUID> (Arrays.asList (//

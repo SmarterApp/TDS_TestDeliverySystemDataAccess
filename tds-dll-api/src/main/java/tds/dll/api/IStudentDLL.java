@@ -1161,4 +1161,5 @@ public interface IStudentDLL
    */
   int getOpportunityNumber (SQLConnection connection, UUID oppKey) throws ReturnStatusException;
   
+  public void handleTISReply(SQLConnection connection, UUID oppkey, Boolean success, String errorMessage) throws ReturnStatusException;
 }

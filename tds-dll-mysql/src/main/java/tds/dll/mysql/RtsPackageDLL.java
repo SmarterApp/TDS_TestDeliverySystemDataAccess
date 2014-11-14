@@ -777,7 +777,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
 
     // auditProc = _commonDll.AuditProc_FN (connection, "P_ValidateProctor");
     try {
-      String rts = null;
       _Ref<Long> userKey = new _Ref<> ();
       _Ref<String> fullname = new _Ref<> ();
       _Ref<String> rtsPassword = new _Ref<> ();
@@ -786,13 +785,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       _Ref<Long> roleEntityRef = new _Ref<> ();
       _Ref<String> roleRef = new _Ref<> ();
       Long entityKey = null;
-      rts = _commonDll.getExternsColumnByClientName (connection, clientName, "proctorDB");
-      if (rts == null) {
-        String msg = String.format ("Unable to locate RTS for proctor %s", proctorId);
-        _commonDll._RecordSystemError_SP (connection, "P_ValidateProctor", msg);
-        return _commonDll._ReturnError_SP (connection, clientName, "P_ValidateProctor", "Unable to locate RTS database");
-      }
-      // TODO EF: create new tbluser in session db (see Oksana's email about it)
+     
       // TODO should we also check clientname here?
       final String SQL_QUERY1 = "select userkey, fullname from tbluser where userid = ${proctorID} ";
       // final String SQL_QUERY1 =
@@ -800,9 +793,8 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       // +
       // " and (${ignorepw} = 1 or password = ${password}) and active = 1 and hasAcknowledged = 1;";
       SqlParametersMaps parms1 = new SqlParametersMaps ().put ("proctorID", proctorId);
-      Map<String, String> unquotedMap = new HashMap<String, String> ();
-      unquotedMap.put ("rts", rts);
-      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedMap), parms1, false).getResultSets ().next ();
+ 
+      result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
       DbResultRecord record = result.getCount () > 0 ? result.getRecords ().next () : null;
       if (record != null) {
         userKey.set (record.<Long> get ("userkey"));

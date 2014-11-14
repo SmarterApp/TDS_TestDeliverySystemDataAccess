@@ -40,6 +40,13 @@ alter table `ft_opportunityitem`
 	on delete cascade 
 	on update no action ;
 
+alter table `qareportqueue`
+     add constraint `fk_qareportqueue`
+     foreign key(`_fk_testopportunity`)
+     references `testopportunity`(`_key`)
+     on delete cascade 
+     on update no action ;
+     
 alter table `qc_validationexception`
 	add constraint `fk_validation`
 	foreign key(`_fk_testopportunity`)
