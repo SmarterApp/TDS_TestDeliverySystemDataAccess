@@ -210,7 +210,7 @@ public class TestReportingDLL
 	 */
 
 
-  @Test
+  //@Test
   public final void test_XML_GetOppXML_Results () throws Exception {
     SQLConnection connection = null;
     List<UUID> oppkeys = new ArrayList<UUID> (Arrays.asList (//
@@ -928,5 +928,84 @@ public class TestReportingDLL
       System.out.println (String.format ("%s = %s", e.getKey (), e.getValue ()));
     }
   }
+	/*
+	 To run following test it needs 
+	 1. to put in C:\Users\akulakov file with name opentestsystem-test-override-properties.xml
+	 2. containing
+	 
+	<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+		<properties>
+			
+			<entry key="AppName">Student</entry>
+			<entry key="SessionType">0</entry>
+		    	<entry key="ClientName">SBAC_PT</entry>
+		
+			<entry key="EnableLoadData">false</entry>
+			<entry key="TDSSessionDBName">session</entry>
+			<entry key="ItembankDBName">itembank</entry>
+			<entry key="TDSArchiveDBName">archive</entry>
+			<entry key="TDSConfigsDBName">configs</entry>
+				
+			<entry key="jdbc.url">jdbc:mysql://127.0.0.1:3306/session?useServerPrepStmts=false&amp;rewriteBatchedStatements=true</entry>
+			<entry key="jdbc.userName">root</entry>
+			<entry key="jdbc.password">root</entry>
+			<entry key="DBDialect">MYSQL</entry>
+			
+		</properties>	 
+	
+	*/
+
+
+	@Test
+	public final void test_XML_GetOppXML_Results_alex() throws Exception { // average size of reports = 30.6KB
+		 SQLConnection _connection = null;
+		List<UUID> oppkeys = new ArrayList<UUID>(Arrays.asList(
+				//
+				UUID.fromString("a8cd3484-bb4f-45fa-ba07-1018356e32d1")));
+		BufferedWriter writer = null;
+		int n = 0;
+		long time = 0L;
+		long allTime = 0L;
+		String file = "C:\\temp\\XML-Reports\\LocalAlex\\XML-ReportTest";
+		String xmlFile = null;
+		try {
+			_connection = _connectionManager.getConnection ();
+			for (UUID oppkey : oppkeys) {
+				xmlFile = file + oppkey.toString();
+				xmlFile = xmlFile + ".xml";
+				long beginTime = System.currentTimeMillis();
+				long endTime;
+
+				String currentRes = _irepDLL.XML_GetOppXML_SP(_connection,
+						oppkey, true);
+
+				endTime = System.currentTimeMillis();
+				time = endTime - beginTime;
+				System.out.println("time = " + (time) + " ms");
+				allTime += time;
+
+				File logFile = new File(xmlFile);
+				System.out.println(logFile.getCanonicalPath());
+				writer = new BufferedWriter(new FileWriter(logFile));
+				writer.write(currentRes);
+				writer.close();
+				n++;
+			}
+			System.out.println("Test finished: time = " + (allTime) + " ms; " + n
+					+ " XML report(s). Average time per XML report: "
+					+ (allTime / n) + " ms.");
+		} catch (Exception e) {
+			_logger.error("Exception: " + e.getMessage() + "; " + e.toString());
+			throw e;
+		} finally {
+			try {
+				// Close the writer regardless of what happens...
+				writer.close();
+			} catch (Exception e) {
+			}
+		}
+
+	}
 
 }

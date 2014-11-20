@@ -14,6 +14,15 @@ update configs.client_testproperties set isselectable= b'1' where clientname = '
 update configs.client_testproperties set label = CONCAT('Perf Task ', label)
 where clientname = 'SBAC_PT' and testid = 'SBAC-Perf-ELA-11' and label not like 'Perf Task%';
 
+update configs.client_segmentproperties set ispermeable = b'0', entryapproval = b'0', exitapproval = b'0', itemreview = b'1' 
+where segmentid = 'SBAC-SEG1-MATH-11';
+update configs.client_segmentproperties set ispermeable = b'1', entryapproval = b'0', exitapproval = b'0', itemreview = b'0' 
+where segmentid = 'SBAC-SEG2-MATH-11';
+update configs.client_segmentproperties set ispermeable = b'0', entryapproval = b'0', exitapproval = b'0', itemreview = b'1' 
+where segmentid = 'SBAC-Perf-S1-ELA-11';
+update configs.client_segmentproperties set ispermeable = b'1', entryapproval = b'0', exitapproval = b'0', itemreview = b'0' 
+where segmentid = 'SBAC-Perf-S2-ELA-11';
+
 INSERT IGNORE INTO `client_toolusage` (`clientname`,`testid`,`tooltype`,`recordUsage`,`reportUsage`) VALUES ('SBAC_PT','SBAC-ELA-11','TTS',b'1',b'1');
 INSERT IGNORE INTO `client_toolusage` (`clientname`,`testid`,`tooltype`,`recordUsage`,`reportUsage`) VALUES ('SBAC_PT','SBAC-ELA-3','TTS',b'1',b'1');
 INSERT IGNORE INTO `client_toolusage` (`clientname`,`testid`,`tooltype`,`recordUsage`,`reportUsage`) VALUES ('SBAC_PT','SBAC-ELA-4','TTS',b'1',b'1');

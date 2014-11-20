@@ -616,7 +616,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   // }
 
   protected String arrayToQuotedString (String[] rows) {
-
+    if (rows.length == 0) {
+      return ("''");
+    }
     StringBuilder sb = new StringBuilder ();
     for (String row : rows) {
       sb.append (" '").append (row).append ("',");
@@ -11982,6 +11984,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // "",
     // });
 
+    String a = null;
+    String[] rows = new String[0];
+    if (rows.length == 0) 
+      a =  ("''");
+    
     String myDate = "2014-04-14 08:55:30.531000";
     String[] tokens = myDate.split ("\\.");
     if (tokens.length == 2 && tokens[1].length () > 3) {

@@ -2294,12 +2294,12 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     if (msgKey == null) {
       msg.set (String.format ("%s[-----]", appkey));
       try {
-        final String SQL_INSERT1 = "insert into _missingmessages(application,contextType,context, appkey, message, _date) "
-            + " select ${application}, ${contextType}, ${context}, ${appkey}, ${msg}, now(3) from _missingmessages where not exists (Select * from _missingmessages where "
+        final String SQL_INSERT1 = "insert into _missingmessages(application,contextType,context, appkey, message) "
+            + " select ${application}, ${contextType}, ${context}, ${appkey}, ${msg} from _missingmessages where not exists (Select * from _missingmessages where "
             + " application = ${application} and contextType = ${contextType} and context = ${context} and appkey = ${appkey} and  message = ${msg});";
 
         SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("application", application).put ("contextType", contextType).put ("context", context)
-            .put ("appkey", appkey).put ("msg", msg);
+            .put ("appkey", appkey).put ("msg", msg.get ());
         int insertedCnt = executeStatement (connection, SQL_INSERT1, parms1, false).getUpdateCount ();
 
       } catch (Exception e) {

@@ -8,6 +8,8 @@
  ******************************************************************************/
 package tds.dll.mysql;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -70,29 +72,36 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   private String at = "@";
   private String slash = "/";
     
-  protected final String TDS_REPORT_NODE_NAME = "TDSReport";
+  protected final String TDS_REPORT_NODE_NAME 		= "TDSReport";
   
-  protected final String TEST_NODE_NAME = "Test";
+  protected final String TEST_NODE_NAME 			= "Test";
   
-  protected final String TESTEE_NODE_NAME = "Examinee";
-  protected final String TESTEEATTRIBUTE_NODE_NAME = TESTEE_NODE_NAME + "Attribute";
+  protected final String TESTEE_NODE_NAME 			= "Examinee";
+  protected final String TESTEEATTRIBUTE_NODE_NAME 	= TESTEE_NODE_NAME + "Attribute";
   protected final String TESTEERELATIONSHIP_NODE_NAME = TESTEE_NODE_NAME + "Relationship";
   
-  protected final String OPPORTUNITY_NODE_NAME = "Opportunity";
-  protected final String SEGMENT_NODE_NAME = "Segment";
-  protected final String ACCOMMODATION_NODE_NAME = "Accommodation";
-  protected final String SCORE_NODE_NAME = "Score";
-  protected final String ITEM_NODE_NAME = "Item";
-  protected final String RESPONSE_NODE_NAME = "Response";
+  protected final String OPPORTUNITY_NODE_NAME 		= "Opportunity";
+  protected final String SEGMENT_NODE_NAME 			= "Segment";
+  protected final String ACCOMMODATION_NODE_NAME 	= "Accommodation";
+  protected final String SCORE_NODE_NAME 			= "Score";
+  protected final String ITEM_NODE_NAME 			= "Item";
+  protected final String RESPONSE_NODE_NAME 		= "Response";
   
-  protected final String SCOREINFO_NODE_NAME = "ScoreInfo";
-  protected final String SCORERATIONALE_NODE_NAME = "ScoreRationale";
+  protected final String SCOREINFO_NODE_NAME 		= "ScoreInfo";
+  protected final String SCORERATIONALE_NODE_NAME 	= "ScoreRationale";
+  protected final String SCOREINFOMESSAGE_NODE_NAME = "Message";
   
-  protected final String COMMENT_NODE_NAME = "Comment";
-  protected final String TOOLUSAGE_NODE_NAME = "ToolUsage";
+  protected final String COMMENT_NODE_NAME 			= "Comment";
+  protected final String TOOLUSAGE_NODE_NAME 		= "ToolUsage";
   
-  protected final String INITIAL = "INITIAL";
-  protected final String FINAL = "FINAL";
+  protected final String INITIAL 					= "INITIAL";
+  protected final String FINAL 						= "FINAL";
+  
+  // Letter from David 2014-10-29:
+  // That's no applicable to open source TDS. 
+  // HARDCODED VALUE !!!
+  protected final int IS_DEMO 						= 1; 
+  protected final String EMPTY 						= "";
   
   protected final String SPACE = " ";
   
@@ -150,7 +159,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     	  }
       } catch(Exception e)
       {
-    	  test = "";
+    	  // see reportxml_os.xsd file
+    	  //<xs:element name="Test" minOccurs="1" maxOccurs="1">
+    	  test = "<" + TEST_NODE_NAME + "/>";
     	  dbmsg = String.format ("Bad  XML Element %s: test key = %s, test mode = %s with error: %s", TEST_NODE_NAME, testkey, mode, e.getMessage());
           _commonDll._LogDBError_SP (connection, "XML_GetOppXML", dbmsg, null, null, null, oppkey);
           _logger.error (dbmsg);
@@ -168,7 +179,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 
       } catch(Exception e)
       {
-    	  testee = "";
+    	  // see reportxml_os.xsd file
+    	  //<xs:element name="Examinee" minOccurs="1" maxOccurs="1">
+    	  testee = "<" + TESTEE_NODE_NAME + "/>"; 
        	  dbmsg = String.format ("Bad  XML Element %s: test key = %s, test mode = %s with error: %s", TESTEE_NODE_NAME, testkey, mode, e.getMessage());
           _commonDll._LogDBError_SP (connection, "XML_GetOppXML", dbmsg, null, null, null, oppkey);
           _logger.error (dbmsg);
@@ -185,7 +198,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     	  }
       } catch(Exception e)
       {
-    	  oppxml = "";
+    	  // see reportxml_os.xsd file
+    	  //<xs:element name="Opportunity" minOccurs="1" maxOccurs="1">
+    	  oppxml = "<" + OPPORTUNITY_NODE_NAME + "/>";
        	  dbmsg = String.format ("Bad  XML Element %s: test key = %s, test mode = %s with error: %s", OPPORTUNITY_NODE_NAME, testkey, mode, e.getMessage());
           _commonDll._LogDBError_SP (connection, "XML_GetOppXML", dbmsg, null, null, null, oppkey);
           _logger.error (dbmsg);
@@ -270,12 +285,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       List<String> orderedColumns = new ArrayList<String> (Arrays.asList (
     		  getNodeAttributeName(TEST_NODE_NAME, "name"),				//"Test/@name",
     		  getNodeAttributeName(TEST_NODE_NAME, "subject"),			//"Test/@subject",
-    		  getNodeAttributeName(TEST_NODE_NAME, "testID"),			//"Test/@testID",
-    		  getNodeAttributeName(TEST_NODE_NAME, "airbank"),			//"Test/@airbank",
-    		  getNodeAttributeName(TEST_NODE_NAME, "handscoreproject"),	//"Test/@handscoreproject",
+    		  getNodeAttributeName(TEST_NODE_NAME, "testId"),			//"Test/@testID",
+    		  getNodeAttributeName(TEST_NODE_NAME, "bankKey"),			//"Test/@airbank",
     		  getNodeAttributeName(TEST_NODE_NAME, "contract"),			//"Test/@contract",
     		  getNodeAttributeName(TEST_NODE_NAME, "mode"),				//"Test/@mode",
     		  getNodeAttributeName(TEST_NODE_NAME, "grade"),			//"Test/@grade",
+    		  getNodeAttributeName(TEST_NODE_NAME, "handScoreProject"),	//"Test/@handscoreproject",
     		  getNodeAttributeName(TEST_NODE_NAME, "assessmentType"),	//"Test/@assessmentType",
     		  getNodeAttributeName(TEST_NODE_NAME, "academicYear"),		//"Test/@academicYear",
     		  getNodeAttributeName(TEST_NODE_NAME, "assessmentVersion")	//"Test/@assessmentVersion"
@@ -283,9 +298,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 
       String query = "select ${testkey} as \"Test/@name\", "
           + " coalesce(S.SubjectCode, B.Name, '') as \"Test/@subject\", "
-          + " T.TestID as \"Test/@testID\",  "
-          + " ${bankKey} as \"Test/@airbank\", "
-          + " P.HandScoreProject as \"Test/@handscoreproject\","
+          + " T.TestID as \"Test/@testId\",  "
+          + " ${bankKey} as \"Test/@bankKey\", "
+          + " P.HandScoreProject as \"Test/@handScoreProject\","
           + " T.Contract as \"Test/@contract\",  "
           + " ${mode} as \"Test/@mode\", "
           + " case when B.Grade is null or B.Grade = '' then ${gradeSpan} else B.Grade end as \"Test/@grade\"  "
@@ -339,13 +354,18 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         clientname = record.<String> get ("clientname");
         testee = record.<Long> get ("testee");
       }
+      if(clientname == null || testee == null)
+      {
+    	  _logger.error("clientname = " + clientname + "; testee = " + testee + ": <Examinee> section will be empty");
+      }
 
-      strBuilder.append ("<").append(TESTEE_NODE_NAME).append(" airkey=\"");
-      strBuilder.append (testee);
-      strBuilder.append ("\" >").append(ls);
+      strBuilder.append ("<").append(TESTEE_NODE_NAME);
+      strBuilder.append(" key=\"").append (testee).append ("\" ");
+      strBuilder.append(" isDemo=\"").append (IS_DEMO).append ("\" ");
+      strBuilder.append (" >").append(ls);
       
-      String initialContextDate = getContextDate(connection, oppkey, INITIAL);
-      String finalContextDate 	= getContextDate(connection, oppkey, FINAL);
+      String initialContextDate = formatXSDateTime(getContextDate(connection, oppkey, INITIAL));
+      String finalContextDate 	= formatXSDateTime(getContextDate(connection, oppkey, FINAL));
 
       context = INITIAL;
       strBuilder.append(getTesteeAttributes(_rtsReporting.getTesteeAttributes(connection, clientname, testee), context, initialContextDate));	      
@@ -503,23 +523,26 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           "@database",
           "@clientName",
           "@key",
-          "@oppid",
-          "@startdate",
+          "@oppId",
+          "@startDate",
           "@status",
           "@opportunity",
-          "@statusdate",
-          "@datecompleted",
-          "@dateForceCompleted",
-          "@pausecount",
-          "@itemcount",
-          "@ftcount",
+          "@statusDate",
+          "@dateCompleted",
+          "@pauseCount",
+          "@itemCount",
+          "@ftCount",
           "@abnormalStarts",
           "@gracePeriodRestarts",
           "@taId",
           "@taName",
-          "@sessionID",
-          "@windowID",
+          "@sessionId",
+          "@windowId",
           "@windowOpportunity",
+          "@dateForceCompleted",
+          //SB-999
+          "@qaLevel",
+          "@assessmentParticipantSessionPlatformUserAgent",
           // SB-512
           "@effectiveDate"
           ));
@@ -529,23 +552,25 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " ${dbName} as \"@database\", "
           + " O.clientname as \"@clientName\", "
           + " O._Key as\"@key\", "
-          + " ReportingID as \"@oppid\", "
-          + " DateStarted as \"@startdate\", "
+          + " ReportingID as \"@oppId\", "
+          + " DateStarted as \"@startDate\", "
           + " O.status as \"@status\", "
           + " opportunity as \"@opportunity\", "
-          + " O.DateChanged as \"@statusdate\", "
-          + " DateCompleted as \"@datecompleted\", "
-          + " O.dateForceCompleted as \"@dateForceCompleted\", "
-          + " Restart as \"@pausecount\", "
-          + " ${itemcount} as \"@itemcount\", "
-          + " ${ftcount} as \"@ftcount\", "
+          + " O.DateChanged as \"@statusDate\", "
+          + " DateCompleted as \"@dateCompleted\", "
+          + " Restart as \"@pauseCount\", "
+          + " ${itemcount} as \"@itemCount\", "
+          + " ${ftcount} as \"@ftCount\", "
           + " abnormalStarts as \"@abnormalStarts\", "
           + " gracePeriodRestarts as \"@gracePeriodRestarts\", "
           + " ProctorID as \"@taId\", "
           + " S.ProctorName as \"@taName\", "
-          + " sessionID as \"@sessionID\", "
-          + " windowID as \"@windowID\", "
+          + " sessionID as \"@sessionId\", "
+          + " windowID as \"@windowId\", "
           + " ${winopp} as \"@windowOpportunity\","
+          + " O.dateForceCompleted as \"@dateForceCompleted\", "
+          + " '' as \"@qaLevel\", "											// TODO Hardcoded value
+          + " '' as \"@assessmentParticipantSessionPlatformUserAgent\", "	// TODO Hardcoded value
           + " ${effectiveDate} as \"@effectiveDate\" "
           + " from testopportunity O, session S where O._Key = ${oppkey}"
           + " and O._fk_Session = S._Key";
@@ -574,10 +599,10 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
             + "\" windowOpportunity=\"" + winopp + "\" " + "/>";
       }
 
-      String items = _XML_GetOpportunityItems_SP (connection, oppkey, debug);
-      String segmentsXML = XML_GetSegments_F (connection, oppkey, debug);
-      String accomodationsXML = XML_GetAccomodations_F (connection, oppkey, debug);
-      String scoresXML = XML_GetScores_F (connection, oppkey, debug);
+      String segmentsXML 		= XML_GetSegments_F (connection, oppkey, debug);
+      String accomodationsXML 	= XML_GetAccomodations_F (connection, oppkey, debug);
+      String scoresXML 			= XML_GetScores_F (connection, oppkey, debug);
+      String items 				= _XML_GetOpportunityItems_SP (connection, oppkey, debug);
       // cut </opportunity>
       int indexOpp = res.indexOf (oppRB);
       StringBuilder oppstrBldr = new StringBuilder();
@@ -652,11 +677,11 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 
       List<String> orderedColumns = new ArrayList<String> (Arrays.asList (
           "@context",
-          "@itemposition",
+          "@itemPosition",
           "@date"));
 
       String query = "select context as \"@context\", "
-          + " itemposition as \"@itemposition\", "
+          + " itemposition as \"@itemPosition\", "
           + " _date  as \"@date\", "
           + " comment "
           + " from testeecomment where _fk_TestOpportunity = ${oppkey} and comment is not null "
@@ -708,6 +733,10 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     String itemkey = null;
     String itemtype = null;
     String response = null;
+    String scoreStatus = null;
+    String scorePoint = null;
+    String scoredimension  = null;
+    String maxscore = null;
     Date responseDate = null;
     String respDate = null;
     String rationale = null;
@@ -758,47 +787,47 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       StringBuilder strBuilder = new StringBuilder ();
       List<String> orderedColumns = new ArrayList<String> (Arrays.asList (
           "Item/@position",
-          "Item/@segmentID",
-          "Item/@bankkey",
-          "Item/@airkey",
+          "Item/@segmentId",
+          "Item/@bankKey",
+          "Item/@key",
           "Item/@operational",
-          "Item/@IsSelected",
+          "Item/@isSelected",
           "Item/@format",
-          "Item/@scorepoints",
+         // "Item/@scorePoints",
           "Item/@score",
-          "Item/@scorestatus",
-          "Item/@admindate",
-          "Item/@answerkey",
+          "Item/@scoreStatus",
+          "Item/@adminDate",
+         // "Item/@answerKey",
           "Item/@numberVisits",
-          "Item/@mimetype",
-          "Item/@clientID",
+          "Item/@mimeType",
+          "Item/@clientId",
           "Item/@strand",
           "Item/@contentLevel",
-          "Item/@pagenumber",
-          "Item/@pagevisits",
-          "Item/@pagetime",
+          "Item/@pageNumber",
+          "Item/@pageVisits",
+          "Item/@pageTime",
           "Item/@dropped"
           ));
 
       String querySuffix = null;
-      String queryPreffix1 = "select R.position as \"Item/@position\", S._efk_Segment as \"Item/@segmentID\", "
-            + "R._efk_ITSBank as \"Item/@bankkey\", R._efk_ITSItem as \"Item/@airkey\", "
+      String queryPreffix1 = "select R.position as \"Item/@position\", S._efk_Segment as \"Item/@segmentId\", "
+            + "R._efk_ITSBank as \"Item/@bankKey\", R._efk_ITSItem as \"Item/@key\", "
             + " cast((1 - R.IsFieldTest) as SIGNED) as \"Item/@operational\", "
-            + " IsSelected as \"Item/@IsSelected\", "
+            + " IsSelected as \"Item/@isSelected\", "
             + " Format as \"Item/@format\",  "
-            + " I.scorepoints as \"Item/@scorepoints\",  "
+            + " I.scorepoints as \"Item/@scorePoints\",  "
             + " R.score as \"Item/@score\", "
-            + " upper(R.scorestatus) as \"Item/@scorestatus\", "
-            + " R.DateGenerated as \"Item/@admindate\", "
-            + " R.answer as \"Item/@answerkey\",  R.numUpdates as \"Item/@numberVisits\", ";
+            + " upper(R.scorestatus) as \"Item/@scoreStatus\", "
+            + " R.DateGenerated as \"Item/@adminDate\", "
+            + " R.answer as \"Item/@answerKey\",  R.numUpdates as \"Item/@numberVisits\", ";
 
-      String queryPreffix3 =  " I.mimetype as \"Item/@mimetype\", "
-            + " I.clientID as \"Item/@clientID\", "
+      String queryPreffix3 =  " I.mimetype as \"Item/@mimeType\", "
+            + " I.clientID as \"Item/@clientId\", "
             + " I.strand as \"Item/@strand\","
             + " I.contentLevel as \"Item/@contentLevel\", "
-            + " R.page as \"Item/@pagenumber\", "
-            + " P.visits as \"Item/@pagevisits\", "
-            + " P.dwell as \"Item/@pagetime\",  "
+            + " R.page as \"Item/@pageNumber\", "
+            + " P.visits as \"Item/@pageVisits\", "
+            + " P.dwell as \"Item/@pageTime\",  "
             + " case when R.IsInactive = 1 or notforScoring = 1 then 1 else 0 end as \"Item/@dropped\" ";
         
       String queryPreffix = queryPreffix1 
@@ -851,25 +880,38 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           record2 = resItr2.next ();
           recordToXML (record2, orderedColumns, strBuilder, debug);
         }
-        query = "select coalesce(response, '') as response, coalesce(scoreRationale, '') as rationale, datesubmitted as responseDate  ";
-        if (dateArchived == null)
-        {
-          query = query + " from testeeresponse ";
-        }
-        else
-        {
-          query = query + " from testeeresponsearchive ";
-        }
+        query = "select coalesce(response, '') as response, coalesce(scoreRationale, '') as rationale, datesubmitted as responseDate,  "
+        		+ " I.scorepoints as scorePoint,"
+        		+ " R.scoredimensions as scoreDimension, "
+        		+ " R.scorestatus as scoreStatus ";
+// TODO: (AK) We need to add to table  testeeresponsearchive column scoredimensions !!!       
+//        if (dateArchived == null)
+//        {
+          query = query + " from testeeresponse R ";
+//        }
+//        else
+//        {
+//          query = query + " from testeeresponsearchive R ";
+//        }
 
-        query = query + " where _fk_testOpportunity = ${oppkey} and _efk_Itemkey = ${itemkey}";
+        query = query 
+                + " left join"
+                + " ${itemstblName} I on "
+                + " I._key = ${itemkey} "
+        		+ " where _fk_testOpportunity = ${oppkey} and _efk_Itemkey = ${itemkey}";
 
-        result2 = executeStatement (connection, query, parameters, false).getResultSets ().next ();
+        result2 = executeStatement (connection, fixDataBaseNames (query, unquotedparms), parameters, false).getResultSets ().next ();
         record2 = result2.getCount () > 0 ? result2.getRecords ().next () : null;
         if (record2 != null) {
           response 		= record2.<String> get ("response");
           rationale 	= record2.<String> get ("rationale");
           responseDate 	= record2.<Date> get ("responseDate");
           respDate 		= (responseDate != null)?  responseDate.toString(): "";
+          respDate		= formatXSDateTime(respDate);
+          scoreStatus   = record2.<String> get ("scoreStatus");
+          Integer spoint	= record2.<Integer> get ("scorePoint");
+          scorePoint = spoint.toString();
+          scoredimension= record2.<String> get ("scoreDimension");
         }
         else
         {
@@ -877,6 +919,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           rationale = "";
           respDate 	= "";
         }
+        scoreStatus 	= formatValueToXSD(scoreStatus, "scoreStatus");
+        scorePoint 		= formatValueToXSD(scorePoint, "scorePoint");
+        scoredimension 	= formatValueToXSD(scoredimension, "scoreDimension");
+        //TODO maxscore????
+        maxscore 	= formatValueToXSD(maxscore, "maxScore");
+
 
         xml = strBuilder.toString ();
         if (xml != null && !xml.isEmpty ())
@@ -887,20 +935,21 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         	strBuilder = new StringBuilder ();
             strBuilder.append(xml.substring (0, indexEnd));
             strBuilder.append(">").append(ls);
-            strBuilder.append("<").append(RESPONSE_NODE_NAME).append(" date=").append("\"").append(respDate).append("\"").append(">");
-            if(!(itemtype.equalsIgnoreCase("MC")||itemtype.equalsIgnoreCase("MS"))) {//TODO
-            	strBuilder.append("<![CDATA[ ");  
-            }
-            
-            strBuilder.append(response);
-            
-            if(!(itemtype.equalsIgnoreCase("MC")||itemtype.equalsIgnoreCase("MS"))) {//TODO
-            	strBuilder.append(" ]]> ");
-            }
+            strBuilder.append("<").append(RESPONSE_NODE_NAME).append(" date =").append("\"").append(respDate).append("\"").append(">");
+	            if(!(itemtype.equalsIgnoreCase("MC")||itemtype.equalsIgnoreCase("MS"))) {
+	            	strBuilder.append("<![CDATA[ ");  
+	            }            
+	            	strBuilder.append(response);            
+	            if(!(itemtype.equalsIgnoreCase("MC")||itemtype.equalsIgnoreCase("MS"))) {
+	            	strBuilder.append(" ]]> ");
+	            }
             strBuilder.append("</").append(RESPONSE_NODE_NAME).append(">").append(ls);
-            strBuilder.append("<").append(SCORERATIONALE_NODE_NAME).append(">");
-            strBuilder.append(rationale);
-            strBuilder.append("</").append(SCORERATIONALE_NODE_NAME).append(">").append(ls);
+            if(rationale != null && !rationale.isEmpty())
+            {
+            	strBuilder.append(getScoreInfo(rationale, scorePoint, 
+            			scoreStatus, scoredimension, maxscore));
+            }
+            
             strBuilder.append("</").append(ITEM_NODE_NAME).append(">").append(ls);
           }
         }
@@ -920,6 +969,38 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 	}
     _commonDll._LogDBLatency_SP (connection, "_XML_GetOpportunityItems", starttime, null, true, null, oppkey);
     return resStrBuilder.toString();
+  }
+  
+  protected String getScoreInfo(String rationale,
+		  String scorePointValue,
+		  String scoreStatusValue,
+		  String scoreDimensionValue,
+		  String maxScoreValue)
+  {
+	StringBuilder strBuilder = new StringBuilder();
+
+	String confLevelValue = "";
+	
+	strBuilder.append("<").append(SCOREINFO_NODE_NAME);
+		strBuilder.append(SPACE).append("scorePoint = \"").append(scorePointValue).append("\" ");
+		strBuilder.append(SPACE).append("maxScore = \"").append(maxScoreValue).append("\" ");
+		strBuilder.append(SPACE).append("scoreDimension = \"").append(scoreDimensionValue).append("\" ");
+		strBuilder.append(SPACE).append("scoreStatus = \"").append(scoreStatusValue).append("\" ");
+		strBuilder.append(SPACE).append("confLevel = \"").append(confLevelValue).append("\" ");	
+	strBuilder.append(">").append(ls);
+	
+    	strBuilder.append(SPACE).append("<").append(SCORERATIONALE_NODE_NAME).append(">").append(ls);
+    	strBuilder.append(SPACE).append("<").append(SCOREINFOMESSAGE_NODE_NAME).append(">").append(ls);
+   	
+    		strBuilder.append(SPACE).append(SPACE).append(rationale);
+        	
+    	strBuilder.append(SPACE).append("</").append(SCOREINFOMESSAGE_NODE_NAME).append(">").append(ls);	
+    	strBuilder.append(SPACE).append("</").append(SCORERATIONALE_NODE_NAME).append(">").append(ls);
+    
+    strBuilder.append("</").append(SCOREINFO_NODE_NAME).append(">").append(ls);
+	  
+	  
+	return  strBuilder.toString(); 
   }
 
   // @Test
@@ -971,9 +1052,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Accommodation/@type",
           "Accommodation/@value",
           "Accommodation/@code",
-          "Accommodation/@segment",
-          "Accommodation/@context",
-          "Accommodation/@contextDate"));
+          "Accommodation/@segment"
+//AK: (2014-11-13)    There are not these attributes in new reportxml_os.xsd file      
+//          ,
+//          "Accommodation/@context",
+//          "Accommodation/@contextDate"
+          ));
 
       String query = "select AccType as \"Accommodation/@type\", AccValue as \"Accommodation/@value\", "
           + " AccCode as \"Accommodation/@code\", Segment as \"Accommodation/@segment\", "
@@ -1049,15 +1133,15 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     try {
       SingleDataResultSet result;
       DbResultRecord record;
-      List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Segment/@ID",
+      List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Segment/@id",
           "Segment/@position",
-          "Segment/@formkey",
-          "Segment/@formID",
+          "Segment/@formId",
+          "Segment/@formKey",
           "Segment/@algorithm",
           "Segment/@algorithmVersion"));// SB-439: See https://docs.google.com/spreadsheet/ccc?key=0ArK0Ai9lGDb9dHZkcUw2bXFodi0ybmJSY1FtcnlCQVE&usp=sharing
 
-      String query = "select  _efk_Segment as \"Segment/@ID\", SegmentPosition as \"Segment/@position\", "
-          + " formkey as \"Segment/@formkey\",  formID as \"Segment/@formID\", algorithm as \"Segment/@algorithm\","
+      String query = "select  _efk_Segment as \"Segment/@id\", SegmentPosition as \"Segment/@position\", "
+          + " formkey as \"Segment/@formKey\",  formID as \"Segment/@formId\", algorithm as \"Segment/@algorithm\","
           + " 0 as   \"Segment/@algorithmVersion\""
           + " from testopportunitysegment where _fk_TestOpportunity = ${oppkey} order by segmentPosition";
       SqlParametersMaps parameters = new SqlParametersMaps ().put ("oppkey", oppkey);
@@ -1118,11 +1202,11 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Toolusage/@type",
           "Toolusage/@code",
           "Toolusage/Toolpage/@page",
-          "Toolusage/Toolpage/@groupID",
+          "Toolusage/Toolpage/@groupId",
           "Toolusage/Toolpage/@count"));
 
       query = "select O.toolType as \"Toolusage/@type\", O.toolCode as \"Toolusage/@code\", "
-          + " itempage as \"Toolusage/Toolpage/@page\", groupID as \"Toolusage/Toolpage/@groupID\","
+          + " itempage as \"Toolusage/Toolpage/@page\", groupID as \"Toolusage/Toolpage/@groupId\","
           + " count(*) as \"Toolusage/Toolpage/@count\" "
           + " from testopptoolsused O, ${ConfigDB}.client_toolusage U  "
           + " where _fk_TestOpportunity = ${oppkey} and clientname = ${clientname} "
@@ -1609,9 +1693,13 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     {
       resValue = value.toString ();
     }
+    String attrName = xmlVertexes[xmlVertexes.length - 1];
     // write value
+    //SB-999
+    resValue = formatValueToXSD(resValue, attrName);
+    
     strBuilder.append (" ");
-    strBuilder.append (xmlVertexes[xmlVertexes.length - 1]);
+    strBuilder.append (attrName);
     strBuilder.append ("=\"");
     strBuilder.append (resValue);
     strBuilder.append ("\"");
@@ -1777,7 +1865,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
    */
   // for debugging only 
   public void dumpRecord (DbResultRecord record) throws ReturnStatusException {
-    System.out.println ();
+
     String columnName = null;
     Iterator<String> itNames = record.getColumnNames ();
     String resValue = "";
@@ -1790,8 +1878,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         resValue = value.toString ();
       }
       _logger.info (String.format ("%s: %s", columnName, resValue));
+      //System.out.println(String.format ("%s: %s", columnName, resValue));
     }
-    System.out.println ();
+
   }
   //
   protected String getNodeAttributeName(String nodeName, String attrName)
@@ -1973,7 +2062,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		return entityKey;
 	}
 
-  private String getContextDate(SQLConnection connection, UUID oppkey, String context) throws ReturnStatusException
+  protected String getContextDate(SQLConnection connection, UUID oppkey, String context) throws ReturnStatusException
   {
 	  String contextDate = "";
       String query = "select _date as date from session.testeerelationship where context = ${context} and _fk_testopportunity = ${oppkey} limit 1";
@@ -2119,7 +2208,110 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
       }
     }
   }
+  
+  public String formatValueToXSD(String resValue, String attrName)
+  {
+	    // SB-999
+	    // type="xs:dateTime"
+	    try{
+		    if(attrName.equalsIgnoreCase("statusDate")
+		    		|| attrName.equalsIgnoreCase("adminDate")
+		    		|| attrName.equalsIgnoreCase("contextDate")
+		    		|| attrName.equalsIgnoreCase("date")
+		    		)
+		    {
+		    	resValue = formatXSDateTime(resValue);
+		    }
+		    // type = "NullableDateTime"
+		    else if(attrName.equalsIgnoreCase("dateCompleted")
+		    		|| attrName.equalsIgnoreCase("startDate")
+		    		|| attrName.equalsIgnoreCase("dateForceCompleted")
+		    		)
+		    {
+		    	resValue = formatNullableDateTime(resValue);
+		    }
+		    // type = Bit 
+		    else if (attrName.equalsIgnoreCase("isSelected")
+		    		|| attrName.equalsIgnoreCase("isDemo")
+		    		|| attrName.equalsIgnoreCase("operational")
+		    		|| attrName.equalsIgnoreCase("dropped")
+		    		) 
+		    {
+		    	resValue = (!(resValue == null || resValue.isEmpty()) 
+		    			|| resValue.equalsIgnoreCase("true")
+		    			|| resValue.equalsIgnoreCase("1"))? "1": "0";
+		    }
+		    // type = 'UFloatAllowNegativeOne'
+		    else if (attrName.equalsIgnoreCase("scorePoint")
+		    		|| attrName.equalsIgnoreCase("maxScore")
+		    		|| attrName.equalsIgnoreCase("score")
+		    		)
+		    {
+		    	resValue = ((resValue == null || resValue.isEmpty()) )? "-1": resValue;	    	
+		    }
+		    // type="xs:unsignedInt" && type="xs:int"
+		    else if(attrName.equalsIgnoreCase("pageTime")
+		    		|| attrName.equalsIgnoreCase("handScoreProject")
+		    		|| attrName.equalsIgnoreCase("academicYear")
+		    		|| attrName.equalsIgnoreCase("segment")
+		    		|| attrName.equalsIgnoreCase("position")
+		    		|| attrName.equalsIgnoreCase("bankKey")
+		    		|| attrName.equalsIgnoreCase("key")
+		    		|| attrName.equalsIgnoreCase("numberVisits")
+		    		|| attrName.equalsIgnoreCase("pageNumber")
+		    		|| attrName.equalsIgnoreCase("pageVisits")
+		    		|| attrName.equalsIgnoreCase("opportunity")
+		    		|| attrName.equalsIgnoreCase("pauseCount")
+		    		|| attrName.equalsIgnoreCase("itemCount")
+		    		|| attrName.equalsIgnoreCase("ftCount")
+		    		|| attrName.equalsIgnoreCase("abnormalStarts")
+		    		|| attrName.equalsIgnoreCase("gracePeriodRestarts")
+		    		|| attrName.equalsIgnoreCase("page")
+		    		|| attrName.equalsIgnoreCase("count")
+		    		)
+		    {
+		    	resValue = ((resValue == null || resValue.isEmpty()) )? "0": resValue;	
+		    }
+	    }
+	    catch(Exception e)
+	    {
+	    	_logger.error(e.getMessage());
+	    }
+	    return resValue;
+	  
+  }
+  
+  public String formatNullableDateTime(String inDate) throws ReturnStatusException {
+	  return (inDate == null || inDate.isEmpty())? EMPTY : formatXSDateTime(inDate);
+  }
 
+	public String formatXSDateTime(String inDate) throws ReturnStatusException {
+	
+		String out = null;
+		// String date_s = "2011-01-18 00:00:00.0";
+		String inputContextDateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
+		// <xs:attribute name="contextDate" use="required" type="xs:dateTime"/>
+		// see reportxml_os.xsd
+		String contextDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+	
+		// *** note that it's "yyyy-MM-dd hh:mm:ss" not "yyyy-mm-dd hh:mm:ss"
+		SimpleDateFormat dt = new SimpleDateFormat(inputContextDateFormat);
+	
+		try {
+			Date date = dt.parse(inDate);
+			// *** same for the format String below
+			SimpleDateFormat dt1 = new SimpleDateFormat(contextDateFormat);
+			out = dt1.format(date);
+	
+		} catch (ParseException e) {
+			throw new ReturnStatusException(e.getMessage());
+		}
+		if (out == null || out.isEmpty())
+			out = inDate;
+	
+		return out;
+	
+	}
 
   public void setTisUrl (String tisUrl) {
     _tisUrl = tisUrl;
