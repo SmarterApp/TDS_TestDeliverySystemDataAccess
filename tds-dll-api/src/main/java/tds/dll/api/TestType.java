@@ -16,7 +16,7 @@ public enum TestType
 {
   
   SUMMATIVE,
-  NON_SUMMATIVE,
-  ANY
-
+  INTERIM,
+  FORMATIVE
+  
 }

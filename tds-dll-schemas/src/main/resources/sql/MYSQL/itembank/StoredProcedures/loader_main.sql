@@ -52,11 +52,11 @@ begin
 	 where _fk_package = v_testpackagekey;
 
 	update loader_testpassages
-	   set filepath = concat(substring_index(filename, '.', 1), '\\')
+	   set filepath = concat(substring_index(filename, '.', 1), '/')
 	 where _fk_package = v_testpackagekey;
 
 	update loader_testitem
-	   set filepath = concat(substring_index(filename, '.', 1), '\\')
+	   set filepath = concat(substring_index(filename, '.', 1), '/')
 	 where _fk_package = v_testpackagekey;
 
 	update loader_testitemrefs tir

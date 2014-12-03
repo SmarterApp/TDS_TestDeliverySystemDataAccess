@@ -930,7 +930,7 @@ public class RtsDLL extends AbstractDLL implements IRtsDLL
     }
 
     //Implementation not required  
-    public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, TestType testType) {
+    public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, List<TestType> testType) {
       return 0;
     }
 

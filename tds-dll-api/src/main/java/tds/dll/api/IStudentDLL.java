@@ -22,6 +22,8 @@ import TDS.Shared.Exceptions.ReturnStatusException;
 
 public interface IStudentDLL
 {
+  
+  public static final String UNKNOWN_ATTRIBUTE_VALUE = "UNKNOWN";
 
   /**
    * @param connection

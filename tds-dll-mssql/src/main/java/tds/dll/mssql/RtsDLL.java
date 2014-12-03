@@ -877,7 +877,7 @@ public SingleDataResultSet R_GetDistrictSchools_SP (SQLConnection connection, St
   }
 
  //Implementation not required  
-  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, TestType testType) throws ReturnStatusException {
+  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, List<TestType> testType) throws ReturnStatusException {
     return 0;
   }
 

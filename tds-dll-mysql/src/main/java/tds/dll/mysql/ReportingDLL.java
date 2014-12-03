@@ -107,7 +107,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   
   private String _tisUrl;
   
-  private String _tisReplyCallbackUrl;
+  private String _tisStatusCallbackUrl;
 
   private long _tisWaitTime;
   
@@ -2181,16 +2181,15 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     long startSentTime = System.currentTimeMillis ();
     while (!isSent) {
       try {
-        String tisReplyCallbackUrl = UrlEncoderDecoderUtils.encode (_tisReplyCallbackUrl.replace ("{testopp}", oppkey.toString ()));
-        String tisUrl = _tisUrl.replace ("{testopp}", oppkey.toString ()).replace ("{replycallback}", tisReplyCallbackUrl);
+        String tisStatusCallbackUrl = UrlEncoderDecoderUtils.encode (_tisStatusCallbackUrl);
+        String tisUrl = _tisUrl.replace ("{statusCallbackUrl}", tisStatusCallbackUrl);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);  
         HttpEntity<String> entity = new HttpEntity<String>(xmlReport, headers);
-        ResponseEntity<String> response = _restClient.exchange (tisUrl, HttpMethod.PUT, entity, String.class);
+        ResponseEntity<String> response = _restClient.exchange (tisUrl, HttpMethod.POST, entity, String.class);
         isSent = true;
-        // TODO jmambo: set necessary response after requirements from TIS are completed
         if (response.getStatusCode () != HttpStatus.OK) {
-          errRef.set (response.getBody ());
+          errRef.set (response.getStatusCode ().toString () + ": " + response.getBody ());
         }
       } catch (Exception e) {
         _logger.error (e.getMessage (), e);
@@ -2317,8 +2316,8 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     _tisUrl = tisUrl;
   }
 
-  public void setTisReplyCallbackUrl (String tisReplyCallbackUrl) {
-    _tisReplyCallbackUrl = tisReplyCallbackUrl;
+  public void setTisStatusCallbackUrl (String tisStatusCallbackUrl) {
+    _tisStatusCallbackUrl = tisStatusCallbackUrl;
   }
 
   public void setTisWaitTime (long tisWaitTime) {

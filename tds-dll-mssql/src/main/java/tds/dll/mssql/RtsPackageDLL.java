@@ -873,7 +873,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @return number of records created
    * @throws ReturnStatusException
    */
-  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
+  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String xmlPackage, List<TestType> testType) throws ReturnStatusException {
     return createAndUpdateIsCurrent (connection, EntityType.PROCTOR, key, clientName, xmlPackage);
   }
 

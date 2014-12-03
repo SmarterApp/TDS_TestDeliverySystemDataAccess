@@ -9,7 +9,6 @@
 package tds.dll.mysql;
 
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -137,7 +136,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           }
           
           // get proctor's institution ID
-          String apiUrl = "user/" + userId;
+          String apiUrl = "user/" +  UrlEncoderDecoderUtils.encode(userId);
           User user = null;
           try {
             user = _trClient.getForObject (apiUrl, User.class);
@@ -493,7 +492,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   public SingleDataResultSet P_GetAllTests_SP (SQLConnection connection, String clientname, int sessionType, Long proctorKey) throws ReturnStatusException {
     Map<String, Object> testKeyMap = new HashMap<> ();
     DbResultRecord proctorRecord = findProctorByKeyAndClientName (connection, proctorKey, clientname);
-    
+    String testTypes = null;
     if (proctorRecord != null) {
       IRtsPackageReader packageReader = new ProctorPackageReader ();
       try {
@@ -501,23 +500,10 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           if (packageObject!= null) {
             if (packageReader.read (packageObject)) {
               RtsTable testList = packageReader.getRtsTable ("Tests");
-              TestType testType = TestType.valueOf (proctorRecord.<String> get ("testType"));  
+              testTypes = proctorRecord.<String> get ("testType");  
               for (RtsRecord packageRecord : testList.getRecords ()) {
-                String packageTestType = packageRecord.get ("TestType");
-                if (!StringUtils.isBlank(packageTestType)) {
-                  boolean hasMatchingTestTypes = false;
-                  if (packageTestType.equalsIgnoreCase(TestType.ANY.name ())) {
-                    hasMatchingTestTypes = true;
-                  } else if (packageTestType.equalsIgnoreCase(TestType.SUMMATIVE.name ()) &&  testType == TestType.SUMMATIVE) {
-                     hasMatchingTestTypes = true;
-                  } else if (!packageTestType.equalsIgnoreCase(TestType.SUMMATIVE.name ()) && testType != TestType.SUMMATIVE) {
-                    //SSO will return Non-Summative while ProctorPackage will have formative, interim
-                    hasMatchingTestTypes = true;
-                  }
-                  if (hasMatchingTestTypes) {
-                     testKeyMap.put (packageRecord.get ("TestKey").trim (), null);
-                  }
-                }
+                //TODO: jmambo test type to come from database
+                testKeyMap.put (packageRecord.get ("TestKey").trim (), null);
               }
             }
           }
@@ -530,13 +516,19 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     SingleDataResultSet resultSet = null;
 
     if(testKeyMap.size () > 0) {
+      String testTypesStr = listToQuotedString (testTypes); 
       final String SQL_QUERY = "select distinct P.TestID, P.GradeText, P.SubjectName as Subject, P.label as DisplayName, "
           + " P.SortOrder, P.AccommodationFamily,P.IsSelectable, M.IsSegmented, M.TestKey"
           + " from ${ConfigDB}.client_testproperties P, ${ConfigDB}.client_testmode M, ${ItemBankDB}.tblsetofadminsubjects S "
           + " where P.clientname = ${clientname}  and M.clientname = ${clientname} and M.testID = P.testID and M.testkey = S._Key"
+          + " and S.testtype in (${testTypesStr})"
           + " order by sortorder";
+      Map<String, String> unquotedparms = new HashMap<String, String> ();
+      unquotedparms.put ("testTypesStr", testTypesStr);
+      String query = fixDataBaseNames (SQL_QUERY, unquotedparms);
+       
       SqlParametersMaps parms = new SqlParametersMaps ().put ("clientname", clientname);
-      resultSet = executeStatement (connection, fixDataBaseNames (SQL_QUERY), parms, false).getResultSets ().next ();
+      resultSet = executeStatement (connection, fixDataBaseNames (query), parms, false).getResultSets ().next ();
       Iterator<DbResultRecord> records = resultSet.getRecords ();
       while (records.hasNext ()) {
         DbResultRecord record = records.next ();
@@ -549,21 +541,37 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     }
     return resultSet;
   }
+  
+  private String listToQuotedString (String theLine) {
+
+    String retLine = "";
+    String splits[] = StringUtils.split (theLine, ",");
+    if (splits.length == 0)
+      return retLine;
+
+    for (String split : splits) {
+      if (retLine.isEmpty ())
+        retLine = String.format ("'%s'", split);
+      else
+        retLine += String.format (", '%s'", split);
+    }
+    return retLine;
+  }
 
   @Override
   public SingleDataResultSet GetRTSUserRoles_SP (SQLConnection connection, String clientName, Long userKey) throws ReturnStatusException {
     return GetRTSUserRoles_SP (connection, clientName, userKey,  null) ;
   }
-
+  
   @Override
-  public SingleDataResultSet GetRTSUserRoles_SP (SQLConnection connection, String clientName, Long userKey, Integer sessionType) throws ReturnStatusException {
+  public SingleDataResultSet GetRTSUserRoles_SP (SQLConnection connection, String clientName, Long userKey,  Integer sessionType) throws ReturnStatusException {
 
     SingleDataResultSet resultSet = null;
      User user = null;
      if (userKey != null) {
        String userId = getUserId (connection, userKey);
        if (userId != null) {
-         String apiUrl = "user/" + userId; 
+         String apiUrl = "user/" +  UrlEncoderDecoderUtils.encode(userId); 
           try {
             user = _trClient.getForObject (apiUrl, User.class);
           } catch (TrApiException e) {
@@ -888,11 +896,11 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @return number of records created
    * @throws ReturnStatusException
    */
-  public int createStudent (SQLConnection connection, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
+  public int createStudent (SQLConnection connection, Long key, String clientName, String xmlPackage, List<TestType> testTypes) throws ReturnStatusException {
     IRtsPackageWriter<StudentPackage> writer = new StudentPackageWriter ();
     try {
       writer.writeObject (xmlPackage);
-      return create (connection, EntityType.STUDENT, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testType);
+      return create (connection, EntityType.STUDENT, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testTypes);
     } catch (RtsPackageWriterException e) {
       _logger.error (e.getMessage (), e);
       throw new ReturnStatusException ("could not create student " + e.getMessage ());
@@ -911,11 +919,11 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @throws ReturnStatusException
    * @throws RtsPackageWriterException
    */
-  public int createProctor (SQLConnection connection, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
+  public int createProctor (SQLConnection connection, Long key, String clientName, String xmlPackage, List<TestType> testTypes) throws ReturnStatusException {
     IRtsPackageWriter<ProctorPackage> writer = new ProctorPackageWriter ();
     try {
       writer.writeObject (xmlPackage);
-      return create (connection, EntityType.PROCTOR, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testType);
+      return create (connection, EntityType.PROCTOR, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testTypes);
     } catch (RtsPackageWriterException e) {
       _logger.error (e.getMessage (), e);
       throw new ReturnStatusException ("could not create proctor " + e.getMessage ());
@@ -933,7 +941,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @return number of records created
    * @throws ReturnStatusException
    */
-  private int create (SQLConnection connection, EntityType entityType, Long key, String clientName, InputStream packageStream, String version, TestType testType) throws ReturnStatusException {
+  private int create (SQLConnection connection, EntityType entityType, Long key, String clientName, InputStream packageStream, String version, List<TestType> testTypes) throws ReturnStatusException {
     String SQL_INSERT = null;
     if (entityType == EntityType.PROCTOR) {
           SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) select ?, ?, ?, ?, now(), ? from dual";
@@ -946,7 +954,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       preparedStatement.setBinaryStream (3, packageStream);
       preparedStatement.setString (4, version);
       if (entityType == EntityType.PROCTOR) {
-        preparedStatement.setString (5, testType.name ());
+        preparedStatement.setString (5, StringUtils.join(testTypes,","));
       }
       preparedStatement.execute ();
       return 1;
@@ -968,7 +976,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @return number of records created
    * @throws ReturnStatusException
    */
-  private int createAndUpdateIsCurrent (SQLConnection connection, EntityType entityType, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
+  private int createAndUpdateIsCurrent (SQLConnection connection, EntityType entityType, Long key, String clientName, String xmlPackage, List<TestType> testType) throws ReturnStatusException {
     int insertCount = 0;
     boolean isCurrent = false;
     try {
@@ -1022,7 +1030,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @return number of records created
    * @throws ReturnStatusException
    */
-  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String xmlPackage, TestType testType) throws ReturnStatusException {
+  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String xmlPackage, List<TestType> testType) throws ReturnStatusException {
     return createAndUpdateIsCurrent (connection, EntityType.PROCTOR, key, clientName, xmlPackage, testType);
   }
 
@@ -1373,6 +1381,5 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   private byte[] getProctorPackageByKeyAndClientName (SQLConnection connection, Long key, String clientName) throws ReturnStatusException {
     return getPackageByKeyAndClientName (connection, EntityType.PROCTOR, key, clientName);
   }
-
 
 }

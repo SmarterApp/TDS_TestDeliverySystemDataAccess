@@ -17,14 +17,17 @@ begin
 	select distinct cr.ruleid
 		 , tp.publisher
 		 , tp.testname
-		 , case when testkey = cr.bpelementid then 'Overall' else cr.bpelementid end
+		 , replace(case when testkey = cr.bpelementid then 'Overall' 
+						when tbp.bpelementid is not null then tbp.bpelementname
+						else cr.bpelementid 
+					end, '&amp;', '&')
 		 , cr.rulelabel
 		 , cr.rulename
 		 , cr.computationorder
 	  from loader_computationrule cr
--- 	  join loader_computationruleparameter crp on crp.bpelementid = cr.bpelementid
--- 											  and crp._fk_package = cr._fk_package
 	  join loader_testpackage tp on tp.packagekey = cr._fk_package
+	  left join loader_testblueprint tbp on tbp._fk_package = cr._fk_package
+										and tbp.bpelementid = cr.bpelementid
 	 where tp.packagekey = v_testpackagekey
 	   and not exists (select 1
 						 from testscorefeature tsf 
@@ -34,3 +37,4 @@ begin
 end $$
 
 DELIMITER ;
+  

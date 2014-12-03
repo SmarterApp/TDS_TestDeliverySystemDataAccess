@@ -8768,7 +8768,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
        parms10.put ("segmentID", segmentId);
        parms10.put ("groupB", groupB);
 
-       _logger.info("loadTest: StudentDLL.T_InsertItems_SP  Update testeeresponse  ");
        updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms3), parms10, false).getUpdateCount ();
        _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 10 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
      }
@@ -11555,7 +11554,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         .put ("printtest", printtest).put ("printtypes", printtypes)
         .put ("pageNumber", pageNumber).put ("groupID", groupID);
 
-    _logger.info("loadTest: StudentDLL.T_GetItemGroup_SP  select testeeresponse  ");
     
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parameters3, false).getResultSets ().next ();
     result.addColumn ("itemFile", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
@@ -11855,7 +11853,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         else if (DbComparator.isEqual (type, "relationship"))
           _rtsDll._GetRTSRelationship_SP (connection, clientname, entity, field, relatedEntityRef, relatedIdRef, valueRef);
 
-        String value = (valueRef.get () == null ? "UNKNOWN" : valueRef.get ());
+        String value = (valueRef.get () == null ?  UNKNOWN_ATTRIBUTE_VALUE : valueRef.get ());
         SqlParametersMaps parms = (new SqlParametersMaps ()).put ("value", value).put ("field", field);
         int updatedCnt = executeStatement (connection, fixDataBaseNames (queryUpdate, unquotedParms), parms, false).getUpdateCount ();
       }

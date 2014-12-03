@@ -8,6 +8,7 @@
  ******************************************************************************/
 package tds.dll.api;
 
+import java.util.List;
 import java.util.UUID;
 
 import AIR.Common.DB.SQLConnection;
@@ -253,8 +254,9 @@ public interface IRtsDLL
    * @param key
    * @param clientName
    * @param proctorPackage
+   * @param testType list
    */
-  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, TestType testType) throws ReturnStatusException;
+  public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, List<TestType> testType) throws ReturnStatusException;
 
   
 }
