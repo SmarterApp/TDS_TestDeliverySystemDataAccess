@@ -863,11 +863,11 @@ public SingleDataResultSet R_GetDistrictSchools_SP (SQLConnection connection, St
     throw new NotImplementedException ("This behavior is only implemented for MySQL RTSPackageDLL");
   }
 //Implementation not required
-  public int createUser(SQLConnection connection,String userId,String fullName) throws ReturnStatusException{
+  public int createUser(SQLConnection connection,String userId,String email,String fullName) throws ReturnStatusException{
      return 0;
   }
 //Implementation not required  
-  public boolean userAlreadyExists(SQLConnection connection,String userId) throws ReturnStatusException {
+  public boolean userAlreadyExists(SQLConnection connection,String userId, String email) throws ReturnStatusException {
     return false;
   }
 

@@ -953,12 +953,12 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   
 
   // TODO Implement when mssql integration required
-  public int createUser (SQLConnection connection, String userId, String fullName) throws ReturnStatusException {
+  public int createUser (SQLConnection connection, String userId, String email, String fullName) throws ReturnStatusException {
     return 0;
   }
 
   // TODO Implement when mssql integration required
-  public boolean userAlreadyExists (SQLConnection connection, String userId) throws ReturnStatusException {
+  public boolean userAlreadyExists (SQLConnection connection, String userId, String email) throws ReturnStatusException {
     return false;
   }
 

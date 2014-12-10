@@ -312,7 +312,7 @@ create table `r_proctorpackage`  (
 	`iscurrent`  	bit null default 1,
 	`datecreated`	datetime(3) not null, -- constraint `df_r_proctorpackage_datecreated`  default (now()),
 	`dateend`    	datetime(3) null,
-	`testtype` 		varchar(20) NOT NULL default 'ANY',
+	`testtype` 		varchar(60) NOT NULL default 'ANY',
 	constraint `pk_r_proctorpackage` primary key clustered(`_key`)
 ) default charset = UTF8;
 

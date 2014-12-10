@@ -42,7 +42,7 @@ begin
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::formposition'))
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::maxitems'))
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::maxresponses'))
-			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/passageref/attribute::passageid'))
+			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/passageref'))
 		;
 
 		-- extract <groupitem> thru this call

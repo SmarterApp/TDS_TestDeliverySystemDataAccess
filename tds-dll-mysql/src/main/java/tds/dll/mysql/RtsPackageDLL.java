@@ -104,14 +104,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     _stateCode = _stateCode.toUpperCase ();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * tds.dll.api.IRtsDLL#_ValidateInstitutionMatch_SP(AIR.Common.DB.SQLConnection
-   * , java.lang.String, java.lang.Long, java.lang.Long,
-   * AIR.Common.Helpers._Ref)
-   */
+
   @Override
   public void _ValidateInstitutionMatch_SP (SQLConnection connection, String clientName, Long testeeKey, Long proctorKey, _Ref<String> instKey) throws ReturnStatusException {
     byte[] packageObject = getStudentPackageByKeyAndClientName (connection, testeeKey, clientName);
@@ -130,16 +123,16 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
             return;
           }
 
-          String userId = getUserId (connection, proctorKey);
-          if (userId == null) {
+          String userEmail = getUserEmail (connection, proctorKey);
+          if (userEmail == null) {
             return;
           }
           
           // get proctor's institution ID
-          String apiUrl = "user/" +  UrlEncoderDecoderUtils.encode(userId);
-          User user = null;
+          String apiUrl = "users?email=" + userEmail;
+          User[] users = null;
           try {
-            user = _trClient.getForObject (apiUrl, User.class);
+            users = _trClient.getForObject (apiUrl, User[].class);
           } catch (TrApiException e) {
             if (e.isErrorExempted ()) {
                instKey.set (studentSchoolId);
@@ -148,10 +141,10 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
            _logger.error (e.getMessage (), e);
          }
           
-          if (user != null) {
+          if (users != null && users.length > 0) {
             RtsRecord rtsRecord = studentReader.getRtsRecord ("INST-HIERARCHY");
             for (RtsField rtsField : rtsRecord.getFields ()) {
-              if (isInstitutionMatch (rtsField, user)) {
+              if (isInstitutionMatch (rtsField, users[0])) {
                 instKey.set (studentSchoolId);
                 break;
               }
@@ -337,13 +330,13 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
       for (District district : districts) {
         CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
-        result.put ("RTSKey", district.getEntityId ());
+        result.put ("RTSKey", district.getId ());
         result.put ("DistrictName", district.getEntityName ());
         result.put ("DistrictID", district.getEntityId ());
         resultList.add (result);
       }
       singleDataResultSet = new SingleDataResultSet ();
-      singleDataResultSet.addColumn ("RTSKey", SQL_TYPE_To_JAVA_TYPE.BIGINT);
+      singleDataResultSet.addColumn ("RTSKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("DistrictName", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("DistrictID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addRecords (resultList);
@@ -371,13 +364,13 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
       for (Institution school : schools) {
         CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
-        result.put ("RTSKey", school.getEntityId ());
+        result.put ("RTSKey", school.getId ());
         result.put ("SchoolName", school.getEntityName ());
         result.put ("SchoolID", school.getEntityId ());
         resultList.add (result);
       }
       singleDataResultSet = new SingleDataResultSet ();
-      singleDataResultSet.addColumn ("RTSKey", SQL_TYPE_To_JAVA_TYPE.BIGINT);
+      singleDataResultSet.addColumn ("RTSKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("SchoolName", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("SchoolID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addRecords (resultList);
@@ -502,7 +495,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
               RtsTable testList = packageReader.getRtsTable ("Tests");
               testTypes = proctorRecord.<String> get ("testType");  
               for (RtsRecord packageRecord : testList.getRecords ()) {
-                //TODO: jmambo test type to come from database
                 testKeyMap.put (packageRecord.get ("TestKey").trim (), null);
               }
             }
@@ -537,7 +529,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           records.remove ();
       }
     } else {
-      _logger.warn ("selected tests from the package is empty");
+      _logger.warn ("Proctor Package has no tests");
     }
     return resultSet;
   }
@@ -567,13 +559,13 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   public SingleDataResultSet GetRTSUserRoles_SP (SQLConnection connection, String clientName, Long userKey,  Integer sessionType) throws ReturnStatusException {
 
     SingleDataResultSet resultSet = null;
-     User user = null;
+     User[] users = null;
      if (userKey != null) {
-       String userId = getUserId (connection, userKey);
-       if (userId != null) {
-         String apiUrl = "user/" +  UrlEncoderDecoderUtils.encode(userId); 
+       String userEmail = getUserEmail (connection, userKey);
+       if (userEmail != null) {
+         String apiUrl = "users?email=" +  userEmail; 
           try {
-            user = _trClient.getForObject (apiUrl, User.class);
+            users = _trClient.getForObject (apiUrl, User[].class);
           } catch (TrApiException e) {
             if (e.isErrorExempted ()) {
               return null;
@@ -583,7 +575,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
        }
      }
 
-     if (user == null) {
+     if (users == null || users.length == 0) {
        List<CaseInsensitiveMap<Object>> resultlist = new ArrayList<CaseInsensitiveMap<Object>> ();
        CaseInsensitiveMap<Object> rcrd = new CaseInsensitiveMap<Object> ();
        rcrd.put ("role", null);
@@ -605,13 +597,20 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
        return resultSet;
      }
      List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
-    
-     for (RoleAssociation roleAssociation : user.getRoleAssociations ()) {
+
+     for (RoleAssociation roleAssociation : users[0].getRoleAssociations ()) {
          CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
          result.put ("rtsKey", userKey);
          result.put ("TDS_Role", roleAssociation.getRole ()); //TODO: calling class looking for proctor
-         result.put ("InstitutionKey", roleAssociation.getAssociatedEntityId ());
-         result.put ("InstitutionName", roleAssociation.getAssociatedEntityId ()); //TODO: name is not returned
+         result.put ("TDS_Role", "proctor"); 
+         result.put ("InstitutionKey", roleAssociation.getAssociatedEntityMongoId ());
+
+         Institution institution = getInstitution(roleAssociation.getAssociatedEntityMongoId ()); //TODO: check if this can be returned without making extra API calls
+         String instName = "";
+         if (institution != null) {
+           instName = institution.getEntityName ();
+          }
+         result.put ("InstitutionName", instName); //TODO: name is not returned
          result.put ("InstitutionID", roleAssociation.getAssociatedEntityId ());
          result.put ("InstitutionType", roleAssociation.getLevel ());
          resultList.add (result);
@@ -628,6 +627,22 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   
      return resultSet;
    
+  }
+  
+  private Institution getInstitution(String trId) {
+    
+    String apiUrl = String.format ("institution/" + trId);
+
+    Institution institution = null;
+    try {
+      institution = _trClient.getForObject (apiUrl, Institution.class);
+    } catch (TrApiException e) {
+      if (e.isErrorExempted ()) {
+         return null;
+      }      
+      _logger.error (e.getMessage (), e);
+    }
+    return institution;
   }
 
   @Override
@@ -1162,21 +1177,42 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return attributes;
   }
 
-  public int createUser (SQLConnection connection, String userId, String fullName) throws ReturnStatusException {
-    final String SQL_QUERY = "insert into tbluser (userid,fullname,clientname) values(${userId},${fullName},${clientName});";
+  public String getTrTestId (SQLConnection connection,  long testeeKey, String testKey) {
+    try {
+      byte[] packageObject = getStudentPackageByKeyAndClientName (connection, testeeKey, _clientName);
+      if (packageObject != null) {
+        IRtsPackageReader studentReader = new StudentPackageReader ();
+        if (studentReader.read (packageObject)) {
+          RtsTable testList = studentReader.getRtsTable ("Tests");
+          for (RtsRecord packageRecord : testList.getRecords ()) {
+            if (packageRecord.get ("TestKey").equals(testKey)) {
+              return packageRecord.get ("TestID");
+            }
+          }
+        }
+      }
+     } catch (RtsPackageReaderException | ReturnStatusException e) {
+       _logger.error (e.getMessage (), e);
+     }
+     return null;  
+   
+  }
+  
+  public int createUser (SQLConnection connection, String userId, String email, String fullName) throws ReturnStatusException {
+    final String SQL_QUERY = "insert into tbluser (userid,email,fullname,clientname) values(${userId},${email},${fullName},${clientName});";
 
     SqlParametersMaps parameters = new SqlParametersMaps ();
     parameters.put ("userId", userId);
+    parameters.put ("email", email);
     parameters.put ("fullName", fullName);
     parameters.put ("clientName", _clientName);
     
     int insertedCnt = executeStatement (connection, SQL_QUERY, parameters, false).getUpdateCount ();
-    System.out.println (insertedCnt);
     return insertedCnt;
   }
 
-  public boolean userAlreadyExists (SQLConnection connection, String userId) throws ReturnStatusException {
-    final String SQL_QUERY1 = "select userkey, fullname from tbluser where userid = ${proctorID}";
+  public boolean userAlreadyExists (SQLConnection connection, String userId, String email) throws ReturnStatusException {
+    final String SQL_QUERY1 = "select userkey, email, fullname from tbluser where userid = ${proctorID}";
     // final String SQL_QUERY1 =
     // "select _Key as userKey, fullname as fullname, password as rtspassword from ${rts}.tbluser where username = ${proctorID}"
     // +
@@ -1199,28 +1235,48 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
      */
     SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
     DbResultRecord record = result.getCount () > 0 ? result.getRecords ().next () : null;
+
     if (record != null) {
+      String existingEmail = record.<String> get ("email");
+      if (!email.equals (existingEmail)) {
+        updateUserEmail(connection, userId, email);
+      }
       return true;
     }
     return false;
   }
-
-
+  
   /**
    * 
    * @param connection
-   * @param clientname
-   * @param studentIds
+   * @param userId
+   * @param email
+   * @return
    * @throws ReturnStatusException
    */
-  private String getUserId (SQLConnection connection, long userKey) throws ReturnStatusException {
-
-    final String SQL_QUERY = "select userid from tbluser where userkey =  ${userKey}";
+  private int updateUserEmail (SQLConnection connection, String userId, String email) throws ReturnStatusException {
+    final String SQL_UPDATE = "update tbluser set email = ${email} where userId = ${userId}";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("email", email);
+    params.put ("userId", userId);
+    int updateCount = executeStatement (connection, SQL_UPDATE, params, false).getUpdateCount ();
+    return updateCount;
+  }
+  
+  /**
+   * 
+   * @param connection
+   * @param userKey
+   * @throws ReturnStatusException
+   */
+  private String getUserEmail (SQLConnection connection, long userKey) throws ReturnStatusException {
+    final String SQL_QUERY = "select email from tbluser where userkey =  ${userKey}";
     SqlParametersMaps parms = (new SqlParametersMaps ()).put ("userKey", userKey);
     SingleDataResultSet result = executeStatement (connection, SQL_QUERY, parms, false).getResultSets ().next ();
     DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-    return (record != null) ? record.<String> get ("userid") : null;
+    return (record != null) ? record.<String> get ("email") : null;
   }
+
 
   /**
    * 

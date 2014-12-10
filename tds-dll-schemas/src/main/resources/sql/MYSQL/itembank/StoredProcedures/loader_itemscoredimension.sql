@@ -21,12 +21,12 @@ Usage: call loader_itemscoredimension( 'test'
 												<bpref>ELPA-ELPA Speaking-Speaking|SER</bpref>
 												<poolproperty property="Language" value="ENU" label="English"/>
 												<poolproperty property="TDSPoolFilter" value="Speaking" label="TDSPoolFilter = Speaking"/>
-												<itemscoredimension measuremodel="IRTPCL" dimension="Grammar" scorepoints="2" weight="1.000000000000000e+000">
+												<itemscoredimension measurementmodel="IRTPCL" dimension="Grammar" scorepoints="2" weight="1.000000000000000e+000">
 													<itemscoreparameter measurementparameter="b0" value="-9.000000000000000e+000"/>
 													<itemscoreparameter measurementparameter="b1" value="-9.000000000000000e+000"/>
 													<property name="recoderule" value="ELPA_Grammar_Recode"/>
 												</itemscoredimension>
-												<itemscoredimension measuremodel="IRTPCL" dimension="Illocution" scorepoints="2" weight="1.000000000000000e+000">
+												<itemscoredimension measurementmodel="IRTPCL" dimension="Illocution" scorepoints="2" weight="1.000000000000000e+000">
 													<itemscoreparameter measurementparameter="b0" value="-9.000000000000000e+000"/>
 													<itemscoreparameter measurementparameter="b1" value="-9.000000000000000e+000"/>
 													<property name="recoderule" value="ELPA_Illocution_Recode"/>
@@ -65,7 +65,7 @@ begin
 	while v_isdcounter <= v_isdloop do
 	begin
 
-		set v_measuremodel = extractvalue(v_xml, concat(v_path, '[', v_isdcounter, ']/attribute::measuremodel'));
+		set v_measuremodel = extractvalue(v_xml, concat(v_path, '[', v_isdcounter, ']/attribute::measurementmodel'));
 		set v_dimension    = extractvalue(v_xml, concat(v_path, '[', v_isdcounter, ']/attribute::dimension'));
 		set v_scorepoints  = extractvalue(v_xml, concat(v_path, '[', v_isdcounter, ']/attribute::scorepoints'));
 		set v_weight 	   = extractvalue(v_xml, concat(v_path, '[', v_isdcounter, ']/attribute::weight'));

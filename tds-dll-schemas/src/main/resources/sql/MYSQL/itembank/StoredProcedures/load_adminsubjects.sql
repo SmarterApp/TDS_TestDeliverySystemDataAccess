@@ -45,6 +45,7 @@ begin
 	  , cset1order varchar(50)
 	  , version bigint
 	  , contract varchar(100)
+	  , testtype varchar(60)
 	);
 
 
@@ -64,7 +65,7 @@ begin
 	
 	-- load test data for both segmented and non-segmented (excluding the test segments)
 	-- elementtype = test
-	insert into tmp_tblsetofadminsubjects (_key, _fk_testadmin, _fk_subject, testid, minitems, maxitems, ftminitems, ftmaxitems, selectionalgorithm, issegmented, version, contract)
+	insert into tmp_tblsetofadminsubjects (_key, _fk_testadmin, _fk_subject, testid, minitems, maxitems, ftminitems, ftmaxitems, selectionalgorithm, issegmented, version, contract, testtype)
 	select bpelementid
 		 , testadmin
 	     , subjectkey
@@ -77,6 +78,7 @@ begin
 		 , v_issegmented
 		 , version
 		 , tp.publisher
+		 , (select propvalue from loader_testpackageproperties tpp where tpp.propname = 'type' and tpp._fk_package = tp.packagekey)
 	  from loader_testblueprint bp
 	  join loader_testpackage tp on tp.packagekey = bp._fk_package
 	 where elementtype = 'test'
@@ -188,12 +190,13 @@ begin
 		 , sas.cset1order = tmp.cset1order
 		 , sas.updateconfig = tmp.version 
 		 , sas.contract = tmp.contract
+		 , sas.testtype = tmp.testtype
 	;
 
 
 	-- check if test or segment already exists
-	insert into tblsetofadminsubjects (_key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, loadconfig, contract)
-	select _key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, version, contract 
+	insert into tblsetofadminsubjects (_key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, loadconfig, contract, testtype)
+	select _key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, version, contract, testtype 
 	  from tmp_tblsetofadminsubjects tmp
 	 where not exists ( select 1 
 						  from tblsetofadminsubjects sas

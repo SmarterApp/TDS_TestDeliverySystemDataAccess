@@ -100,9 +100,6 @@ begin
 						set @filepath = @filepath + @pathdelim;
 				*/
 
-	-- ?? Do we need to create itembank ??
-	-- tblItembank
-
 	call load_subject(v_testpackagekey);
 	call load_strands(v_testpackagekey);
 	
@@ -125,8 +122,6 @@ begin
 	call load_adminformitems(v_testpackagekey);
 	call load_affinitygroups(v_testpackagekey);
 
-	-- ?? do we need this ?? call load_testgrades();
-	-- ?? not needed ??    exec Load_AdminPerformanceLevels;
 	
 	/*** STEP 5: Populate client_* tables in configs db ***/
  	call updatetdsconfigs(v_testpackagekey);

@@ -648,6 +648,7 @@ create table `tblsetofadminsubjects`  (
     `bpmetricfunction`          varchar(25) not null default 'bp2',
     `_efk_blueprint`            bigint default NULL,
     `initialabilitytestID`      varchar(100) default NULL,
+    `testtype`                  varchar(30) default NULL,
 	constraint `pk_tblsetofadminsubjects` primary key clustered(`_key`)
 ) default charset = UTF8;
 

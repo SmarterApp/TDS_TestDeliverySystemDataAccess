@@ -899,3 +899,17 @@ SET @test = NULL;
 SET @notRequired = NULL;
 SET @invisibleTools = NULL;
 
+-- to fix non-unique name for SBAC-Mathemmatics-6 test and to turn off
+-- nore thsan one test form on its segments
+update configs.client_testproperties set label = 'Grade 6 Mathematics' where testid = 'SBAC-Mathematics-6';
+update configs.client_testformproperties set startdate = '2001-01-01 00:00:00.000', enddate = '2001-01-01 00:00:00.000'
+where _efk_testform in ('187-404', '187-467', '187-468', '187-405');
+update configs.client_segmentproperties set ispermeable = 0, entryapproval = 0, exitapproval = 0, itemreview= 1
+where segmentid = 'SBAC-SEG1-MATH-6';
+update configs.client_segmentproperties set ispermeable = 1, entryapproval = 1, exitapproval = 0, itemreview= 0
+where segmentid = 'SBAC-SEG2-MATH-6';
+
+--Only to reset testtype for TestPackages that were already loaded before 
+-- we added testtype to tblsetofadminsubjects
+update itembank.tblsetofadminsubjects set testtype = 'INTERIM' where virtualtest is null;
+ 

@@ -36,11 +36,11 @@ proc: begin
 	declare v_counter int default 1;
 
 	-- This path has been seperated from the subpaths declared below to ensure flexibility during testing
- 	set v_root = 'testpackage/';
- 	set v_path = 'testpackage/administration/';
+ -- set v_root = 'testpackage/';
+ -- set v_path = 'testpackage/administration/';
 
--- 	set v_root = 'testspecification/';
--- 	set v_path = 'testspecification/administration/';
+ 	set v_root = 'testspecification/';
+ 	set v_path = 'testspecification/administration/';
  
 	set v_testkey = (extractvalue(v_xml, concat(v_root, 'identifier/attribute::uniqueid')));
 

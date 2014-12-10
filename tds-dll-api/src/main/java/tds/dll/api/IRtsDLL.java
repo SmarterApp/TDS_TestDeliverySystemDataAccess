@@ -230,16 +230,17 @@ public interface IRtsDLL
    * @return
    * @throws ReturnStatusException
    */
-  public int createUser(SQLConnection connection,String userId,String fullName) throws ReturnStatusException;
+  public int createUser(SQLConnection connection,String userId, String email, String fullName) throws ReturnStatusException;
   
   /**
    * 
    * @param connection
    * @param userId
+   * @param email
    * @return
    * @throws ReturnStatusException
    */
-  public boolean userAlreadyExists(SQLConnection connection,String userId) throws ReturnStatusException;
+  public boolean userAlreadyExists(SQLConnection connection,String userId, String email) throws ReturnStatusException;
 
   /**
    * @param connection
@@ -257,6 +258,5 @@ public interface IRtsDLL
    * @param testType list
    */
   public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, List<TestType> testType) throws ReturnStatusException;
-
   
 }

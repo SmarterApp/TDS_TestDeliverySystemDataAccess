@@ -131,7 +131,9 @@ public class StudentPackageReader implements IRtsPackageReader
   public RtsTable getRtsTable (String fieldName) {
     if (fieldName.equals ("--ACCOMMODATIONS--")) {
       return getAccommodationList ();
-    }
+    } else if (fieldName.equals ("Tests")) {
+      return getTests ();
+    } 
     return null;
   }
 
@@ -301,5 +303,19 @@ public class StudentPackageReader implements IRtsPackageReader
         {RoleLevel.CLIENT.name (), _student.getClientId ()}
     });
   }
+  
+  private RtsTable getTests () {
+    Tests tests = _student.getTests ();
+    RtsTable rtsTable = new RtsTable();
+    for (Test test : tests.getTest ()) {
+      rtsTable.addRecord (new RtsRecord (new String[][] {
+          {"TestID", test.getTestName ()},  
+          {"Subject", test.getSubjectCode ()},
+          {"TestKey", test.getTestName ()}
+      }));
+    }
+    return rtsTable;
+  }
+  
 
 }

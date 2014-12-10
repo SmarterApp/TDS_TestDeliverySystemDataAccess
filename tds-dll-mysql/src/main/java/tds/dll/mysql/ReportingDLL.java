@@ -296,6 +296,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     		  getNodeAttributeName(TEST_NODE_NAME, "assessmentVersion")	//"Test/@assessmentVersion"
           ));
 
+      String academicYear = getAcademicYear(connection, testkey);
+      
       String query = "select ${testkey} as \"Test/@name\", "
           + " coalesce(S.SubjectCode, B.Name, '') as \"Test/@subject\", "
           + " T.TestID as \"Test/@testId\",  "
@@ -305,7 +307,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " ${mode} as \"Test/@mode\", "
           + " case when B.Grade is null or B.Grade = '' then ${gradeSpan} else B.Grade end as \"Test/@grade\"  "
           + " , \'\' as \"Test/@assessmentType\" "			// Added for new attributes TODO
-          + " , TA.schoolyear as \"Test/@academicYear\""			// Added for new attributes
+          + " , ${academicYear} as \"Test/@academicYear\""			// Added for new attributes
           + " , case when TA.Updateconfig is null then TA.loadconfig else TA.Updateconfig  end as \"Test/@assessmentVersion\" "// Added for new attributes
           + " from ${ItemBankDB}.tblsetofadminsubjects T, ${ItemBankDB}.tblsubject B, "
           + " ${ConfigDB}.client_testproperties P,  ${ConfigDB}.client_subject S,"
@@ -317,6 +319,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 
       SqlParametersMaps parameters = new SqlParametersMaps ().put ("testkey", testkey);
       parameters.put ("bankKey", bankKey).put ("gradeSpan", gradeSpan).put ("mode", mode).put ("clientName", clientName);
+      parameters.put("academicYear", academicYear);
       result = executeStatement (connection, this.fixDataBaseNames (query), parameters, false).getResultSets ().next ();
       Iterator<DbResultRecord> resItr = result.getRecords ();
       while (resItr.hasNext ())
@@ -1983,7 +1986,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		  
 		  Set<String> attrNames = testeeRelationships.keySet();
 		  String mapKey = null;
-		  String entityKey = "";
+		  //String entityKey = ""; see letter from Adam
 		  String value;
 		  for(String name : orderedColumns)
 		  {
@@ -1995,7 +1998,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 			  strBuilder.append("<").append(TESTEERELATIONSHIP_NODE_NAME).append(SPACE);
 			  strBuilder.append("context = \"").append(context).append("\"").append(SPACE);
 			  strBuilder.append("name = \"").append(name).append("\"").append(SPACE);
-			  strBuilder.append("entityKey = \"").append(entityKey).append("\"").append(SPACE);
+			  //strBuilder.append("entityKey = \"").append(entityKey).append("\"").append(SPACE);
 			  strBuilder.append("value = \"").append(value).append("\"").append(SPACE);
 			  strBuilder.append("contextDate = \"").append(contextDate).append("\"").append(SPACE);
 			  strBuilder.append("/>").append(ls);			  			  
@@ -2328,4 +2331,39 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     _tisMaxWaitTime = tisMaxWaitTime;
   }
  
+  public String getAcademicYear (SQLConnection connection, String testkey) throws ReturnStatusException
+  {
+	      String academicYear = null;
+	      SingleDataResultSet result;
+	      DbResultRecord record;
+	      String query = "select TA.schoolyear as academicYear "
+	      		+ " from ${ItemBankDB}.tblsetofadminsubjects T, ${ItemBankDB}.tbltestadmin TA "
+	      		+ " where T._Key = ${testkey}"
+	      		+ " and  T._fk_testadmin = TA._key";
+
+	      SqlParametersMaps parameters = new SqlParametersMaps ().put ("testkey", testkey);
+	      result = executeStatement (connection, this.fixDataBaseNames (query), parameters, false).getResultSets ().next ();
+	      record = result.getCount () > 0 ? result.getRecords ().next () : null;
+	      if (record != null) {
+	        academicYear = record.<String> get ("academicYear");
+	      }
+	      
+	      if(academicYear != null)
+	      {
+	    	  if(academicYear.length() > 4)
+	    		  academicYear = academicYear.substring(academicYear.length() - 4); 
+	    	  try{
+	    		  Integer ayear = Integer.parseInt(academicYear);
+	    		  // to do nothing;
+	    	  } catch (Exception e)
+	    	  {
+	    		  academicYear = "";
+	    	  }
+	      }
+	      else
+	      {
+	    	  academicYear = "";	      
+	      }
+	      return academicYear;
+  }
 }

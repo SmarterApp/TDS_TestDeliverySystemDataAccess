@@ -2301,7 +2301,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 	        + " , FTStartPos, FTEndPos, FTMinItems, FTMaxItems "
 	        // -- Item selection algorithm
 	        + " , selectionAlgorithm "
-	        + " , 'bp1'as adaptiveVersion "
+	        + " , bpmetricfunction as adaptiveVersion "
 	        //-- 11/6/2013: new fields for new AA
 	        + " , abilityWeight  "
 	        + " , rcAbilityWeight  "
