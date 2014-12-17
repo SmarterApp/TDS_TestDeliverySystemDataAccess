@@ -367,8 +367,8 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
       return _commonDll._ReturnError_SP (connection, clientName, "P_ApproveAccommodations", "Accommodations update failed", null, opportunityKey, null);
     }
     _commonDll._LogDBLatency_SP (connection, "P_ApproveAccommodations", now, proctorKey, true, 0, null, sessionKey, null, null);
-    return result;
-  }
+    return null;  
+}
 
   
   /**

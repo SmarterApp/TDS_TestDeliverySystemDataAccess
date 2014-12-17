@@ -1,3 +1,7 @@
+alter table `qareportqueue` 
+	drop foreign key `fk_qareportqueue`
+	;
+
 alter table `admineventitems`
 	drop foreign key `fk_admineventitems`
 	 ;

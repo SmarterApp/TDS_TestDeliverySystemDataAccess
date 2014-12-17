@@ -11,6 +11,7 @@ package tds.dll.mysql;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -2772,11 +2773,19 @@ public class SimDLL extends AbstractDLL implements ISimDLL
   }
 
   public SingleDataResultSet SIM_OpenSession_SP (SQLConnection connection, UUID sessionkey) throws ReturnStatusException {
-
-    final String cmd1 = "   update session set status = 'open', dateend = (now(3) + INTERVAL 1 MONTH), "
-        + " datevisited = now(3), datechanged = now(3) "
+	  
+	Date startDate = _dateUtil.getDateWRetStatus (connection);
+	Calendar cal = Calendar.getInstance ();
+	cal.setTime (startDate);
+	cal.add(Calendar.MONTH, 1);
+	Date endDate = cal.getTime();	    	  	 
+	Timestamp startTime = new Timestamp(startDate.getTime());
+	Timestamp endTime = new Timestamp(endDate.getTime());
+	
+    final String cmd1 = "   update session set status = 'open', dateend = ${endDate}, "
+        + " datevisited = ${startDate}, datechanged = ${startDate} "
         + "   where _key = ${sessionKey} and environment = 'SIMULATION'";
-    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey);
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey).put("startDate", startTime).put("endDate", endTime);
     int updatedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
 
     final String cmd2 = "  select dbname as itembank, clientname, sessionID, _efk_Proctor as proctorKey, "

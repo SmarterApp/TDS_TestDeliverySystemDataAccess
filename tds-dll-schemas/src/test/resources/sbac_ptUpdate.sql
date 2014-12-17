@@ -908,6 +908,14 @@ update configs.client_segmentproperties set ispermeable = 0, entryapproval = 0, 
 where segmentid = 'SBAC-SEG1-MATH-6';
 update configs.client_segmentproperties set ispermeable = 1, entryapproval = 1, exitapproval = 0, itemreview= 0
 where segmentid = 'SBAC-SEG2-MATH-6';
+update configs.client_segmentproperties set ispermeable = 0, entryapproval = 0, exitapproval = 0, itemreview= 1
+where segmentid = 'SBAC-SEG1-MATH-8';
+update configs.client_segmentproperties set ispermeable = 1, entryapproval = 1, exitapproval = 0, itemreview= 0
+where segmentid = 'SBAC-SEG2-MATH-8';
+
+UPDATE `configs`.`client_testtooltype` SET `isselectable`=b'1', `isvisible`=b'1' WHERE `toolname`='TTS Audio Adjustments';
+UPDATE `configs`.`client_testtooltype` SET `isselectable`=b'1', `isvisible`=b'1' WHERE `toolname`='System Volume Control';
+
 
 --Only to reset testtype for TestPackages that were already loaded before 
 -- we added testtype to tblsetofadminsubjects

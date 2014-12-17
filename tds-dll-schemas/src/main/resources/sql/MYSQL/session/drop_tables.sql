@@ -1,3 +1,4 @@
+drop table if exists `qareportqueue`;
 
 drop table if exists  `adminevent`  ;
 

@@ -95,4 +95,9 @@ public class ProctorPackageReader implements IRtsPackageReader
     return _proctor.getTests ().getTest ().size ();
   }
 
+  @Override
+  public boolean read (String pkg) throws RtsPackageReaderException {
+    return false;
+  }
+
 }

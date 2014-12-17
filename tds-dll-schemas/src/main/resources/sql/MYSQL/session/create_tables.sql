@@ -1,4 +1,3 @@
-
 create table `adminevent`  ( 
 	`_key`       	varbinary(16) not null,
 	`eventtype`  	varchar(25) not null,
@@ -1201,6 +1200,7 @@ create table `tblclsclientsessionstatus`  (
 CREATE TABLE `tbluser` (
   `userid` varchar(50) NOT NULL,
   `userkey` bigint(20) NOT NULL auto_increment,
+  `email` varchar(128) NULL,
   `fullname` varchar(75)  NULL,
   `clientname` varchar(225) NULL,
   PRIMARY KEY (`userid`),

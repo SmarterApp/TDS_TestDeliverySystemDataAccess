@@ -21,6 +21,8 @@
 	<import resource="classpath:opentestsystem.shared.test-db-context-module.xml"/>
 	<import resource="classpath:modules/test-context-schema-deployer.xml" />
 	<import resource="classpath:modules/test-context-scripts.xml" />
+	
+	<import resource="classpath:opentestsystem.shared.tr-api-context-module.xml" />
 
 	
 	<!-- TDSSettings bean. This gives access to clientname and any other info such as session type etc. -->

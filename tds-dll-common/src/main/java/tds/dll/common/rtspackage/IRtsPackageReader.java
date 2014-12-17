@@ -8,8 +8,6 @@
  ******************************************************************************/
 package tds.dll.common.rtspackage;
 
-import java.util.List;
-
 import tds.dll.common.rtspackage.common.exception.RtsPackageReaderException;
 import tds.dll.common.rtspackage.common.table.RtsRecord;
 import tds.dll.common.rtspackage.common.table.RtsTable;
@@ -30,6 +28,13 @@ public interface IRtsPackageReader
    * @return true if successful
    */
   public boolean read (byte[] pkg) throws RtsPackageReaderException;
+  
+  /**
+   * @param pkg
+   * @return
+   * @throws RtsPackageReaderException
+   */
+  boolean read (String pkg) throws RtsPackageReaderException;
   
   /**
    * Get the value of a field
@@ -61,5 +66,7 @@ public interface IRtsPackageReader
    * @return Package object
    */
   <T> T getPackage (Class<T> clazz);
+
+
   
 }

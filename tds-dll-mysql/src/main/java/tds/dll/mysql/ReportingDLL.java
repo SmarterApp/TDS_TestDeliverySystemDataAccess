@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +115,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   
   private long _tisMaxWaitTime;
   
+  @PostConstruct
+  private void init () {
+    if (_tisUrl != null && _tisStatusCallbackUrl != null) {
+      _tisUrl += "?statusCallback=" + UrlEncoderDecoderUtils.encode (_tisStatusCallbackUrl);
+    }
+  }
   
  //
   public String XML_GetOppXML_SP (SQLConnection connection, UUID oppkey, boolean debug) throws ReturnStatusException
@@ -1091,13 +1099,13 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     try {
       SingleDataResultSet result;
       DbResultRecord record;
-      List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Score/@measureof",
-          "Score/@measurelabel",
+      List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Score/@measureOf",
+          "Score/@measureLabel",
           "Score/@value",
-          "Score/@standarderror"));
+          "Score/@standardError"));
 
-      String query = "select measureof as \"Score/@measureof\", measurelabel as \"Score/@measurelabel\", coalesce(value, '') as \"Score/@value\", "
-          + " standarderror as \"Score/@standarderror\" "
+      String query = "select measureof as \"Score/@measureOf\", measurelabel as \"Score/@measureLabel\", coalesce(value, '') as \"Score/@value\", "
+          + " standarderror as \"Score/@standardError\" "
           + " from testopportunityscores where _fk_TestOpportunity = ${oppkey}";
       SqlParametersMaps parameters = new SqlParametersMaps ().put ("oppkey", oppkey);
       result = executeStatement (connection, query, parameters, false).getResultSets ().next ();
@@ -2184,12 +2192,10 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     long startSentTime = System.currentTimeMillis ();
     while (!isSent) {
       try {
-        String tisStatusCallbackUrl = UrlEncoderDecoderUtils.encode (_tisStatusCallbackUrl);
-        String tisUrl = _tisUrl.replace ("{statusCallbackUrl}", tisStatusCallbackUrl);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);  
         HttpEntity<String> entity = new HttpEntity<String>(xmlReport, headers);
-        ResponseEntity<String> response = _restClient.exchange (tisUrl, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = _restClient.exchange (_tisUrl, HttpMethod.POST, entity, String.class);
         isSent = true;
         if (response.getStatusCode () != HttpStatus.OK) {
           errRef.set (response.getStatusCode ().toString () + ": " + response.getBody ());

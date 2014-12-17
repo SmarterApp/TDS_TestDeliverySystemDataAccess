@@ -11,15 +11,24 @@ package tds.dll.common.rtspackage.student;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.StringReader;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.apache.commons.lang3.StringUtils;
+import org.opentestsystem.shared.trapi.data.Ethnicity;
 import org.opentestsystem.shared.trapi.data.RoleLevel;
 import org.opentestsystem.shared.trapi.data.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tds.dll.common.rtspackage.IRtsPackageReader;
 import tds.dll.common.rtspackage.common.exception.RtsPackageReaderException;
+import tds.dll.common.rtspackage.common.exception.RtsPackageWriterException;
 import tds.dll.common.rtspackage.common.table.RtsRecord;
 import tds.dll.common.rtspackage.common.table.RtsTable;
 import tds.dll.common.rtspackage.student.data.Accommodation;
@@ -35,9 +44,13 @@ import tds.dll.common.rtspackage.student.data.Tests;
 public class StudentPackageReader implements IRtsPackageReader
 {
 
+  private static final Logger _logger = LoggerFactory.getLogger (StudentPackageReader.class);
+  
   private Student        _student;
 
   private StudentPackage _studentPackage;
+  
+  private static JAXBContext  _jaxbContext = getJaxbContext();
 
 
   /**
@@ -118,6 +131,9 @@ public class StudentPackageReader implements IRtsPackageReader
     case "ENRDIST-STUDENT":
       rtsRecord = getDistrict ();
       break;
+    case "STATE-STUDENT":
+      rtsRecord = getState ();
+      break;
     case "INST-HIERARCHY":
       rtsRecord = getInstitutionHierarchy ();
       break;
@@ -156,6 +172,24 @@ public class StudentPackageReader implements IRtsPackageReader
     }
   }
 
+ //TODO: This will not be needed once ART has fixed student endpoint to return queries by ssid and externalID
+  @Override
+  public boolean read (String pkg) throws RtsPackageReaderException {
+    if (pkg == null) {
+      throw new RtsPackageReaderException ("Package XML is null");
+    }
+     try {
+       Unmarshaller jaxbUnmarshaller = _jaxbContext.createUnmarshaller ();
+       _studentPackage = (StudentPackage) jaxbUnmarshaller.unmarshal (new StringReader (pkg));
+       _student = _studentPackage.getStudent ();
+     } catch (JAXBException e) {
+       _logger.debug ("Student Package: {}",  pkg );
+       throw new RtsPackageReaderException (e.getMessage (), e);
+     }
+     return true;
+    
+  }
+  
   private RtsRecord getInstitution () {
     return new RtsRecord (new String[][] {
         {"entityKey", _student.getResponsibleInstitutionIdentifier ()},
@@ -169,6 +203,14 @@ public class StudentPackageReader implements IRtsPackageReader
         {"entityKey", _student.getResponsibleDistrictIdentifier ()},
         {"entityId", _student.getResponsibleDistrictIdentifier ()},
         {"entityName", _student.getOrganizationName ()},
+    });
+  }
+  
+  private RtsRecord getState () {
+    return new RtsRecord (new String[][] {
+        {"entityKey", _student.getStateAbbreviation ()},
+        {"entityId", _student.getStateAbbreviation ()},
+        {"entityName", _student.getStateName ()},
     });
   }
 
@@ -259,8 +301,24 @@ public class StudentPackageReader implements IRtsPackageReader
   }
 
   private String getEthnicity () {
-    // TODO:
-    return _student.getDemographicRaceTwoOrMoreRaces ();
+    StringBuilder ethnicities = new StringBuilder();
+    appendEthnicity(ethnicities, Ethnicity.HispanicOrLatinoEthnicity, _student.getHispanicOrLatinoEthnicity());
+    appendEthnicity(ethnicities, Ethnicity.AmericanIndianOrAlaskaNative, _student.getAmericanIndianOrAlaskaNative());
+    appendEthnicity(ethnicities, Ethnicity.Asian, _student.getAsian());
+    appendEthnicity(ethnicities, Ethnicity.BlackOrAfricanAmerican, _student.getBlackOrAfricanAmerican());
+    appendEthnicity(ethnicities, Ethnicity.White, _student.getWhite());
+    appendEthnicity(ethnicities, Ethnicity.NativeHawaiianOrOtherPacificIslander, _student.getNativeHawaiianOrOtherPacificIslander());
+    appendEthnicity(ethnicities, Ethnicity.DemographicRaceTwoOrMoreRaces, _student.getDemographicRaceTwoOrMoreRaces());
+    if (ethnicities.length () > 0) {
+      ethnicities.setLength (ethnicities.length () - 2);
+    }
+    return ethnicities.toString ();
+  }
+  
+  private void appendEthnicity(StringBuilder ethnicities, Ethnicity ethnicity,  String value) {
+    if (value != null && value.equalsIgnoreCase ("Yes")) {
+      ethnicities.append (ethnicity.name ()) .append(", ");
+    }
   }
 
   private String getEligibleTests () {
@@ -317,5 +375,15 @@ public class StudentPackageReader implements IRtsPackageReader
     return rtsTable;
   }
   
+  
+  //TODO: This will not be needed once ART has fixed student end point to return queries by ssid and externalID
+  private static JAXBContext getJaxbContext() {
+    try {
+      return JAXBContext.newInstance (StudentPackage.class);
+    } catch (JAXBException e) {
+      _logger.error (e.getMessage (), e);
+    }
+    return null;
+ }
 
 }

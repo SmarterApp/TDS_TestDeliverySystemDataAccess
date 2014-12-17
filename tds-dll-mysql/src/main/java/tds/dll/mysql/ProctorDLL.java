@@ -8,7 +8,6 @@
  ******************************************************************************/
 package tds.dll.mysql;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tds.dll.api.ICommonDLL;
 import tds.dll.api.IProctorDLL;
 import tds.dll.api.IRtsDLL;
+import tds.dll.common.rtspackage.IRtsPackageReader;
+import tds.dll.common.rtspackage.common.table.RtsRecord;
 import AIR.Common.DB.AbstractDLL;
 import AIR.Common.DB.DataBaseTable;
 import AIR.Common.DB.DbComparator;
@@ -188,7 +189,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     } else
       return 1;
   }
-
+  
   /**
    * @param connection
    * @param clientName
@@ -197,6 +198,111 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    * @throws ReturnStatusException
    */
   public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException {
+
+    String attname = null;
+    String attType = null;
+    String RTSName = null;
+    String err = null;
+    _Ref<Long> testee = new _Ref<> ();
+    _Ref<String> attval = new _Ref<> ();
+    _Ref<String> entityKey = new _Ref<> ();
+    _Ref<String> entityID = new _Ref<> ();
+    _Ref<String> entityName = new _Ref<> ();
+    SingleDataResultSet result = null;
+
+    DataBaseTable attributesTable = getDataBaseTable ("attributes").addColumn ("TDS_ID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("type", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
+        .addColumn ("atLogin", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("rtsName", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("label", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
+        .addColumn ("value", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("sortOrder", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
+        .addColumn ("entityID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("showOnProctor", SQL_TYPE_To_JAVA_TYPE.BIT);
+    connection.createTemporaryTable (attributesTable);
+    Map<String, String> unquotedParms = new HashMap<String, String> ();
+    unquotedParms.put ("attributesTblName", attributesTable.getTableName ());
+
+    final String SQL_INSERT1 = "insert into ${attributesTblName} (TDS_ID, type, rtsName, label, sortOrder, atLogin, showOnProctor) "
+        + " select TDS_ID, type, RTSName, label, sortOrder, atlogin, showOnProctor  from ${ConfigDB}.client_testeeattribute where clientname = ${clientname};";
+    String finalQuery = fixDataBaseNames (SQL_INSERT1);
+    SqlParametersMaps parms = new SqlParametersMaps ().put ("clientname", clientName);
+    int insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms, false).getUpdateCount ();
+    // System.err.println (insertedCnt); // for testing
+    
+    testeeId = testeeId.trim ();
+    
+    //TODO: cast as implementation is not complete need to use SchoolStudent class
+    IRtsPackageReader packageReader =  ((RtsPackageDLL)_rtsDll).getRtsPackageReader(testeeId);
+    if (packageReader == null) {
+      final String SQL_QUERY1 = "select * from ${attributesTblName};";
+      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms), null, false).getResultSets ().next ();
+      return result;
+    }
+    final String SQL_INSERT2 = "insert into ${attributesTblName} ( TDS_ID, type, value) values (${--RTS KEY--}, ${ENTITYKEY}, ${testee});";
+    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("testee", testeeId).put ("--RTS KEY--", "--RTS KEY--").put ("ENTITYKEY", "ENTITYKEY");
+    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms), parms1, false).getUpdateCount ();
+    // System.err.println (insertedCnt); // for testing
+
+    final String SQL_QUERY2 = "select TDS_ID from ${attributesTblName} where value is null limit 1";
+    while (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms), null, false))) {
+      final String SQL_QUERY3 = "select TDS_ID as attname, Type as attType, rtsName as RTSName from ${attributesTblName} where value is  null limit 1;";
+      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms), null, false).getResultSets ().next ();
+      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+      if (record != null) {
+        attname = record.<String> get ("attname");
+        attType = record.<String> get ("attType");
+        RTSName = record.<String> get ("RTSName");
+      }
+      if (DbComparator.isEqual ("attribute", attType)) {
+        attval.set (null);
+        String attribute = packageReader.getFieldValue (RTSName);
+        if (attribute != null) {
+          attval.set (attribute);
+        }
+
+        final String SQL_UPDATE1 = "update ${attributesTblName} set value = case when ${attval} is null then ${NA} else ${attval} end where TDS_ID = ${attname};";
+        SqlParametersMaps parms2 = new SqlParametersMaps ().put ("attval", attval.get ()).put ("NA", "NA").put ("attname", attname);
+        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), parms2, false).getUpdateCount ();
+        // System.err.println (updateCnt); // for testing
+
+      } else if (DbComparator.isEqual ("relationship", attType)) {
+        entityKey.set (null);
+        entityID.set (null);
+        entityName.set (null);
+ 
+        RtsRecord rtsRecord = packageReader.getRtsRecord (RTSName  );
+        if (rtsRecord != null) {
+           entityKey.set (UUID.randomUUID().toString());   //TODO: replace UUID with ART id
+           entityID.set (rtsRecord.get ("entityId"));
+           entityName.set (rtsRecord.get ("entityName"));
+        }
+        final String SQL_UPDATE2 = "update ${attributesTblName} set value = case when ${entityKey} is null then ${NA} else ${entityName} end, entityKey = ${entityKey}, "
+            + " entityID = ${entityID} where TDS_ID = ${attname};";
+        SqlParametersMaps parms3 = new SqlParametersMaps ().put ("entityKey", entityKey.get ()).put ("NA", "NA").put ("entityName", entityName.get ()).put ("entityID", entityID.get ())
+            .put ("attname", attname);
+        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms), parms3, false).getUpdateCount ();
+        // System.err.println (updateCnt); // for testing
+      } else {
+        err = String.format ("Unknown attribute type: %s", attType);
+
+        final String SQL_DELETE = "delete from ${attributesTblName} where TDS_ID = ${attname};";
+        SqlParametersMaps parms4 = new SqlParametersMaps ().put ("attname", attname);
+        int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE, unquotedParms), parms4, false).getUpdateCount ();
+        // System.err.println (deletedCnt); // for testing
+        _commonDll._LogDBError_SP (connection, "GetTesteeAttributes", err, null, null, null, null, clientName, null);
+      }
+    }
+    final String SQL_QUERY4 = "select * from ${attributesTblName} order by type, sortOrder;";
+    result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms), null, false).getResultSets ().next ();
+    connection.dropTemporaryTable (attributesTable);
+
+    return result;
+  }
+
+  /**
+   * @param connection
+   * @param clientName
+   * @param testeeId
+   * @return
+   * @throws ReturnStatusException
+   */
+  public SingleDataResultSet GetTesteeAttributes_SP_old (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException {
 
     String attname = null;
     String attType = null;
@@ -223,7 +329,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     SqlParametersMaps parms = new SqlParametersMaps ().put ("clientname", clientName);
     int insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms, false).getUpdateCount ();
     // System.err.println (insertedCnt); // for testing
-
+   
     _rtsDll._GetRTSEntity_SP (connection, clientName, testeeId, "STUDENT", testee);
     if (testee.get () == null) {
       final String SQL_QUERY1 = "select * from ${attributesTblName};";
@@ -1441,7 +1547,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
 
   private void updateTestOppRequest (SQLConnection connection, UUID requestKey, Date today) throws ReturnStatusException {
 
-    final String SQL_UPDATE = "update TestOppRequest set DateFulfilled = ${today} where _key = ${requestKey};";
+    final String SQL_UPDATE = "update testopprequest set DateFulfilled = ${today} where _key = ${requestKey};";
     SqlParametersMaps parms = new SqlParametersMaps ().put ("today", today).put ("requestKey", requestKey);
     int updateCnt = executeStatement (connection, SQL_UPDATE, parms, false).getUpdateCount ();
   }
@@ -1577,7 +1683,8 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     // [Language],
     // @rparas as RequestParameters, @rdesc as RequestDescription;
 
-    if ((DbComparator.isEqual ("PRINT", rtype) || DbComparator.isEqual ("PRINTPASSAGE", rtype) || DbComparator.isEqual ("PRINTSTIMULUS", rtype)) && DbComparator.notEqual (rval, null)) {
+    if ((DbComparator.isEqual ("PRINT", rtype) || DbComparator.isEqual ("PRINTPASSAGE", rtype) || DbComparator.isEqual ("PRINTSTIMULUS", rtype)) 
+         && rval != null) {
 
       List<CaseInsensitiveMap<Object>> resultlist = new ArrayList<CaseInsensitiveMap<Object>> ();
       CaseInsensitiveMap<Object> rcrd = new CaseInsensitiveMap<Object> ();

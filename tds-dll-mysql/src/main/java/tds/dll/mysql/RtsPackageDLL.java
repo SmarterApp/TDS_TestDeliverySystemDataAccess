@@ -191,7 +191,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           }
         }
       } catch (RtsPackageReaderException e) {
-        // TODO Auto-generated catch block
         _logger.error (e.getMessage (), e);
       }
     }
@@ -330,7 +329,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
       for (District district : districts) {
         CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
-        result.put ("RTSKey", district.getId ());
+        result.put ("RTSKey", district.getEntityId ());
         result.put ("DistrictName", district.getEntityName ());
         result.put ("DistrictID", district.getEntityId ());
         resultList.add (result);
@@ -364,7 +363,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
       for (Institution school : schools) {
         CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
-        result.put ("RTSKey", school.getId ());
+        result.put ("RTSKey", school.getEntityId ());
         result.put ("SchoolName", school.getEntityName ());
         result.put ("SchoolID", school.getEntityId ());
         resultList.add (result);
@@ -409,14 +408,40 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
 
     return singleDataResultSet;
   }
-
+  /**
+   * @param testeeId
+   */
+  public IRtsPackageReader getRtsPackageReader (String testeeId) {
+    String studentPackage  = null;
+    try {
+       //TODO: externalSsid does not work for student endpoint
+        String apiUrl = String.format ("studentpackage?stateabbreviation=%s&externalId=%s", _stateCode, testeeId);
+        studentPackage =  _trClient.getPackage (apiUrl);
+     } catch (TrApiException e) {
+      if (e.isErrorExempted ()) {
+        return null;
+       }    
+       _logger.error (e.getMessage (), e);
+       return null;
+    }
+    IRtsPackageReader reader = new StudentPackageReader();
+    try {
+      if (reader.read (studentPackage)) {
+         return reader;
+      }
+    } catch (RtsPackageReaderException e) {
+      _logger.error (e.getMessage (), e);
+    }
+    return null;
+  }
+  
   @Override
   public SingleDataResultSet getSchoolStudents (SQLConnection connection, String clientname, String schoolKey, String grade, String firstName, String lastName) throws ReturnStatusException {
   
     SingleDataResultSet singleDataResultSet = null;
 
     StringBuilder sb = new StringBuilder ();
-    if (!StringUtils.isBlank (grade)) {
+    if (!StringUtils.isBlank (grade) && !grade.equalsIgnoreCase ("all") ) {
       sb.append ("&gradeLevelWhenAssessed=%s");
     }
     if (!StringUtils.isBlank (firstName)) {
@@ -440,31 +465,19 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       _logger.error (e.getMessage (), e);
     }
 
-    if (schoolStudents != null) {
-      sb = new StringBuilder ();
-      for (SchoolStudent student : schoolStudents) {
-        sb.append (student.getEntityId ()).append (",");
-      }
-      sb.setLength (sb.length () - 1);
-      SingleDataResultSet rs = getStudentKeys (connection, clientname, sb.toString ());
-      Iterator<DbResultRecord> records = rs.getRecords ();
-      Map<String, Long> idKeys = new HashMap<> ();
-      while (records.hasNext ()) {
-        DbResultRecord record = records.next ();
-        idKeys.put (record.<String> get ("studentid"), record.<Long> get ("studentkey"));
-      }
+    if (schoolStudents != null && schoolStudents.length > 0) {
       List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
       for (SchoolStudent student : schoolStudents) {
         CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
-        result.put ("rtsKey", idKeys.get (student.getEntityId ()));
+        result.put ("rtsKey", student.getEntityId ());
         result.put ("SSID", student.getEntityId ());
-        result.put ("FirstName", student.getLastName ());
+        result.put ("FirstName", student.getFirstName ());
         result.put ("LastName", student.getLastName ());
         result.put ("Grade", student.getGradeLevelWhenAssessed ());
         resultList.add (result);
       }
       singleDataResultSet = new SingleDataResultSet ();
-      singleDataResultSet.addColumn ("rtsKey", SQL_TYPE_To_JAVA_TYPE.BIGINT);
+      singleDataResultSet.addColumn ("rtsKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("SSID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("FirstName", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("LastName", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
@@ -601,16 +614,12 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
      for (RoleAssociation roleAssociation : users[0].getRoleAssociations ()) {
          CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
          result.put ("rtsKey", userKey);
-         result.put ("TDS_Role", roleAssociation.getRole ()); //TODO: calling class looking for proctor
+         result.put ("TDS_Role", roleAssociation.getRole ());
          result.put ("TDS_Role", "proctor"); 
-         result.put ("InstitutionKey", roleAssociation.getAssociatedEntityMongoId ());
+         result.put ("InstitutionKey", roleAssociation.getAssociatedEntityId ());
 
-         Institution institution = getInstitution(roleAssociation.getAssociatedEntityMongoId ()); //TODO: check if this can be returned without making extra API calls
-         String instName = "";
-         if (institution != null) {
-           instName = institution.getEntityName ();
-          }
-         result.put ("InstitutionName", instName); //TODO: name is not returned
+         result.put ("InstitutionName", roleAssociation.getAssociatedEntityId ());  //TODO: get from SSO
+         
          result.put ("InstitutionID", roleAssociation.getAssociatedEntityId ());
          result.put ("InstitutionType", roleAssociation.getLevel ());
          resultList.add (result);
@@ -629,21 +638,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    
   }
   
-  private Institution getInstitution(String trId) {
-    
-    String apiUrl = String.format ("institution/" + trId);
-
-    Institution institution = null;
-    try {
-      institution = _trClient.getForObject (apiUrl, Institution.class);
-    } catch (TrApiException e) {
-      if (e.isErrorExempted ()) {
-         return null;
-      }      
-      _logger.error (e.getMessage (), e);
-    }
-    return institution;
-  }
 
   @Override
   public SingleDataResultSet T_GetRTSAccommodations_SP (SQLConnection connection, String clientname, Long testee) throws ReturnStatusException {
@@ -886,20 +880,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   }
 
 
-
-  /**
-   * Find records from Proctor given a ProctorKey and ClientName.
-   * 
-   * @param connection
-   * @param key
-   * @param clientName
-   * @return SingleDataResultSet
-   * @throws ReturnStatusException
-   */
-  private SingleDataResultSet findAllProctorByKeyAndClientName (SQLConnection connection, Long key, String clientName) throws ReturnStatusException {
-    return findAllByKeyAndClientName (connection, EntityType.PROCTOR, key, clientName);
-  }
-
   /**
    * Creates a new student record.
    * 
@@ -959,9 +939,9 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   private int create (SQLConnection connection, EntityType entityType, Long key, String clientName, InputStream packageStream, String version, List<TestType> testTypes) throws ReturnStatusException {
     String SQL_INSERT = null;
     if (entityType == EntityType.PROCTOR) {
-          SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) select ?, ?, ?, ?, now(), ? from dual";
+          SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) values (?, ?, ?, ?, now(), ?)";
       } else {
-          SQL_INSERT = "insert into r_studentpackage (StudentKey, ClientName, Package, Version, DateCreated) select ?, ?, ?, ?, now() from dual";
+          SQL_INSERT = "insert into r_studentpackage (StudentKey, ClientName, Package, Version, DateCreated) values (?, ?, ?, ?, now())";
       }
     try (PreparedStatement preparedStatement = connection.prepareStatement (SQL_INSERT)) {
       preparedStatement.setLong (1, key);
@@ -1177,7 +1157,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return attributes;
   }
 
-  public String getTrTestId (SQLConnection connection,  long testeeKey, String testKey) {
+  public String getRtsTestKey (SQLConnection connection,  long testeeKey, String testKey) {
     try {
       byte[] packageObject = getStudentPackageByKeyAndClientName (connection, testeeKey, _clientName);
       if (packageObject != null) {
@@ -1372,20 +1352,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return null;
   }
 
-  
-  /**
-   * Find records from Student given a StudentKey and ClientName.
-   * 
-   * @param connection
-   * @param key
-   * @param clientName
-   * @return package
-   * @throws ReturnStatusException
-   */
-  private DbResultRecord findStudentByKeyAndClientName (SQLConnection connection, Long key, String clientName) throws ReturnStatusException {
-    return findByKeyAndClientName (connection, EntityType.STUDENT, key, clientName);
-  }
-
   /**
    * Gets student package given a StudentKey and ClientName.
    * 
@@ -1399,18 +1365,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return getPackageByKeyAndClientName (connection, EntityType.STUDENT, key, clientName);
   }
   
-  /**
-   * Find records from Student given a StudentKey and ClientName.
-   * 
-   * @param connection
-   * @param key
-   * @param clientName
-   * @return package
-   * @throws ReturnStatusException
-   */
-  private SingleDataResultSet findAllStudentByKeyAndClientName (SQLConnection connection, Long key, String clientName) throws ReturnStatusException {
-    return findAllByKeyAndClientName (connection, EntityType.STUDENT, key, clientName);
-  }
 
   /**
    * Find records from Proctor given a ProctorKey and ClientName.
@@ -1438,4 +1392,5 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return getPackageByKeyAndClientName (connection, EntityType.PROCTOR, key, clientName);
   }
 
+  
 }

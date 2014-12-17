@@ -11884,7 +11884,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String cmd1 = "select TDS_ID, Label, SortOrder  from ${ConfigDB}.client_testeeattribute "
         + " where clientname = ${clientName} and atLogin = 'REQUIRE'";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
-    SingleDataResultSet rs1 = executeStatement (null, fixDataBaseNames (cmd1), parms1, false).getResultSets ().next ();
+    SingleDataResultSet rs1 = executeStatement (connection, fixDataBaseNames (cmd1), parms1, false).getResultSets ().next ();
 
     return rs1;
   }
