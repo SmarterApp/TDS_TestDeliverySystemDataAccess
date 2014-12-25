@@ -2956,5 +2956,5 @@ public class SimDLL extends AbstractDLL implements ISimDLL
 
     Boolean exists = exists (executeStatement (connection, cmd1, parms1, false));
     return exists;
-  }
+  }  
 }

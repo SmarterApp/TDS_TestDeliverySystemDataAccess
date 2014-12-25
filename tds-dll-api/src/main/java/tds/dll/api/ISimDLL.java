@@ -217,6 +217,5 @@ public interface ISimDLL
   
   public boolean simGetSimAbort (SQLConnection connection, UUID session) throws ReturnStatusException;
   
-  public String sim_getItemType (SQLConnection connection, String sItemKey)throws ReturnStatusException;
-  
+  public String sim_getItemType (SQLConnection connection, String sItemKey)throws ReturnStatusException;  
 }

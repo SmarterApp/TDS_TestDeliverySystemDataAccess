@@ -1936,11 +1936,14 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         + " and not exists "
         + " (select * from ${ConfigDB}.Client_TestToolType Tool where Tool.ContextType = ${TEST} and Tool.Context = MODE.testID and Tool.Toolname = TType.Toolname and Tool.Clientname = MODE.clientname);";
 
+    // Note that codeStr var is already comma separated list of quoted strings
     String query = fixDataBaseNames (SQL_INSERT);
     Map<String, String> unquotedparms = new HashMap<String, String> ();
     unquotedparms.put ("tblName", testKeyAccomsTable.getTableName ());
+    unquotedparms.put ("codeStr", codeStr);
+    
     SqlParametersMaps parameters = (new SqlParametersMaps ()).put ("testkey", testKey).put ("TEST", "TEST").put ("ALL", "ALL").put ("SEGMENT", "SEGMENT").put ("starParam", "*")
-        .put ("Language", "Language").put ("codeStr", codeStr);
+        .put ("Language", "Language");
     int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedparms), parameters, false).getUpdateCount ();
 
     return testKeyAccomsTable;

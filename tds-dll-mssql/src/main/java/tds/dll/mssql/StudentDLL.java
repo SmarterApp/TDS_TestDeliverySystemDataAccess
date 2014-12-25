@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -1193,18 +1194,28 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     connection.createTemporaryTable (tbl);
     Date now = _dateUtil.getDateWRetStatus (connection);
 
-    final String SQL_QUERY = "insert into ${tblName} (windowmax, windowid,startdate,enddate,mode,testkey,modemax,windowsession,modesession) "
-        + " (select distinct W.numopps as windowMax, W.windowID "
-        + ", case when W.startDate is null then ${now} else dateadd(day, shiftWindowStart, W.startDate)end as startDate "
-        + ", case when W.endDate is null then ${now} else dateadd(day, shiftWindowEnd, W.endDate) end as endDate "
-        + ", M.mode, M.testkey, M.maxopps as modeMax"
-        + ", W.sessionType as windowSession, M.sessionType as modeSession "
-        + " from ${ConfigDB}.Client_TestWindow W, ${ConfigDB}.Client_Testmode M, _externs E "
-        + " where W.clientname = ${clientname} and W.testID = ${testID} and E.clientname = ${clientname} "
-        + "  and ${now} between case when W.startDate is null then ${now} else dateadd(day, shiftWindowStart, W.startDate)end "
-        + "               and case when W.endDate is null then ${now} else dateadd(day, shiftWindowEnd, W.endDate) end "
-        + "  and M.clientname = ${clientname} and M.testID = ${testID} and (M.sessionType = -1 or M.sessionType = ${sessionType}) "
-        + " and (W.sessionType = -1 or W.sessionType = ${sessionType}))";
+		// TODO: arp - shiftwindowstart, shiftwindowend in _externs are unknown
+		// in ms-sql/simulator
+		final String SQL_QUERY = "insert into ${tblName} (windowmax, windowid,startdate,enddate,mode,testkey,modemax,windowsession,modesession) "
+				+ " (select distinct W.numopps as windowMax, W.windowID "
+				// +
+				// ", case when W.startDate is null then ${now} else dateadd(day, shiftWindowStart, W.startDate)end as startDate "
+				// +
+				// ", case when W.endDate is null then ${now} else dateadd(day, shiftWindowEnd, W.endDate) end as endDate "
+				+ ", case when W.startDate is null then ${now} else ( W.startDate ) end as startDate "
+				+ ", case when W.endDate is null then ${now} else ( W.endDate ) end as endDate "
+				+ ", M.mode, M.testkey, M.maxopps as modeMax"
+				+ ", W.sessionType as windowSession, M.sessionType as modeSession "
+				+ " from ${ConfigDB}.Client_TestWindow W, ${ConfigDB}.Client_Testmode M, _externs E "
+				+ " where W.clientname = ${clientname} and W.testID = ${testID} and E.clientname = ${clientname} "
+				// +
+				// "  and ${now} between case when W.startDate is null then ${now} else dateadd(day, shiftWindowStart, W.startDate)end "
+				// +
+				// "               and case when W.endDate is null then ${now} else dateadd(day, shiftWindowEnd, W.endDate) end "
+				+ "  and ${now} between case when W.startDate is null then ${now} else ( W.startDate )end "
+				+ "               and case when W.endDate is null then ${now} else ( W.endDate ) end "
+				+ "  and M.clientname = ${clientname} and M.testID = ${testID} and (M.sessionType = -1 or M.sessionType = ${sessionType}) "
+				+ " and (W.sessionType = -1 or W.sessionType = ${sessionType}))";
 
     SqlParametersMaps parms = (new SqlParametersMaps ()).put ("now", now).put ("clientname", clientname).put ("testID", testID).put ("sessionType", sessionType);
     Map<String, String> unquotedParms = new HashMap<String, String> ();
@@ -4143,11 +4154,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         .addColumn ("_efk_Segment", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250)
         .addColumn ("SegmentPosition", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("formKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("FormID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200)
         .addColumn ("algorithm", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("opItemCnt", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("ftItemCnt", SQL_TYPE_To_JAVA_TYPE.INT)
-        .addColumn ("ftItems", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000).addColumn ("IsPermeable", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("restorePermOn", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
+        .addColumn ("ftItems", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 65535).addColumn ("IsPermeable", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("restorePermOn", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
         .addColumn ("segmentID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("entryApproved", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("exitApproved", SQL_TYPE_To_JAVA_TYPE.DATETIME)
         .addColumn ("formCohort", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 20).addColumn ("IsSatisfied", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("initialAbility", SQL_TYPE_To_JAVA_TYPE.FLOAT)
         .addColumn ("currentAbility", SQL_TYPE_To_JAVA_TYPE.FLOAT).addColumn ("_date", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("dateExited", SQL_TYPE_To_JAVA_TYPE.DATETIME)
-        .addColumn ("itempool", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000).addColumn ("poolcount", SQL_TYPE_To_JAVA_TYPE.INT);
+        .addColumn ("itempool", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 65535).addColumn ("poolcount", SQL_TYPE_To_JAVA_TYPE.INT);
 
     connection.createTemporaryTable (segmentsTable);
     Map<String, String> unquotedParms = new HashMap<> ();
@@ -4271,6 +4282,19 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             _FT_SelectItemgroups_SP (connection, oppKey, testKey, pos, segmentId, language, ftcntRef);
           } else {
             ftcntRef.set (0);
+          }
+          
+          Integer ftminitems = null;
+          final String SQL_QUERY15 = "select ftminitems as ftminitems from ${ItemBankDB}.tblSetofAdminSubjects where _Key = ${testkey}";
+          String finalQuery = fixDataBaseNames (SQL_QUERY15);
+          SqlParametersMaps parms15 = new SqlParametersMaps ().put("testkey", testKey);
+          result = executeStatement (connection, finalQuery, parms15, false).getResultSets ().next ();
+          record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+          if (record != null) {
+             ftminitems = record.<Integer> get ("ftminitems");
+          }
+          if  (ftcntRef.get () != null && ftminitems != null && ftminitems < ftcntRef.get ()){
+        	  ftcntRef.set(ftminitems);
           }
           if (ftcntRef.get () != null && newlenRef.get () != null && DbComparator.isEqual (ftcntRef.get () + newlenRef.get (), 0)) {
             isSatisfied = true;
@@ -4624,6 +4648,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Integer newlen = null;
     SingleDataResultSet result = null;
     DbResultRecord record = null;
+    String algorithm = null;
+	Integer minItems = null;
+	Integer maxItems = null;
+
 
     DataBaseTable poolTable = getDataBaseTable ("pool").addColumn ("itemkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("isFT", SQL_TYPE_To_JAVA_TYPE.BIT)
         .addColumn ("isActive", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("strand", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200);
@@ -4660,13 +4688,15 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       SqlParametersMaps parms2 = parms1;
       insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms2), parms2, false).getUpdateCount ();
 
-      final String SQL_QUERY1 = "select minitems as testlen from ${ItemBankDB}.tblSetofAdminSubjects where _Key = ${segmentKey};";
+      final String SQL_QUERY1 = "select selectionAlgorithm as algorithm,  minitems as minItems, maxitems as maxItems from ${ItemBankDB}.tblSetofAdminSubjects where _Key = ${segmentKey};";
       query = fixDataBaseNames (SQL_QUERY1);
       SqlParametersMaps parms3 = parms1;
       result = executeStatement (connection, query, parms3, false).getResultSets ().next ();
       record = (result.getCount () > 0 ? result.getRecords ().next () : null);
       if (record != null) {
-        testlen.set (record.<Integer> get ("testlen"));
+        algorithm = record.<String> get ("algorithm");
+        minItems = record.<Integer> get ("minItems");
+        maxItems = record.<Integer> get ("maxItems");
       }
     } else {
       final String SQL_UPDATE2 = "update ${poolTable} set isFT = isFieldTest, isActive = I.isActive, strand = I.strand from SIM_SegmentItem I" +
@@ -4685,14 +4715,21 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       SqlParametersMaps parms5 = parms4;
       insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms4), parms5, false).getUpdateCount ();
 
-      final String SQL_QUERY2 = "select minitems as testlen from SIM_Segment where _fk_Session = ${sessionkey} and _efk_Segment = ${segmentKey};";
+      final String SQL_QUERY2 = "select selectionAlgorithm as algorithm,  minitems as minItems, maxitems as maxItems from SIM_Segment where _fk_Session = ${sessionkey} and _efk_Segment = ${segmentKey};";
       SqlParametersMaps parms6 = parms4;
       result = executeStatement (connection, SQL_QUERY2, parms6, false).getResultSets ().next ();
       record = (result.getCount () > 0 ? result.getRecords ().next () : null);
       if (record != null) {
-        testlen.set (record.<Integer> get ("testlen"));
+          algorithm = record.<String> get ("algorithm");
+          minItems = record.<Integer> get ("minItems");
+          maxItems = record.<Integer> get ("maxItems");
       }
-    }
+    }    
+    if (algorithm.equals("adaptive2"))
+    	testlen.set(maxItems);
+    else 
+    	testlen.set(minItems);    
+    
     final String SQL_QUERY3 = "select sum(minitems - poolcnt) as shortfall from ${bluePrintTable} where poolcnt < minitems;";
     Map<String, String> unquotedParms5 = new HashMap<String, String> ();
     unquotedParms5.put ("bluePrintTable", bluePrintTable.getTableName ());
@@ -9346,11 +9383,17 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return null;
   }
 
-  @Override
-  public SingleDataResultSet T_LoginRequirements (SQLConnection connection, String clientname) throws ReturnStatusException {
-    // TODO Auto-generated method stub
-    return null;
-  }
+	@Override
+	public SingleDataResultSet T_LoginRequirements(SQLConnection connection,
+			String clientname) throws ReturnStatusException {
+		final String cmd1 = "select TDS_ID, Label, SortOrder from ${ConfigDB}.client_testeeattribute "
+				+ " where clientname = ${clientName} and atLogin = 'REQUIRE'";
+		SqlParametersMaps parms1 = (new SqlParametersMaps()).put("clientname",
+				clientname);
+		SingleDataResultSet rs1 = executeStatement(connection,
+				fixDataBaseNames(cmd1), parms1, false).getResultSets().next();
+		return rs1;
+	}
 
 
   @Override

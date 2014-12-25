@@ -920,4 +920,36 @@ UPDATE `configs`.`client_testtooltype` SET `isselectable`=b'1', `isvisible`=b'1'
 --Only to reset testtype for TestPackages that were already loaded before 
 -- we added testtype to tblsetofadminsubjects
 update itembank.tblsetofadminsubjects set testtype = 'INTERIM' where virtualtest is null;
+
+-- to add LIne reader to a test:
+insert into configs.client_testtooltype 
+(`clientname`, `toolname`, `allowchange`, `tideselectable`, `rtsfieldname`, 
+`isrequired`, `tideselectablebysubject`, 
+`isselectable`, `isvisible`, 
+`studentcontrol`, `tooldescription`, `sortorder`, `dateentered`, 
+`origin`, `source`, `contexttype`, `context`, `dependsontooltype`, `disableonguestsession`, 
+`isfunctional`, `testmode`)
+ VALUES
+	('SBAC_PT', 'Line Reader', b'1', b'0', 'TDSAcc-LineReader', b'0', b'0',
+	 b'1', b'1', b'0', NULL, 0, '2013-12-13 11:40:22.120',
+	  'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
+	  'TEST', 'SBAC-ELA-11', NULL, b'0', b'1', 'ALL');
+	  
+INSERT IGNORE INTO `client_testtool` 
+(`clientname`, `type`, `code`, `value`, `isdefault`, `allowcombine`, `valuedescription`, 
+`context`, `sortorder`, `origin`, `source`, `contexttype`, `testmode`, `equivalentclientcode`) 
+VALUES ('SBAC_PT', 'Line Reader', 'TDS_LR0', 'Line Reader Off', b'1', b'0', 
+'Line Reader Off', 'SBAC-ELA-11', 1, 
+'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
+'TEST', 'ALL', NULL);
+
+INSERT IGNORE INTO `client_testtool` 
+(`clientname`, `type`, `code`, `value`, `isdefault`, `allowcombine`, `valuedescription`, 
+`context`, `sortorder`, `origin`, `source`, `contexttype`, `testmode`, `equivalentclientcode`) 
+VALUES ('SBAC_PT', 'Line Reader', 'TDS_LR1', 'Line Reader On', b'0', b'0', 
+'Line Reader On', 'SBAC-ELA-11', 0, 
+'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
+'TEST', 'ALL', NULL);
+	  
+	  
  

@@ -2283,15 +2283,15 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 	      selectionAlgorithm = record.<String> get ("selectionAlgorithm");
 	    }
 	    // -- First the segment-level specs
-	    final String SQL_QUERY0 = " select _Key as segmentkey, coalesce(refreshMinutes, 33) as refreshMinutes "
+	    final String SQL_QUERY0 = " select _Key as segmentkey, coalesce(refreshMinutes, bigtoint(33)) as refreshMinutes "
 	        + " , case when VirtualTest is null then ${segmentKey} else VirtualTest end as ParentTest "
-	        + " , case when TestPosition is null then 1 else Testposition end as segmentPosition "
+	        + " , case when TestPosition is null then bigtoint(1) else Testposition end as segmentPosition "
 	        + " , (TestID) as SegmentID, blueprintWeight as bpWeight "
 	        + " , itemWeight, abilityOffset "
 	        + " , cset1size, cset1Order "
 	        + " , cset2random as randomizer, cset2InitialRandom as initialRandom "
-	        + " , case when MinItems is null then 0 else MinItems end as minOpItems "
-	        + " , case when MaxItems is null then 0 else MaxItems end as maxOpItems "
+	        + " , case when MinItems is null then bigtoint(0) else MinItems end as minOpItems "
+	        + " , case when MaxItems is null then bigtoint(0) else MaxItems end as maxOpItems "
 	        //
 			+ " , coalesce(startAbility, 0) as startAbility  "
 			+ " , coalesce(startInfo, 0) as startInfo  "
@@ -2322,12 +2322,12 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 	    SingleDataResultSet res0 = executeStatement (connection, query, parameters, true).getResultSets ().next ();
 	    resultsSets.add (res0);
 
-	    // -- Next the content-level specs (strands, content-levels
-	    // and affinity groups together)
-
+	    // -- Next the content-level specs (strands, content-levels and affinity groups together)
 	    final String SQL_QUERY1 = " (select _fk_Strand as contentLevel, minItems, maxItems, isStrictMax "
 	        + ", bpweight, adaptiveCut, StartAbility, StartInfo, Scalar "
-	        + ", case when StartAbility is not null then 1 else 0 end as isReportingCategory, abilityWeight "
+	    		// to make the same as in SimDLL.AA_SIM_GetSegment2
+	        + ", case when StartAbility is not null then 'true' else 'false' end as isReportingCategory"
+	        + ", abilityWeight "
 	        + ", precisionTarget, precisionTargetMetWeight, precisionTargetNotMetWeight"
 	        + ", case when SS._fk_Parent is null then 0 else 1 end as elementType "
 	        + " from  ${ItemBankDB}.tbladminstrand S   "
@@ -2336,7 +2336,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 	        + " where S._fk_AdminSubject = ${segmentKey} ) "
 	        + " union all "
 	        + " (select GroupID, minitems, maxitems, isStrictmax, weight, null, StartAbility, StartInfo, null, "
-	        + "  case when StartAbility is not null then 1 else 0 end as isReportingCategory"
+	        + "  case when StartAbility is not null then 'true' else 'false' end as isReportingCategory"
 	        + ", abilityWeight"
 	        + ", precisionTarget, precisionTargetMetWeight, precisionTargetNotMetWeight"
 	        + ", 2 as elementType"
@@ -2374,7 +2374,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 
 	    // -- Need all items from the virtual test not on this segment
 		if (parentTest != null) {
-			final String SQL_QUERY4 = "  select distinct coalesce(S.TestPosition, 1) as segmentPosition"
+			final String SQL_QUERY4 = "select distinct coalesce(S.TestPosition, cast(1 as unsigned)) as segmentPosition"
 					+ ", groupID as GID, _fk_Item as itemkey, ItemPosition as  position , isRequired"
 					+ ", strandName as strand, isActive, isFieldTest"
 					+ ", case ${selectionAlgorithm} when 'adaptive2' then clString else null end as clString "
@@ -2391,7 +2391,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 		}
 		// -- Need all dims and corresponding IRT params for the new AA - all segments, including the current
 
-		final String SQL_QUERY5 = "  select coalesce(S.TestPosition, 1) as segmentPosition, AI._fk_Item as itemkey,"
+		final String SQL_QUERY5 = "select coalesce(S.TestPosition, cast(1 as unsigned)) as segmentPosition, AI._fk_Item as itemkey,"
 				+ " DIM.Dimension, upper(DIM.ModelName) as irtModel, DIM.parmnum, DIM.parmname, DIM.parmvalue "
 				+ " from  ${ItemBankDB}.tblsetofadminitems AI  "
 				+ " inner join  ${ItemBankDB}.tblsetofadminsubjects S  "
@@ -2421,7 +2421,141 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
 
 	    return new MultiDataResultSet (resultsSets);
 	  }
-   // -- Collect all test-level historical data needed to perform adaptive item
+      
+   @Override
+   public MultiDataResultSet AA_SIM_GetSegment2_SP(SQLConnection connection,
+		   UUID sessionKey, String segmentKey, Boolean controlTriples)
+				   throws ReturnStatusException {
+	   Date startTime = _dateUtil.getDateWRetStatus (connection);
+	   String client = _commonDll.TestKeyClient_FN (connection, segmentKey);
+	   String parentTest = null;
+	   String algorithm = null;
+
+	   List<SingleDataResultSet> resultsSets = new ArrayList<SingleDataResultSet> ();
+	   SingleDataResultSet res;
+	   DbResultRecord record;
+
+	   // Sql Parameters 
+	   SqlParametersMaps parameters = new SqlParametersMaps();
+	   parameters.put ("segmentKey", segmentKey);
+	   parameters.put ("sessionKey", sessionKey);
+
+	   // Get the parent test
+	   final String SQL_QUERY = "select VirtualTest, selectionAlgorithm"
+			   + " from ${ItemBankDB}.tblsetofadminsubjects where _Key = ${segmentKey} ";
+	   String query = fixDataBaseNames (SQL_QUERY);
+	   res = executeStatement (connection, query, parameters, false).getResultSets ().next ();
+	   record = res.getCount () > 0 ? res.getRecords ().next () : null;
+	   if (record != null) {
+		   parentTest = record.<String> get ("VirtualTest");
+		   algorithm = record.<String> get ("selectionAlgorithm");
+		   parameters.put ("parentTest", parentTest);
+		   parameters.put ("selectionAlgorithm", algorithm);
+	   }
+
+	   // -- Segment-level specs
+	   final String SQL_QUERY0 = " select _efk_Segment as segmentkey, bigtoint(1000000) as refreshMinutes "
+			   + " , _efk_AdminSubject as ParentTest "
+			   + " , S.segmentPosition,  S.SegmentID, S.blueprintWeight as bpWeight "
+			   + " , S.itemWeight, S.abilityOffset, S.cset1size, S.cset1Order "
+			   + " , S.cset2random as randomizer, S.cset2InitialRandom as initialRandom "
+			   + " , S.MinItems as minOpItems, S.MaxItems as maxOpItems "
+			   + " , S.startAbility, S.startInfo "
+			   + " , coalesce(A.Slope, 1) as slope "
+			   + " , coalesce(A.Intercept, 0) as intercept "
+			   + " , S.FTStartPos, S.FTEndPos, S.FTMinItems, S.FTMaxItems "
+			   + " , S.selectionAlgorithm "
+			   + " , bpMetricFunction as adaptiveVersion "
+			   + ", S.rcAbilityWeight, S.abilityWeight, S.precisionTargetNotMetWeight, S.precisionTargetMetWeight "
+			   + ", S.precisionTarget, S.adaptiveCut, S.tooCloseSEs, S.terminationMinCount, S.terminationOverallInfo"
+			   + ", S.terminationRCInfo, S.terminationTooClose, S.terminationFlagsAnd"
+			   + " from sim_segment S  , ${ItemBankDB}.tblsetofadminsubjects A   "
+			   + " where  S._fk_Session = ${sessionKey} and S._efk_Segment = ${segmentkey} and A._Key =${segmentkey}";
+	   query = fixDataBaseNames (SQL_QUERY0);
+	   SingleDataResultSet res0 = executeStatement (connection, query, parameters, true).getResultSets ().next ();
+	   resultsSets.add (res0);
+
+	   // -- Content-level specs (strands, content-levels and affinity groups together)
+	   final String SQL_QUERY1 = " select S.contentLevel, S.minItems, S.maxItems, S.isStrictMax "
+			   + ", S.bpweight, S.adaptiveCut, S.StartAbility, S.StartInfo, S.Scalar "
+			   + ", case when S.StartAbility is not null then 'true' else 'false' end as isReportingCategory"
+			   + ", case when AG.GroupID is not null then 2 when SS._fk_Parent is null then 0 else 1 end as elementType"
+			   + ", S.abilityWeight, S.precisionTargetNotMetWeight, S.precisionTargetMetWeight, S.precisionTarget"
+			   + " from sim_segmentcontentlevel S   "
+			   + " left outer join ${ItemBankDB}.AffinityGroup AG on AG._fk_AdminSubject = S._efk_Segment and AG.GroupID = S.contentLevel"
+			   + " left outer join ${ItemBankDB}.tblStrand SS on SS._Key = S.contentLevel"
+			   + " where S._fk_Session = ${sessionKey} and S._efk_Segment =${segmentKey}" 
+			   + " order by isReportingCategory desc, contentLevel";	  	 
+	   query = fixDataBaseNames (SQL_QUERY1);
+	   SingleDataResultSet res1 = executeStatement (connection, query, parameters, true).getResultSets ().next ();
+	   resultsSets.add (res1);
+
+	   // -- Itemgroups 
+	   final String SQL_QUERY2 = " select groupID as itemGroup, -1 as itemsRequired, maxItems, 1 as bpweight "
+			   + " from sim_itemgroup   "
+			   + " where _fk_Session = ${sessionKey} and _efk_Segment = ${segmentKey} ";
+	   SingleDataResultSet res2 = executeStatement (connection, SQL_QUERY2, parameters, true).getResultSets ().next ();
+	   resultsSets.add (res2);
+
+
+	   // -- Items
+	   final String SQL_QUERY3 = " select I.groupID as GID, I._fk_Item as itemkey"
+			   + ", I.ItemPosition as position, S.isRequired, I.strandName as strand, I.isFieldTest "
+			   + ", S.isActive, I.clString "
+			   + " from sim_segmentitem S  ,  ${ItemBankDB}.tblsetofadminitems I   "
+			   + " where S._fk_Session = ${sessionKey} and S._efk_Segment = ${segmentKey} "
+			   + " and I._fk_AdminSubject = ${segmentKey} and S._efk_Item = I._fk_Item";
+	   query = fixDataBaseNames (SQL_QUERY3);
+	   SingleDataResultSet res3 = executeStatement (connection, query, parameters, true).getResultSets ().next ();
+	   resultsSets.add (res3);
+
+	   // -- Items from the virtual test not on this segment
+	   if (parentTest != null)
+	   {
+		   final String SQL_QUERY4 = "  select distinct coalesce(S.TestPosition, bigtoint(1)) as segmentPosition, I.groupID as GID, I._fk_Item as itemkey"
+				   + ", I.ItemPosition as position, I1.isRequired, I.strandName as strand, I1.isActive, I.isFieldTest"
+				   + ", case ${selectionAlgorithm} when 'adaptive2' then clString else null end as clString"
+				   + " from  ${ItemBankDB}.tblsetofadminsubjects S,  ${ItemBankDB}.tblsetofadminitems I, sim_segmentitem I1  "
+				   + "  where S.VirtualTest = ${parentTest} and S._Key <> ${segmentKey} and _fk_AdminSubject = S._Key "
+				   + " and I._fk_AdminSubject = S._Key"
+				   + " and I1._fk_Session =  ${sessionKey} and I1._efk_Segment <> ${segmentKey} and I1._efk_Item = I._fk_Item"				  
+				   + " and not exists (select * from sim_segmentitem I2 where I2._fk_Session =  ${sessionKey} and I2._efk_Segment = ${segmentKey} and I2._efk_Item = I1._efk_Item)" ;
+		   query = fixDataBaseNames (SQL_QUERY4);
+		   SingleDataResultSet res4 = executeStatement (connection, query, parameters, true).getResultSets ().next ();
+		   resultsSets.add (res4);
+	   }
+
+	   // Dimensions and corresponding IRT params for the new AA - all segments, including the current
+	   final String SQL_QUERY5 = " select coalesce(S.TestPosition, 1) as segmentPosition, AI._fk_Item as itemkey "
+			   + ", DIM.Dimension, upper(DIM.ModelName) as irtModel, DIM.parmnum, DIM.parmname, DIM.parmvalue"
+			   + " from ${ItemBankDB}.tblSetofadminItems AI" 
+			   + " inner join ${ItemBankDB}.tblSetofAdminSubjects S"
+			   + " on S._Key = AI._fk_AdminSubject"
+			   + " inner join" 
+			   + " (select D._fk_AdminSubject, D._fk_Item, D.Dimension,m.ModelName, p.parmnum, p.parmname, ip.parmvalue"
+			   + " from ${ItemBankDB}.ItemScoreDimension AS D" 
+			   + "	inner join ${ItemBankDB}.MeasurementModel m"
+			   + 		" on m.ModelNumber = D._fk_MeasurementModel"
+			   + " inner join ${ItemBankDB}.MeasurementParameter p"
+			   +		" on p._fk_measurementModel = m.ModelNumber"
+			   + " inner join ${ItemBankDB}.ItemMeasurementParameter ip"
+			   + 		" on ip._fk_ItemScoreDimension = D._Key"
+			   +		" and ip._fk_MeasurementParameter = p.parmnum) as DIM"
+			   +		" on DIM._fk_AdminSubject = AI._fk_AdminSubject"
+			   +		" and DIM._fk_Item = AI._fk_Item"
+			   + " where S._Key = ${segmentKey} or S.VirtualTest = ${parentTest}";
+	   query = fixDataBaseNames (SQL_QUERY5);
+	   SingleDataResultSet res5 = executeStatement (connection, query, parameters, true).getResultSets ().next ();
+	   resultsSets.add (res5);
+
+	   _commonDll._LogDBLatency_SP (connection, "AA_SIM_GetSegment2",
+			   startTime, null, true, null, null, sessionKey, client, segmentKey);
+
+	   return new MultiDataResultSet (resultsSets);
+   }   
+
+
+// -- Collect all test-level historical data needed to perform adaptive item
    // selection
    // -- Has the side-effect of updating existing data where needed (i.e.
    // TestopportunitySegment.itempool and TestOpportunity.itemgroupString,

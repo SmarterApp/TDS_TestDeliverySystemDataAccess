@@ -2057,6 +2057,14 @@ public MultiDataResultSet AA_GetSegment2_SP(SQLConnection connection,
 }
 
 @Override
+public MultiDataResultSet AA_SIM_GetSegment2_SP(SQLConnection connection,
+		UUID sessionKey, String segmentKey, Boolean controlTriples)
+		throws ReturnStatusException {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
 public MultiDataResultSet AA_GetDataHistory2_SP(SQLConnection connection,
 		UUID oppkey, String segmentKey) throws ReturnStatusException {
 	// TODO Auto-generated method stub

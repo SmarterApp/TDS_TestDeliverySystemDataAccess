@@ -271,7 +271,18 @@ public interface IItemSelectionDLL
 	 * @throws ReturnStatusException
 	 */
   public MultiDataResultSet AA_GetSegment2_SP (SQLConnection connection, String segmentKey) throws ReturnStatusException;
-
+  
+  /**
+   * 
+   * @param connection
+   * @param sessionKey
+   * @param segmentKey
+   * @param controlTriples
+   * @return
+   * @throws ReturnStatusException
+   */
+  public MultiDataResultSet AA_SIM_GetSegment2_SP(SQLConnection connection, UUID sessionKey, String segmentKey, Boolean controlTriples) throws ReturnStatusException;    
+  
   /**
    * 
    * @param connection

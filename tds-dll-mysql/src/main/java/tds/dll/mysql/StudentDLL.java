@@ -1013,7 +1013,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   }
 
   public void _ValidateTesteeAccessProc_SP (SQLConnection connection, UUID testoppkey, UUID session, UUID browserId, Boolean checkSession, _Ref<String> message) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date now = _dateUtil.getDateWRetStatus (connection);
     if (testoppkey != null && session != null & browserId != null)
       _logger.info ("_ValidateTesteeAccessProc: opp " + testoppkey.toString () + " session " + session.toString () + " browser " + browserId.toString ());
@@ -1027,7 +1026,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (exists (executeStatement (connection, SQL_QUERY1, parameters, false))) {
       checkSession = false;
     }
-    _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 1: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     UUID sessionKey = null;
     UUID browserKey = null;
     final String SQL_QUERY2 = "SELECT _fk_Session as sessionKey,  _fk_browser as browserKey from testopportunity where _Key = ${testoppkey}";
@@ -1039,7 +1037,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       sessionKey = record.<UUID> get ("sessionKey");
       browserKey = record.<UUID> get ("browserKey");
     }
-    _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 1: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     if (DbComparator.notEqual (browserKey, browserId)) {
       if (browserId != null && browserKey != null)
         _logger.info ("browser key does not match " + browserId.toString () + " should be " + browserKey.toString ());
@@ -1083,7 +1080,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         proctor = record.<Long> get ("proctor");
         sessionBrowser = record.<UUID> get ("sessionBrowser");
       }
-      _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 3: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
       dateBegin = _commonDll.adjustDateMinutes (dateBegin, -5);
       if (DbComparator.notEqual (sessionStatus, "open") || DbComparator.lessThan (now, dateBegin) || DbComparator.greaterThan (now, dateEnd)) {
         // if ("open".equalsIgnoreCase (sessionStatus) == false || now.compareTo
@@ -1106,9 +1102,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       if (record != null) {
         checkin = record.<Integer> get ("checkin");
       }
-      _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 4: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
       dateVisited = _commonDll.adjustDateMinutes (dateVisited, checkin);
-      _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 5: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
       if (checkin != null && checkin > 0 && DbComparator.greaterThan (now, dateVisited)) {
 
         // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
@@ -1120,10 +1114,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
         MultiDataResultSet sets = executeStatement (connection, fixDataBaseNames (SQL_INSERT), parms, false);
         int insertCnt = sets.getUpdateCount ();
-        _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 6: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
         _commonDll.P_PauseSession_SP (connection, session, proctor, sessionBrowser);
         message.set ("The session is not available for testing, please check with your test administrator.");
-        _logger.info ("<<<<<<<<< _ValidateTesteeAccessProc_SP 7 Total: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
         return;
       }
     }
@@ -4466,13 +4458,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         .addColumn ("_efk_Segment", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250)
         .addColumn ("SegmentPosition", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("formKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("FormID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200)
         .addColumn ("algorithm", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("opItemCnt", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("ftItemCnt", SQL_TYPE_To_JAVA_TYPE.INT)
-        .addColumn ("ftItems", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000).addColumn ("IsPermeable", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("restorePermOn", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
+        .addColumn ("ftItems", SQL_TYPE_To_JAVA_TYPE.TEXT).addColumn ("IsPermeable", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("restorePermOn", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
         .addColumn ("segmentID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("entryApproved", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("exitApproved", SQL_TYPE_To_JAVA_TYPE.DATETIME)
         .addColumn ("formCohort", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 20).addColumn ("IsSatisfied", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("initialAbility", SQL_TYPE_To_JAVA_TYPE.FLOAT)
         .addColumn ("currentAbility", SQL_TYPE_To_JAVA_TYPE.FLOAT).addColumn ("_date", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("dateExited", SQL_TYPE_To_JAVA_TYPE.DATETIME)
-        .addColumn ("itempool", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000).addColumn ("poolcount", SQL_TYPE_To_JAVA_TYPE.INT);
+        .addColumn ("itempool", SQL_TYPE_To_JAVA_TYPE.TEXT).addColumn ("poolcount", SQL_TYPE_To_JAVA_TYPE.INT);
 
-    connection.createTemporaryTable (segmentsTable);
+    connection.createTemporaryDiskTable (segmentsTable);
     Map<String, String> unquotedParms = new HashMap<> ();
     unquotedParms.put ("segmentsTableName", segmentsTable.getTableName ());
     error.set (null);
@@ -8020,21 +8012,23 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _logger.debug (" page = " + page + ", segment = " + segment + ", segmentId = " + segmentId + ", groupId = " + groupId);
     }
 
-    final String SQL_QUERY1 = "select max(position) as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and _efk_ITSItem is not null;";
+    /*final String SQL_QUERY1 = "select max(position) as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and _efk_ITSItem is not null;";
     SqlParametersMaps parms = new SqlParametersMaps ().put ("oppkey", oppKey);
     result = executeStatement (connection, SQL_QUERY1, parms, false).getResultSets ().next ();
     DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
     if (record != null) {
       lastPosition = record.<Integer> get ("lastPosition");
-    }
+    }*/
 
-    final String SQL_QUERY2 = "select segment as lastSegment, page as lastPage from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = ${lastPosition};";
-    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("lastPosition", lastPosition);
+//    final String SQL_QUERY2 = "select segment as lastSegment, page as lastPage from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = ${lastPosition};";
+    final String SQL_QUERY2 = "select segment as lastSegment, page as lastPage, position as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = (select max(position) as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and _efk_ITSItem is not null);";
+    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("oppkey", oppKey)/*.put ("lastPosition", lastPosition)*/;
     result = executeStatement (connection, SQL_QUERY2, parms1, false).getResultSets ().next ();
-    record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+    DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
     if (record != null) {
       lastSegment = record.<Integer> get ("lastSegment");
       lastPage = record.<Integer> get ("lastPage");
+      lastPosition = record.<Integer> get ("lastPosition");
     }
     if (_debug)
     {
@@ -8576,20 +8570,22 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    Integer lastpage = null;
    Integer lastpos = null;
 
-   final String SQL_QUERY4 = "select max(position) as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and _efk_ITSItem is not null;";
+   /*final String SQL_QUERY4 = "select max(position) as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and _efk_ITSItem is not null;";
    SqlParametersMaps parms4 = parms1;
    result = executeStatement (connection, SQL_QUERY4, parms4, false).getResultSets ().next ();
    record = (result.getCount () > 0 ? result.getRecords ().next () : null);
    if (record != null) {
      lastPosition = record.<Integer> get ("lastPosition");
-   }
-   final String SQL_QUERY5 = "select segment as lastSegment, page as lastPage from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = ${lastPosition};";
-   SqlParametersMaps parms5 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("lastPosition", lastPosition);
+   }*/
+//   final String SQL_QUERY5 = "select segment as lastSegment, page as lastPage from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = ${lastPosition};";
+   final String SQL_QUERY5 = "select segment as lastSegment, page as lastPage, position as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = (select max(position) as lastPosition from testeeresponse where _fk_TestOpportunity = ${oppkey} and _efk_ITSItem is not null);";
+   SqlParametersMaps parms5 = new SqlParametersMaps ().put ("oppkey", oppKey)/*.put ("lastPosition", lastPosition)*/;
    result = executeStatement (connection, SQL_QUERY5, parms5, false).getResultSets ().next ();
    record = (result.getCount () > 0 ? result.getRecords ().next () : null);
    if (record != null) {
      lastSegment = record.<Integer> get ("lastSegment");
      lastpage = record.<Integer> get ("lastPage");
+     lastPosition = record.<Integer> get ("lastPosition");
    }
    
    _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 5 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());

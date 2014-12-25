@@ -1099,10 +1099,10 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     try {
       SingleDataResultSet result;
       DbResultRecord record;
-      List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Score/@measureOf",
+      List<String> orderedColumns = new ArrayList<String> (Arrays.asList ("Score/@value",
+          "Score/@standardError",
           "Score/@measureLabel",
-          "Score/@value",
-          "Score/@standardError"));
+          "Score/@measureOf"));
 
       String query = "select measureof as \"Score/@measureOf\", measurelabel as \"Score/@measureLabel\", coalesce(value, '') as \"Score/@value\", "
           + " standarderror as \"Score/@standardError\" "
