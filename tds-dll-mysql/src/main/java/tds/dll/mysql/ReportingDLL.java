@@ -372,7 +372,9 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 
       strBuilder.append ("<").append(TESTEE_NODE_NAME);
       strBuilder.append(" key=\"").append (testee).append ("\" ");
-      strBuilder.append(" isDemo=\"").append (IS_DEMO).append ("\" ");
+      if(debug)
+    	  strBuilder.append(" isDemo=\"").append (IS_DEMO).append ("\" ");
+      
       strBuilder.append (" >").append(ls);
       
       String initialContextDate = formatXSDateTime(getContextDate(connection, oppkey, INITIAL));
@@ -580,7 +582,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " windowID as \"@windowId\", "
           + " ${winopp} as \"@windowOpportunity\","
           + " O.dateForceCompleted as \"@dateForceCompleted\", "
-          + " '' as \"@qaLevel\", "											// TODO Hardcoded value
+          + " '' as \"@qaLevel\", "											// TODO Hardcoded value SB-999
           + " '' as \"@assessmentParticipantSessionPlatformUserAgent\", "	// TODO Hardcoded value
           + " ${effectiveDate} as \"@effectiveDate\" "
           + " from testopportunity O, session S where O._Key = ${oppkey}"
@@ -1064,7 +1066,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           "Accommodation/@value",
           "Accommodation/@code",
           "Accommodation/@segment"
-//AK: (2014-11-13)    There are not these attributes in new reportxml_os.xsd file      
+//AK: (2014-11-13)    There are not these attributes in new reportxml_os.xsd file. See SB-971.      
 //          ,
 //          "Accommodation/@context",
 //          "Accommodation/@contextDate"
