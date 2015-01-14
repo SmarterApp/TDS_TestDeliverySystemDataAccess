@@ -2583,4 +2583,77 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     return result;
   }
 
+  public void _CreateClientReportingID_SP (SQLConnection connection, String clientname, UUID oppkey, _Ref<Long> newIdRef) throws ReturnStatusException {
+	    // -- this makes lock specific to a client
+	    String resourcename = String.format ("createtestID%s", clientname);
+	    // -- indicates no applock obtained
+	    Integer applock = -1;
+
+	    String errorMsg = null;
+	    newIdRef.set (null);
+
+	    try {
+	      boolean preexistingAutoCommitMode = connection.getAutoCommit ();
+	      connection.setAutoCommit (false);
+	      applock = getAppLock (connection, resourcename, "Exclusive");
+
+	      if (DbComparator.lessThan (applock, 0)) {
+	        _LogDBError_SP (connection, "_CreateClientReportingID", "Failed to get applock", null, null, null, oppkey, clientname, null);
+
+	        connection.rollback ();
+	        connection.setAutoCommit (preexistingAutoCommitMode);
+	        return;
+	      }
+	      final String SQL_QUERY1 = "select  max(reportingID) + 1 as newId from Client_ReportingID where clientname = ${clientname};";
+	      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
+	      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
+	      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+	      if (record != null)
+	        newIdRef.set (record.<Long> get ("newId"));
+
+	      // -- if newID is null, then get the starting value from externs
+	      if (newIdRef.get () == null) {
+	        final String SQL_QUERY2 = "select InitialReportingID as newID from Externs where clientname = ${clientname}";
+	        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("clientname", clientname);
+	        result = executeStatement (connection, SQL_QUERY2, parms2, false).getResultSets ().next ();
+	        record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+	        if (record != null)
+	          newIdRef.set (record.<Long> get ("newId"));
+	      }
+
+	      final String SQL_QUERY3 = "insert into Client_ReportingID (clientname, reportingID, _fk_TestOpportunity) "
+	          + " values (${clientname}, ${newID}, ${oppkey})";
+	      SqlParametersMaps parms3 = (new SqlParametersMaps ()).
+	          put ("clientname", clientname).put ("newId", newIdRef.get ()).put ("oppkey", oppkey);
+	      int insertedCnt = executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
+
+	      releaseAppLock (connection, resourcename);
+
+	      applock = -1;
+	      connection.commit ();
+	      connection.setAutoCommit (preexistingAutoCommitMode);
+	      return;
+
+	    } catch (SQLException se) {
+	      errorMsg = se.getMessage ();
+	    } catch (ReturnStatusException re) {
+	      errorMsg = re.getMessage ();
+	    }
+
+	    // this will kick if we caught SQLException or ReturnStatusException
+	    newIdRef.set (null);
+	    if (DbComparator.greaterOrEqual (applock, 0))
+	      releaseAppLock (connection, resourcename);
+
+	    try {
+	      connection.rollback ();
+
+	    } catch (SQLException se) {
+	      _logger.error (String.format ("Failed rollback: %s", se.getMessage ()));
+	    }
+	    if (errorMsg == null)
+	      errorMsg = "no error message logged";
+
+	    _LogDBError_SP (connection, "_CreateClientReportingID", errorMsg, null, null, null, oppkey, clientname, null);
+	  }
 }

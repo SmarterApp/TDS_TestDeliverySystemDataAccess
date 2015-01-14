@@ -218,4 +218,12 @@ public interface ISimDLL
   public boolean simGetSimAbort (SQLConnection connection, UUID session) throws ReturnStatusException;
   
   public String sim_getItemType (SQLConnection connection, String sItemKey)throws ReturnStatusException;  
+  
+  public SingleDataResultSet SIM_GetItemSelectionParameters (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException;
+
+  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String bpElementID, String paramName, String paramValue) throws ReturnStatusException;
+
+  public void SIM_DeleteAllItemSelectionParameterDefaultRecords (SQLConnection connection) throws ReturnStatusException;
+
+  public void SIM_AddItemSelectionParameterDefaultRecord (SQLConnection connection, String algorithmType, String entityType, String name, String value, String label) throws ReturnStatusException;
 }

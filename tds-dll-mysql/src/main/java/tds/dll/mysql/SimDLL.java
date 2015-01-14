@@ -11,6 +11,7 @@ package tds.dll.mysql;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -575,6 +576,14 @@ public class SimDLL extends AbstractDLL implements ISimDLL
           + "    where S._fk_Session = ${session} and S._efk_AdminSubject = ${testKey} and A._fk_AdminSubject = S._efk_SEgment";
       SqlParametersMaps parms10 = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
       inserted = executeStatement (connection, fixDataBaseNames (cmd10), parms10, false).getUpdateCount ();
+
+      final String cmdItemSelectionParam = " insert into sim_itemselectionparameter (_fk_session, _fk_adminsubject, bpelementid, name, value, label) "
+          + "select ${session}, _fk_adminsubject, bpelementid, name, value, label "
+          + " from ${ItemBankDB}.tblitemselectionparm "
+          + " where _fk_AdminSubject=${testKey} ";
+      SqlParametersMaps parmsItemSelectionParam = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
+      inserted = executeStatement (connection, fixDataBaseNames (cmdItemSelectionParam), parmsItemSelectionParam, false).getUpdateCount ();
+      SIM_CreateItemSelectionParameters (connection, session);
 
       return _commonDll.ReturnStatusReason ("success", null);
 
@@ -1595,6 +1604,15 @@ public class SimDLL extends AbstractDLL implements ISimDLL
           + " and _efk_AdminSubject = ${testkey} limit 1";
       SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
       if (!exists (executeStatement (connection, cmd2, parms2, false))) {
+        
+        String currentSelectionAlgorithm = null;         
+        final String cmd4 = "select selectionalgorithm from sim_segment where _fk_Session = ${session} and _efk_adminsubject= ${testkey} and _efk_segment=${segmentkey}";
+        SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey).put ("segmentkey", segmentKey);
+        SingleDataResultSet rs = executeStatement (connection, cmd4, parms4, false).getResultSets ().next ();
+        DbResultRecord rd = (rs.getCount () > 0 ? rs.getRecords ().next () : null);
+        if (rd != null)
+          currentSelectionAlgorithm = rd.<String> get ("selectionalgorithm");
+        
         final String cmd3 = "UPDATE  sim_segment "
             + " SET StartAbility=${startAbility}, StartInfo=${startInfo}, MinItems=${minItems}, MaxItems=${maxItems} "
             + " , blueprintWeight=${bpWeight}, cset1size=${cset1size}, cset2Random=${cset2Random} "
@@ -1624,7 +1642,10 @@ public class SimDLL extends AbstractDLL implements ISimDLL
             put ("terminationTooClose", terminationTooClose).put ("terminationFlagsAnd", terminationFlagsAnd);
 
         Integer updatedCnt = executeStatement (connection, cmd3, parms3, false).getUpdateCount ();
-
+        
+        if ((currentSelectionAlgorithm != null) && !selectionAlgorithm.equals (currentSelectionAlgorithm))
+            SIM_CreateItemSelectionParameters(connection, session); 
+        
         return _commonDll.ReturnStatusReason ("success", null);
 
       } else {
@@ -2773,19 +2794,19 @@ public class SimDLL extends AbstractDLL implements ISimDLL
   }
 
   public SingleDataResultSet SIM_OpenSession_SP (SQLConnection connection, UUID sessionkey) throws ReturnStatusException {
-	  
-	Date startDate = _dateUtil.getDateWRetStatus (connection);
-	Calendar cal = Calendar.getInstance ();
-	cal.setTime (startDate);
-	cal.add(Calendar.MONTH, 1);
-	Date endDate = cal.getTime();	    	  	 
-	Timestamp startTime = new Timestamp(startDate.getTime());
-	Timestamp endTime = new Timestamp(endDate.getTime());
-	
+
+    Date startDate = _dateUtil.getDateWRetStatus (connection);
+    Calendar cal = Calendar.getInstance ();
+    cal.setTime (startDate);
+    cal.add (Calendar.MONTH, 1);
+    Date endDate = cal.getTime ();
+    Timestamp startTime = new Timestamp (startDate.getTime ());
+    Timestamp endTime = new Timestamp (endDate.getTime ());
+
     final String cmd1 = "   update session set status = 'open', dateend = ${endDate}, "
         + " datevisited = ${startDate}, datechanged = ${startDate} "
         + "   where _key = ${sessionKey} and environment = 'SIMULATION'";
-    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey).put("startDate", startTime).put("endDate", endTime);
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey).put ("startDate", startTime).put ("endDate", endTime);
     int updatedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
 
     final String cmd2 = "  select dbname as itembank, clientname, sessionID, _efk_Proctor as proctorKey, "
@@ -2937,6 +2958,55 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     return itemType;
   }
 
+  @Override
+  public SingleDataResultSet SIM_GetItemSelectionParameters (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException {
+    final String cmd = "select _fk_session, _fk_adminsubject, bpelementtype, "
+        + " (case bpelementtype when ${testentitytype} then ${emptystring} else bpelementid end) as bpelementid, "
+        + " name, value, label "
+        + " from sim_itemselectionparameter "
+        + " where _fk_session = ${sessionkey} and _fk_adminsubject = ${testkey}";
+    SqlParametersMaps parms = (new SqlParametersMaps ())
+        .put ("sessionkey", sessionKey).put ("testkey", testKey)
+        .put ("testentitytype", "Test").put ("emptystring", "");
+    SingleDataResultSet rs = executeStatement (connection, cmd, parms, false).getResultSets ().next ();
+    return rs;
+  }
+  
+  @Override
+  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String bpElementID, String paramName, String paramValue)
+      throws ReturnStatusException {
+    String cmd = "update sim_itemselectionparameter "
+        + " set value=${value} "
+        + " where _fk_session = ${sessionkey} and _fk_adminsubject = ${testkey} and name=${name} ";
+    if (bpElementID.isEmpty ()) {
+      cmd += " and bpelementtype=${testentitytype} ";
+    } else {
+      cmd += " and bpelementid=${bpelementid} ";
+    }
+    SqlParametersMaps parms = (new SqlParametersMaps ())
+        .put ("sessionkey", sessionKey).put ("testkey", testKey).put ("bpelementid", bpElementID)
+        .put ("name", paramName).put ("value", paramValue).put ("testentitytype", "Test");
+    executeStatement (connection, cmd, parms, false);
+  }
+
+  @Override
+  public void SIM_DeleteAllItemSelectionParameterDefaultRecords (SQLConnection connection)
+      throws ReturnStatusException {
+    final String cmd = "delete from sim_defaultitemselectionparameter";
+    executeStatement (connection, cmd, null, false);
+  }
+
+  @Override
+  public void SIM_AddItemSelectionParameterDefaultRecord (SQLConnection connection, String algorithmType, String entityType, String name, String value, String label)
+      throws ReturnStatusException {
+    final String cmd = "insert into sim_defaultitemselectionparameter (algorithmtype, entitytype, name, value, label) "
+        + " values (${algorithmtype}, ${entitytype}, ${name}, ${value}, ${value}) ";
+    SqlParametersMaps parms = (new SqlParametersMaps ())
+        .put ("algorithmtype", algorithmType).put ("entitytype", entityType)
+        .put ("name", name).put ("value", value).put ("label", label);
+    executeStatement (connection, cmd, parms, false);
+  }
+
   private String getClientnameFromSession (SQLConnection connection, UUID session) throws ReturnStatusException {
     String client = null;
     final String cmd1 = "select clientname as client from session where _Key = ${session}";
@@ -2956,5 +3026,54 @@ public class SimDLL extends AbstractDLL implements ISimDLL
 
     Boolean exists = exists (executeStatement (connection, cmd1, parms1, false));
     return exists;
-  }  
+  }
+
+  private void SIM_CreateItemSelectionParameters (SQLConnection connection, UUID sessionKey)
+      throws ReturnStatusException {
+    DataBaseTable tempitemselectionparamsTbl = getDataBaseTable ("tempitemselectionparams").addColumn ("testname", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
+        addColumn ("bpelementtype", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("bpelementid", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).
+        addColumn ("name", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("value", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("label", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200);
+    connection.createTemporaryTable (tempitemselectionparamsTbl);
+    SqlParametersMaps parms = (new SqlParametersMaps ())
+        .put ("sessionkey", sessionKey)
+        .put ("testentity", "Test").put ("segmententity", "Segment");
+
+    Map<String, String> dbparams = new HashMap<String, String> ();
+    dbparams.put ("tempdbname", tempitemselectionparamsTbl.getTableName ());
+
+    try {
+      boolean preexistingAutoCommitMode = connection.getAutoCommit ();
+      connection.setAutoCommit (false);
+      final String cmd1 = " insert into ${tempdbname} (testname, bpelementtype, bpelementid, name, value, label) "
+          + " select S._efk_adminsubject, P.entitytype, S.segmentid, P.name, P.value, P.label "
+          + " from sim_defaultitemselectionparameter P, sim_segment S  "
+          + " where P.algorithmtype = S.selectionalgorithm and P.entitytype in (${testentity}, ${segmententity}) and S._fk_session=${sessionkey}";
+      executeStatement (connection, fixDataBaseNames (cmd1, dbparams), parms, false);
+
+      final String cmd2 = " update ${tempdbname} T inner join sim_itemselectionparameter P "
+          + " on P._fk_adminsubject = T.testname AND P.bpelementid = T.bpelementid and P.name = T.name "
+          + " set T.value=P.value "
+          + " where P._fk_session=${sessionkey} ";
+      executeStatement (connection, fixDataBaseNames (cmd2, dbparams), parms, false);
+
+      final String cmd3 = " delete from sim_itemselectionparameter where _fk_session=${sessionkey}";
+      executeStatement (connection, fixDataBaseNames (cmd3, dbparams), parms, false);
+
+      final String cmd4 = " insert into sim_itemselectionparameter(_fk_session, _fk_adminsubject, bpelementtype, bpelementid, name, value, label) "
+          + " select ${sessionkey}, testname, bpelementType, bpelementid, name, value, label "
+          + " from ${tempdbname} ";
+      executeStatement (connection, fixDataBaseNames (cmd4, dbparams), parms, false);
+
+      connection.commit ();
+      connection.setAutoCommit (preexistingAutoCommitMode);
+    } catch (Exception e) {
+      try {
+        connection.rollback ();
+      } catch (SQLException se) {
+        _logger.error ("Failed rollback transaction", se);
+      }
+      _logger.error (String.format ("SIM_CreateItemSelectionParameters failed: %s", e.getMessage ()));
+      throw new ReturnStatusException (e);
+    }
+  }
 }

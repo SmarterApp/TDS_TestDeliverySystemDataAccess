@@ -14,6 +14,7 @@ drop table if exists `tblclient`;
 drop table if exists `tblalternatetest`;
 drop table if exists `tbladminstrand`;
 drop table if exists `tbladminstimulus`;
+drop table if exists `tblitemselectionparm`;
 drop table if exists `_dblatency`;
 drop table if exists `_testupdate`;
 drop table if exists `_sys_formtestitems`;

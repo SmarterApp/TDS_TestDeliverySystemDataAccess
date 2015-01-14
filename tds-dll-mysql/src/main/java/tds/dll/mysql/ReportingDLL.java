@@ -45,7 +45,6 @@ import AIR.Common.DB.results.DbResultRecord;
 import AIR.Common.DB.results.SingleDataResultSet;
 import AIR.Common.Helpers._Ref;
 import AIR.Common.Sql.AbstractDateUtilDll;
-import AIR.Common.Utilities.UrlEncoderDecoderUtils;
 import TDS.Shared.Exceptions.ReturnStatusException;
 import TDS.Shared.Web.client.ITdsRestClient;
 
@@ -118,7 +117,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   @PostConstruct
   private void init () {
     if (_tisUrl != null && _tisStatusCallbackUrl != null) {
-      _tisUrl += "?statusCallback=" + UrlEncoderDecoderUtils.encode (_tisStatusCallbackUrl);
+      _tisUrl += "?statusCallback=" + /*UrlEncoderDecoderUtils.encode (*/_tisStatusCallbackUrl;
     }
   }
   
@@ -367,13 +366,21 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       }
       if(clientname == null || testee == null)
       {
-    	  _logger.error("clientname = " + clientname + "; testee = " + testee + ": <Examinee> section will be empty");
+    	  String error = "clientname = " + clientname + "; testee = " + testee + ": <Examinee> section will be empty";
+    	  _logger.error(error);
+    	  throw new ReturnStatusException (error);
       }
 
       strBuilder.append ("<").append(TESTEE_NODE_NAME);
       strBuilder.append(" key=\"").append (testee).append ("\" ");
       if(debug)
     	  strBuilder.append(" isDemo=\"").append (IS_DEMO).append ("\" ");
+      
+      if(testee < 0)
+      {
+    	  strBuilder.append("/>");
+    	  return strBuilder.toString();
+      }
       
       strBuilder.append (" >").append(ls);
       
@@ -416,6 +423,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     try {
       Long itemcount = null;
       Long ftcount = null;
+      _Ref<Long> newReportingIdRef = new _Ref<> (); // this is reportingId !!!
       Date archived = null;
       String testid = null;
       String testkey = null;
@@ -519,6 +527,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           itemcount = record.<Long> get ("itemcount");
         }
       }
+      
+      _commonDll._CreateClientReportingID_SP (connection, client, oppkey, newReportingIdRef);
 
       //String dbName = getAppSettings ().get ("TDSSessionDBName");// jdbc.url
       String dbName = getTdsSettings().getTDSSessionDBName ();
@@ -554,7 +564,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           "@windowOpportunity",
           "@dateForceCompleted",
           //SB-999
-          "@qaLevel",
+          //"@qaLevel", // qaLevel is n/a for OSS.  email from Adam Thu 1/8/2015 3:28 PM
           "@assessmentParticipantSessionPlatformUserAgent",
           // SB-512
           "@effectiveDate"
@@ -565,7 +575,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " ${dbName} as \"@database\", "
           + " O.clientname as \"@clientName\", "
           + " O._Key as\"@key\", "
-          + " ReportingID as \"@oppId\", "
+          + " ${reportingID} as \"@oppId\", "
           + " DateStarted as \"@startDate\", "
           + " O.status as \"@status\", "
           + " opportunity as \"@opportunity\", "
@@ -588,7 +598,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " from testopportunity O, session S where O._Key = ${oppkey}"
           + " and O._fk_Session = S._Key";
 
-      parameters.put ("itemcount", itemcount).put ("ftcount", ftcount)
+      parameters.put ("itemcount", itemcount).put ("ftcount", ftcount).put("reportingID", newReportingIdRef.get())
           .put ("winopp", winopp).put ("dbName", dbName).put("effectiveDate", effectiveDate);
       result = executeStatement (connection, this.fixDataBaseNames (query), parameters, false).getResultSets ().next ();
       resItr = result.getRecords ();
@@ -897,7 +907,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         		+ " I.scorepoints as scorePoint,"
         		+ " R.scoredimensions as scoreDimension, "
         		+ " R.scorestatus as scoreStatus ";
-// TODO: (AK) We need to add to table  testeeresponsearchive column scoredimensions !!!       
+// TODO: (AK) We need to add the column scoredimensions to table  testeeresponsearchive !!!       
 //        if (dateArchived == null)
 //        {
           query = query + " from testeeresponse R ";
@@ -2203,6 +2213,8 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
           errRef.set (response.getStatusCode ().toString () + ": " + response.getBody ());
         }
       } catch (Exception e) {
+        _logger.error ("_tisUrl::: "+_tisUrl);
+        _logger.error ("xmlReport::: "+xmlReport);
         _logger.error (e.getMessage (), e);
         isSent = false;
         try {
@@ -2359,7 +2371,14 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
 	      if(academicYear != null)
 	      {
 	    	  if(academicYear.length() > 4)
+	    	  {
+//	    		  email from Mon 12/8/2014 11:19 AM	    		  
+//	    		  The way it is defined in our specifications, as well as in CEDS (https://ceds.ed.gov/CEDSElementDetails.aspx?TermId=7243), is as follows:
+//	    		  For academic years that span a calendar year this is the four digit year-end. E.g. 2013 for 2012-2013. 1900 <= YYYY <= 9999. xsd:integer
+//	    		  See row 10 in TDS Output tab on our spec sheet.
+
 	    		  academicYear = academicYear.substring(academicYear.length() - 4); 
+	    	  }
 	    	  try{
 	    		  Integer ayear = Integer.parseInt(academicYear);
 	    		  // to do nothing;

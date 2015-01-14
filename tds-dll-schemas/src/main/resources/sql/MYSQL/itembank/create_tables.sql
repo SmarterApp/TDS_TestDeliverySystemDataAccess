@@ -85,6 +85,17 @@ create table `itemscoredimension`  (
 	`_fk_measurementmodel`	int not null,
 	constraint `pk_itemscoredim` primary key clustered(`_key`)
 ) default charset = UTF8;
+
+create table `tblitemselectionparm`  ( 
+	`_fk_adminsubject` varchar(250) not null,
+	`bpelementid`      varchar(200) default null,
+	`name`             varchar(100) not null,
+	`value`            varchar(200) not null,
+	`label`            varchar(200) default null,
+	`_key`             varbinary(16) not null,
+ 	constraint `pk_tblitemselectionparm` primary key clustered(`_key`) 
+) default charset = UTF8;
+
 /*
 create table `loader_accommodations`  ( 
 	`type`            	varchar(255) not null,

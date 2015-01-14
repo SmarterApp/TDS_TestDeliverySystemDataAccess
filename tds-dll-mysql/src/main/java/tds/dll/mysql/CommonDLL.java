@@ -2398,10 +2398,10 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       return ReturnStatusReason ("success", null);
     }
 
-    //final String cmd1 = "insert into qareportqueue (_fk_testopportunity, changestatus, dateentered)"
-    //    + " values (${oppkey}, ${changestatus}, now(3))";
-    //SqlParametersMaps parms1 =(new SqlParametersMaps ()).put ("oppkey", oppkey).put ("changestatus", statusChange);
-    //int insertedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
+    final String cmd1 = "insert into qareportqueue (_fk_testopportunity, changestatus, dateentered)"
+        + " values (${oppkey}, ${changestatus}, now(3))";
+    SqlParametersMaps parms1 =(new SqlParametersMaps ()).put ("oppkey", oppkey).put ("changestatus", statusChange);
+    int insertedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
     
     _LogDBLatency_SP (connection, "SubmitQAReport", starttime, null, true, null, oppkey);
     return ReturnStatusReason ("success", null);
@@ -3156,5 +3156,76 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   private String replaceSeparatorChar (String str) {
     return str.replace ('/', java.io.File.separatorChar).replace ('\\', java.io.File.separatorChar);
+  }
+  
+  public void _CreateClientReportingID_SP (SQLConnection connection, String clientname, UUID oppkey, _Ref<Long> newIdRef) throws ReturnStatusException {
+    // -- this makes lock specific to a client
+    String resourcename = String.format ("createtestID%s", clientname);
+    // -- indicates no applock obtained
+    Integer applock = -1;
+
+    String errorMsg = null;
+    newIdRef.set (null);
+    // on MySql getAppLock return1 if success
+    applock = getAppLock (connection, resourcename, "Exclusive");
+
+    if (applock == null || applock != 1) {
+      _LogDBError_SP (connection, "_CreateClientReportingID", "Failed to get applock", null, null, null, oppkey, clientname, null);
+      return;
+    }
+    try {
+      boolean preexistingAutoCommitMode = connection.getAutoCommit ();
+      connection.setAutoCommit (false);
+
+      final String SQL_QUERY1 = "select  max(reportingID) + 1 as newId from client_reportingid where clientname = ${clientname};";
+      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
+      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
+      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+      if (record != null)
+        newIdRef.set (record.<Long> get ("newId"));
+
+      // -- if newID is null, then get the starting value from externs
+      if (newIdRef.get () == null) {
+        final String SQL_QUERY2 = "select InitialReportingID as newID from externs where clientname = ${clientname}";
+        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("clientname", clientname);
+        result = executeStatement (connection, SQL_QUERY2, parms2, false).getResultSets ().next ();
+        record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+        if (record != null)
+          newIdRef.set (record.<Long> get ("newId"));
+      }
+
+      final String SQL_QUERY3 = "insert into client_reportingid (clientname, reportingID, _fk_TestOpportunity, _date) "
+          + " values (${clientname}, ${newID}, ${oppkey}, now(3))";
+      SqlParametersMaps parms3 = (new SqlParametersMaps ()).
+          put ("clientname", clientname).put ("newId", newIdRef.get ()).put ("oppkey", oppkey);
+      int insertedCnt = executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
+
+      // _commonDll.releaseAppLock (connection, resourcename);
+
+      connection.commit ();
+      connection.setAutoCommit (preexistingAutoCommitMode);
+      releaseAppLock (connection, resourcename);
+      return;
+
+    } catch (SQLException se) {
+      errorMsg = se.getMessage ();
+    } catch (ReturnStatusException re) {
+      errorMsg = re.getMessage ();
+    }
+
+    try {
+      connection.rollback ();
+
+    } catch (SQLException se) {
+      _logger.error (String.format ("Failed rollback: %s", se.getMessage ()));
+    }
+
+    if (DbComparator.isEqual (applock, 1))
+      releaseAppLock (connection, resourcename);
+
+    if (errorMsg == null)
+      errorMsg = "no error message logged";
+
+    _LogDBError_SP (connection, "_CreateClientReportingID", errorMsg, null, null, null, oppkey, clientname, null);
   }
 }

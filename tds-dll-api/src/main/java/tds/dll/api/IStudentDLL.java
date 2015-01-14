@@ -623,8 +623,6 @@ public interface IStudentDLL
       UUID sessionId, UUID browserId,
       _Ref<String> newstatusRef, String accommodations, Boolean restoreRTS, _Ref<UUID> testoppkeyRef) throws ReturnStatusException;
 
-  public void _CreateClientReportingID_SP (SQLConnection connection, String clientname, UUID oppkey, _Ref<Long> newIdRef) throws ReturnStatusException;
-
   public String TestSubject_FN (SQLConnection connection, String testkey) throws ReturnStatusException;
 
   public void _GetTestParms_SP (SQLConnection connection, String clientname, String testkey,

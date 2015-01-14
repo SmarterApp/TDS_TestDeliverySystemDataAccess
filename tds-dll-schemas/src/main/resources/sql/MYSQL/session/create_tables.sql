@@ -485,6 +485,16 @@ create table `simp_sessiontests`  (
 	constraint `pk_simpsessiontests` primary key clustered(`_fk_session`,`_efk_adminsubject`)
 ) default charset = UTF8;
 
+create table `simp_itemselectionparameter` (
+	`_fk_session`	   varbinary(16) not null,
+	`_fk_adminsubject` varchar(250) not null,
+	`bpelementid`	   varchar(200) not null,
+	`name`             varchar(100) not null,
+	`value`            varchar(200) not null,
+	`label`            varchar(200) default null,
+	constraint `pk_simpitemselectionparameter` primary key clustered(`_fk_session`,`_fk_adminsubject`,`bpelementid`,`name`)
+) default charset = UTF8
+
 create table `sim_itemgroup`  ( 
 	`_fk_session` 	varbinary(16) not null,
 	`_efk_segment`	varchar(250) not null,
@@ -579,6 +589,25 @@ create table `sim_userclient`  (
 	`isadmin`    	bit not null default 0,
 	constraint `pk_simuserclient` primary key clustered(`_fk_simuser`,`clientname`)
 ) default charset = UTF8;
+
+create table `sim_itemselectionparameter` (
+	`_fk_session`      varbinary(16) not null,
+	`_fk_adminsubject` varchar(250) not null,
+	`bpelementtype`    varchar(100) null,
+	`bpelementid`	   varchar(200) not null,
+	`name`             varchar(100) not null,
+	`value`            varchar(200) not null,
+	`label`            varchar(200) default null,
+	constraint `pk_simitemselectionparameter` primary key clustered(`_fk_session`,`_fk_adminsubject`,`bpelementid`, `name`)
+) default charset = UTF8
+
+create table  `sim_defaultitemselectionparameter`(
+	`algorithmtype` varchar(100) not null,
+	`entitytype` 	varchar(100) not null,
+	`name` 		varchar(100) not null,
+	`value` 	varchar(200) not null,
+	`label` 	varchar(200) default null
+) default charset = UTF8
 
 create table `sirve_audit`  ( 
 	`_date`           	datetime(3) not null, -- constraint `df__sirve_aud___date__30a40e89`  default (now()),

@@ -68,6 +68,8 @@ drop table if exists  `simp_session`  ;
 
 drop table if exists  `simp_sessiontests`  ;
 
+drop table if exists  `simp_itemselectionparameter`  ;
+
 drop table if exists  `sim_itemgroup`  ;
 
 drop table if exists  `sim_segment`  ;
@@ -79,6 +81,10 @@ drop table if exists  `sim_segmentitem`  ;
 drop table if exists  `sim_user`  ;
 
 drop table if exists  `sim_userclient`  ;
+
+drop table if exists  `sim_itemselectionparameter`  ;
+
+drop table if exists  `sim_defaultitemselectionparameter`  ;
 
 drop table if exists  `sirve_audit`  ;
 

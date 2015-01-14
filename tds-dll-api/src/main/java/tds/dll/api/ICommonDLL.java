@@ -390,5 +390,8 @@ public interface ICommonDLL
   public SingleDataResultSet T_GetBrowserWhiteList_SP (SQLConnection connection, String clientName, String appName) throws ReturnStatusException;
 
   public SingleDataResultSet T_GetBrowserWhiteList_SP (SQLConnection connection, String clientName, String appName, String context) throws ReturnStatusException;
+  
+  public void _CreateClientReportingID_SP (SQLConnection connection, String clientname, UUID oppkey, _Ref<Long> newIdRef) throws ReturnStatusException;
+
 
 }

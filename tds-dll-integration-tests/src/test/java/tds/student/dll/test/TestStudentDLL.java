@@ -921,40 +921,6 @@ public class TestStudentDLL
     }
   }
 
-  // declare @newid bigint
-  // exec _CreateClientReportingID 'hawaii_pt',
-  // 'AAA3217A-2A82-405C-8ED9-20F1AAF29ECE',
-  // @newid output
-  // select @newid
-  @Test
-  public void test_CreateClientReportingID_SP1 () throws ReturnStatusException, SQLException {
-    String clientname = "Hawaii_PT";
-    UUID oppKey = UUID.fromString ("AAA3217A-2A82-405C-8ED9-20F1AAF29ECE");
-    _Ref<Long> newIdRef = new _Ref<> ();
-
-    try (SQLConnection connection = _connectionManager.getConnection ()) {
-      _dll._CreateClientReportingID_SP (connection, clientname, oppKey, newIdRef);
-      _logger.info (String.format ("NewID: %d", newIdRef.get ()));
-      // each call c=increases newid number, that's why we do not check for
-      // known
-      // value here
-      assertTrue (newIdRef.get () != null && newIdRef.get () > 0);
-    }
-  }
-
-  @Test
-  public void test_CreateClientReportingID_SP2 () throws ReturnStatusException, SQLException {
-    String clientname = "abc";
-    UUID oppKey = UUID.fromString ("AAA3217A-2A82-405C-8ED9-20F1AAF29ECE");
-    _Ref<Long> newIdRef = new _Ref<> ();
-
-    try (SQLConnection connection = _connectionManager.getConnection ()) {
-      _dll._CreateClientReportingID_SP (connection, clientname, oppKey, newIdRef);
-      _logger.info (String.format ("NewID: %d", newIdRef.get ()));
-      assertTrue (newIdRef.get () == null);
-    }
-  }
-
   // declare @newstatus varchar(50);
   // declare @oppkey uniqueidentifier;
   // exec _OpenExistingOpportunity 'Hawaii_PT',

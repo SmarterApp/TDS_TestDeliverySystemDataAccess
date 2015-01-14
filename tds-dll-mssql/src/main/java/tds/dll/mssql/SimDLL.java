@@ -759,4 +759,29 @@ public class SimDLL extends AbstractDLL implements ISimDLL {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+  @Override
+  public SingleDataResultSet SIM_GetItemSelectionParameters (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String bpElementID, String paramName, String paramValue)
+      throws ReturnStatusException {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void SIM_DeleteAllItemSelectionParameterDefaultRecords (SQLConnection connection) throws ReturnStatusException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void SIM_AddItemSelectionParameterDefaultRecord (SQLConnection connection, String algorithmType, String entityType, String name, String value, String label)
+      throws ReturnStatusException {
+    // TODO Auto-generated method stub
+
+  }
 }
