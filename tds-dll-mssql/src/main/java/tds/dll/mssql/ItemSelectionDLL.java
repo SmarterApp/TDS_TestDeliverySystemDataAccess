@@ -2051,7 +2051,7 @@ public boolean AA_SetSegmentSatisfied_SP(SQLConnection connection, UUID oppkey,
 
 @Override
 public MultiDataResultSet AA_GetSegment2_SP(SQLConnection connection,
-		String segmentKey) throws ReturnStatusException {
+		String segmentKey, Boolean controlTriples) throws ReturnStatusException {
 	// TODO Auto-generated method stub
 	return null;
 }
@@ -2088,6 +2088,14 @@ public MultiDataResultSet AA_GetDataHistory_LA2_SP(SQLConnection connection,
 @Override
 public MultiDataResultSet AA_GetDataHistory2_LA2_SP(SQLConnection connection,
 		UUID oppkey, String segmentKey) throws ReturnStatusException {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public SingleDataResultSet AA_AddOffgradeItems_SP(SQLConnection connection,
+		UUID oppkey, String poolfilterProperty, String segmentkey)
+		throws ReturnStatusException {
 	// TODO Auto-generated method stub
 	return null;
 }

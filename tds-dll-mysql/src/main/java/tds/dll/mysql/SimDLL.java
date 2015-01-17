@@ -3000,7 +3000,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
   public void SIM_AddItemSelectionParameterDefaultRecord (SQLConnection connection, String algorithmType, String entityType, String name, String value, String label)
       throws ReturnStatusException {
     final String cmd = "insert into sim_defaultitemselectionparameter (algorithmtype, entitytype, name, value, label) "
-        + " values (${algorithmtype}, ${entitytype}, ${name}, ${value}, ${value}) ";
+        + " values (${algorithmtype}, ${entitytype}, ${name}, ${value}, ${label}) ";
     SqlParametersMaps parms = (new SqlParametersMaps ())
         .put ("algorithmtype", algorithmType).put ("entitytype", entityType)
         .put ("name", name).put ("value", value).put ("label", label);
@@ -3036,7 +3036,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     connection.createTemporaryTable (tempitemselectionparamsTbl);
     SqlParametersMaps parms = (new SqlParametersMaps ())
         .put ("sessionkey", sessionKey)
-        .put ("testentity", "Test").put ("segmententity", "Segment");
+        .put ("testentity", "Test");
 
     Map<String, String> dbparams = new HashMap<String, String> ();
     dbparams.put ("tempdbname", tempitemselectionparamsTbl.getTableName ());
@@ -3047,7 +3047,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       final String cmd1 = " insert into ${tempdbname} (testname, bpelementtype, bpelementid, name, value, label) "
           + " select S._efk_adminsubject, P.entitytype, S.segmentid, P.name, P.value, P.label "
           + " from sim_defaultitemselectionparameter P, sim_segment S  "
-          + " where P.algorithmtype = S.selectionalgorithm and P.entitytype in (${testentity}, ${segmententity}) and S._fk_session=${sessionkey}";
+          + " where P.algorithmtype = S.selectionalgorithm and P.entitytype=${testentity} and S._fk_session=${sessionkey}";
       executeStatement (connection, fixDataBaseNames (cmd1, dbparams), parms, false);
 
       final String cmd2 = " update ${tempdbname} T inner join sim_itemselectionparameter P "

@@ -197,7 +197,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException {
+  public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId, long proctorKey) throws ReturnStatusException {
 
     String attname = null;
     String attType = null;
@@ -227,8 +227,8 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     
     testeeId = testeeId.trim ();
     
-    //TODO: cast as implementation is not complete need to use SchoolStudent class
-    IRtsPackageReader packageReader =  ((RtsPackageDLL)_rtsDll).getRtsPackageReader(testeeId);
+    //TODO: cast as implementation is not complete. Use SchoolStudent class
+    IRtsPackageReader packageReader =  ((RtsPackageDLL)_rtsDll).getRtsPackageReader(connection, testeeId, proctorKey);
     if (packageReader == null) {
       final String SQL_QUERY1 = "select * from ${attributesTblName};";
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms), null, false).getResultSets ().next ();
@@ -268,7 +268,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
  
         RtsRecord rtsRecord = packageReader.getRtsRecord (RTSName  );
         if (rtsRecord != null) {
-           entityKey.set (UUID.randomUUID().toString());   //TODO: replace UUID with ART id
+           entityKey.set (UUID.randomUUID().toString());   //TODO: replace UUID with ART id by using SchoolStudent instead of studentpackage
            entityID.set (rtsRecord.get ("entityId"));
            entityName.set (rtsRecord.get ("entityName"));
         }
@@ -743,9 +743,9 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet P_GetRTSTestee_SP (SQLConnection connection, String clientName, String externalId) throws ReturnStatusException {
+  public SingleDataResultSet P_GetRTSTestee_SP (SQLConnection connection, String clientName, String externalId, long proctorKey) throws ReturnStatusException {
 
-    SingleDataResultSet result = GetTesteeAttributes_SP (connection, clientName, externalId);
+    SingleDataResultSet result = GetTesteeAttributes_SP (connection, clientName, externalId, proctorKey);
     return result;
   }
 
@@ -775,7 +775,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     SqlParametersMaps parms = new SqlParametersMaps ().put ("closed", "closed").put ("clientname", clientName).put ("today", today).put ("sessionType", sessionType).put ("proctorKey", proctorKey);
 
     while (exists (executeStatement (connection, SQL_QUERY1, parms, false))) {
-      long st = System.currentTimeMillis ();
       final String SQL_QUERY2 = "select _Key as _key, _fk_browser as browser from session S, timelimits T where T.clientname = ${clientname} and _efk_Proctor = ${proctorKey}"
           + " and sessionType = ${sessionType} and status <> ${closed} and dateend > ${today} and S.clientname = T.clientname and TACheckinTime is not null and TACheckinTime > 0"
           + " and (DateVisited + INTERVAL TACheckInTime MINUTE) < ${today} order by (DateVisited + INTERVAL TACheckInTime MINUTE) limit 1;";

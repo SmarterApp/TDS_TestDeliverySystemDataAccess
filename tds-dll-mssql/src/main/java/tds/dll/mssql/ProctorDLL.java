@@ -199,7 +199,7 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException {
+  public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId, long proctorKey) throws ReturnStatusException {
 
     String attname = null;
     String attType = null;
@@ -633,9 +633,9 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet P_GetRTSTestee_SP (SQLConnection connection, String clientName, String externalId) throws ReturnStatusException {
+  public SingleDataResultSet P_GetRTSTestee_SP (SQLConnection connection, String clientName, String externalId, long proctorKey) throws ReturnStatusException {
 
-    SingleDataResultSet result = GetTesteeAttributes_SP (connection, clientName, externalId);
+    SingleDataResultSet result = GetTesteeAttributes_SP (connection, clientName, externalId, proctorKey);
     return result;
   }
 

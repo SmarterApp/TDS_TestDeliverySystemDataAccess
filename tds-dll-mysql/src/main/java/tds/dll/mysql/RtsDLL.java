@@ -934,5 +934,11 @@ public class RtsDLL extends AbstractDLL implements IRtsDLL
       return 0;
     }
 
+    //Implementation not required  
+    @Override
+    public String getTrTestId (SQLConnection connection, String testeeId, String testKey) {
+      return null;
+    }
+
 }
 

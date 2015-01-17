@@ -367,7 +367,7 @@ public class StudentPackageReader implements IRtsPackageReader
     RtsTable rtsTable = new RtsTable();
     for (Test test : tests.getTest ()) {
       rtsTable.addRecord (new RtsRecord (new String[][] {
-          {"TestID", test.getTestName ()},  
+          {"TestID", test.getTestId ()},  
           {"Subject", test.getSubjectCode ()},
           {"TestKey", test.getTestName ()}
       }));

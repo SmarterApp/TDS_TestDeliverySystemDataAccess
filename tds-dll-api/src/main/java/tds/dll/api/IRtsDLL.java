@@ -258,5 +258,13 @@ public interface IRtsDLL
    * @param testType list
    */
   public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String proctorPackage, List<TestType> testType) throws ReturnStatusException;
+
+  /**
+  * @param connection
+  * @param testeeId
+  * @param testKey
+  * @return TR Test ID
+  */
+  public String getTrTestId (SQLConnection connection, String testeeId, String testKey);
   
 }

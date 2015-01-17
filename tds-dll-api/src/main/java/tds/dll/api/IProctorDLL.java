@@ -76,7 +76,7 @@ public interface IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException;
+  public SingleDataResultSet GetTesteeAttributes_SP (SQLConnection connection, String clientName, String testeeId, long proctorKey) throws ReturnStatusException;
 
   /**
    * @param connection
@@ -147,7 +147,7 @@ public interface IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet P_GetRTSTestee_SP (SQLConnection connection, String clientName, String externalId) throws ReturnStatusException;
+  public SingleDataResultSet P_GetRTSTestee_SP (SQLConnection connection, String clientName, String externalId, long proctorKey) throws ReturnStatusException;
 
   public SingleDataResultSet P_GetCurrentSessions_SP (SQLConnection connection, String clientName, Long proctorKey) throws ReturnStatusException;
 

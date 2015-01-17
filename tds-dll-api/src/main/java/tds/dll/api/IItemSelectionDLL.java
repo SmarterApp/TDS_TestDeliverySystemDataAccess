@@ -270,7 +270,7 @@ public interface IItemSelectionDLL
 	 * @return
 	 * @throws ReturnStatusException
 	 */
-  public MultiDataResultSet AA_GetSegment2_SP (SQLConnection connection, String segmentKey) throws ReturnStatusException;
+  public MultiDataResultSet AA_GetSegment2_SP (SQLConnection connection, String segmentKey, Boolean controlTriples) throws ReturnStatusException;
   
   /**
    * 
@@ -322,4 +322,17 @@ public interface IItemSelectionDLL
    */
   public MultiDataResultSet AA_GetDataHistory2_LA2_SP(SQLConnection connection, UUID oppkey, String segmentKey)
 			throws ReturnStatusException;
+  
+  /**
+   * 
+   * @param connection
+   * @param oppkey
+   * @param poolfilterProperty
+   * @param segmentkey
+   * @return
+   * @throws ReturnStatusException
+   */
+  public SingleDataResultSet AA_AddOffgradeItems_SP(SQLConnection connection, UUID oppkey,
+		  String poolfilterProperty, String segmentkey) throws ReturnStatusException;
+  
 }
