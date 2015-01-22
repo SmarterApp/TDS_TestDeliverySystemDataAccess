@@ -138,19 +138,21 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       String oppxml = null;
       String comments = null;
       String tools 	= null;
+      Long testeeKey = null;
 		
 	  String dbmsg 	= null;
 		
       SingleDataResultSet result;
       DbResultRecord record;
 
-      String query = "select _efk_AdminSubject as testkey, mode from testopportunity where _Key = ${oppkey}";
+      String query = "select _efk_AdminSubject as testkey, mode, _efk_Testee as testeeKey from testopportunity where _Key = ${oppkey}";
       SqlParametersMaps parameters = new SqlParametersMaps ().put ("oppkey", oppkey);
       result = executeStatement (connection, query, parameters, false).getResultSets ().next ();
       record = result.getCount () > 0 ? result.getRecords ().next () : null;
       if (record != null) {
         testkey = record.<String> get ("testkey");
         mode 	= record.<String> get ("mode");
+        testeeKey = record.<Long> get ("testeeKey");
       }
 
       try{
@@ -173,12 +175,16 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           _commonDll._LogDBError_SP (connection, "XML_GetOppXML", dbmsg, null, null, null, oppkey);
           _logger.error (dbmsg);
       }
-      
+ 
+      StringBuilder strBlder = new StringBuilder ();
       try{
+    	  
+    	  strBlder.append("<").append(TESTEE_NODE_NAME).append(" key=\"").append (testeeKey).append ("\" />");
+    	  
     	  testee 	= XML_GetTestee_F (connection, oppkey, debug);
     	  if(testee == null || testee.isEmpty())
     	  {
-    		  testee = "<" + TESTEE_NODE_NAME + "/>";
+    		  testee = strBlder.toString();
         	  dbmsg = String.format ("XML Element %s is either empty or null: test key = %s, test mode = %s ", TESTEE_NODE_NAME, testkey, mode);
               _commonDll._LogDBError_SP (connection, "XML_GetOppXML", dbmsg, null, null, null, oppkey);
               _logger.error (dbmsg);    		  
@@ -188,7 +194,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       {
     	  // see reportxml_os.xsd file
     	  //<xs:element name="Examinee" minOccurs="1" maxOccurs="1">
-    	  testee = "<" + TESTEE_NODE_NAME + "/>"; 
+    	  testee = strBlder.toString(); 
        	  dbmsg = String.format ("Bad  XML Element %s: test key = %s, test mode = %s with error: %s", TESTEE_NODE_NAME, testkey, mode, e.getMessage());
           _commonDll._LogDBError_SP (connection, "XML_GetOppXML", dbmsg, null, null, null, oppkey);
           _logger.error (dbmsg);
@@ -376,7 +382,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       if(debug)
     	  strBuilder.append(" isDemo=\"").append (IS_DEMO).append ("\" ");
       
-      if(testee < 0)
+      if(testee < 0) // case when Examinee = "GUEST"
       {
     	  strBuilder.append("/>");
     	  return strBuilder.toString();
@@ -2077,13 +2083,6 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		}
 		return mapKey;
 	}
-	
-  //
-  protected String findEntityKey() {
-		//TODO What is EntityKey?
-		String entityKey = "9206";
-		return entityKey;
-	}
 
   protected String getContextDate(SQLConnection connection, UUID oppkey, String context) throws ReturnStatusException
   {
@@ -2096,6 +2095,29 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
     	  contextDate = record.<Date> get ("date").toString();
       }
 	 return contextDate; 
+  }
+  
+  protected String getContextDateForGUEST(SQLConnection connection, UUID oppkey, String context) throws ReturnStatusException
+  {
+		String contextDate = "";
+		if (context.equalsIgnoreCase(INITIAL)) {
+			String query = "select datestarted as date from testopportunity where  _key = ${oppkey}";
+			SqlParametersMaps parameters = new SqlParametersMaps().put(	"oppkey", oppkey).put("context", context);
+			SingleDataResultSet result = executeStatement(connection, query, parameters, false).getResultSets().next();
+			DbResultRecord record = result.getCount() > 0 ? result.getRecords().next() : null;
+			if (record != null) {
+				contextDate = record.<Date> get("date").toString();
+			}
+		} else if (context.equalsIgnoreCase(FINAL)) {
+			String query = "select datecompleted as date from testopportunity where  _key = ${oppkey}";
+			SqlParametersMaps parameters = new SqlParametersMaps().put(	"oppkey", oppkey).put("context", context);
+			SingleDataResultSet result = executeStatement(connection, query, parameters, false).getResultSets().next();
+			DbResultRecord record = result.getCount() > 0 ? result.getRecords().next() : null;
+			if (record != null) {
+				contextDate = record.<Date> get("date").toString();
+			}
+		}
+		return contextDate;
   }
 
   public String getEffectiveDate(SQLConnection connection, String client, String testid) throws ReturnStatusException

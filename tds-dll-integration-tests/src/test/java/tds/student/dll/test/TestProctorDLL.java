@@ -206,7 +206,7 @@ public class TestProctorDLL
     String clientName = "Oregon";
     String testeeId = "2941406";
     try (SQLConnection connection = _connectionManager.getConnection ()) {
-      SingleDataResultSet result = _dll.GetTesteeAttributes_SP (connection, clientName, testeeId);
+      SingleDataResultSet result = _dll.GetTesteeAttributes_SP (connection, clientName, testeeId, 0);
       assertTrue (result.getCount () == 12);
       Iterator<DbResultRecord> records = result.getRecords ();
       while (records.hasNext ()) {
@@ -233,7 +233,7 @@ public class TestProctorDLL
     String clientName = "AIR";
     String testeeId = "2941406";
     try (SQLConnection connection = _connectionManager.getConnection ()) {
-      SingleDataResultSet result = _dll.GetTesteeAttributes_SP (connection, clientName, testeeId);
+      SingleDataResultSet result = _dll.GetTesteeAttributes_SP (connection, clientName, testeeId, 0);
       assertTrue (result.getCount () == 11);
       Iterator<DbResultRecord> records = result.getRecords ();
       while (records.hasNext ()) {
@@ -580,7 +580,7 @@ public class TestProctorDLL
     String clientName = "Oregon";
     String externalId = "2941406";
     try (SQLConnection connection = _connectionManager.getConnection ()) {
-      SingleDataResultSet result = _dll.P_GetRTSTestee_SP (connection, clientName, externalId);
+      SingleDataResultSet result = _dll.P_GetRTSTestee_SP (connection, clientName, externalId, 0);
       assertTrue (result.getCount () == 12);
       Iterator<DbResultRecord> records = result.getRecords ();
       while (records.hasNext ()) {
