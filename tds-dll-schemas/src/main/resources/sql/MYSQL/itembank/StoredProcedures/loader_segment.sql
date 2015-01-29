@@ -58,7 +58,7 @@ begin
 	end while;
 
 
-	if (v_itemselectortype = 'Adaptive') then
+	if (v_itemselectortype like 'adaptive%') then
 		call loader_segmentpool(v_testpackagekey, v_xml, concat(v_path, '/segmentpool/itemgroup'), v_segmentid);
 	end if;
 

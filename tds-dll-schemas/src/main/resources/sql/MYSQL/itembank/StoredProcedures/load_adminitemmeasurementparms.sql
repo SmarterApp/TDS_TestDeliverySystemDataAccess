@@ -64,7 +64,7 @@ begin
 		 , dimension
 		 , scorepoints
 		 , weight
-		 , _fk_measurementmodel
+		 , coalesce(_fk_measurementmodel, 0)
 		 , recoderule
     from tmp_itemdimension;
 
@@ -77,6 +77,7 @@ begin
 										and isd.testitemid = ais._fk_item
 	  join tmp_itemdimension id on id._fk_item = isd.testitemid 
 							   and id._fk_adminsubject = ais._fk_adminsubject
+							   and id.dimension = isd.dimensionname
 	 where isd._fk_package = v_testpackagekey
 	   and (measurementparamnum is not null or measurementvalue is not null);
 

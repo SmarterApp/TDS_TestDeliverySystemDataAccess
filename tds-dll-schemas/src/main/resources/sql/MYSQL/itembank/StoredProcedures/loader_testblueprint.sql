@@ -39,8 +39,8 @@ begin
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/identifier/attribute::name'))
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::minopitems'))
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::maxopitems'))
-			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::minftitems'))
-			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::maxftitems'))
+			 , case when extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::minftitems')) = '' then 0 else extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::minftitems')) end
+			 , case when extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::maxftitems')) = '' then 0 else extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::maxftitems')) end
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::opitemcount'))
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::ftitemcount'))
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::parentid'))

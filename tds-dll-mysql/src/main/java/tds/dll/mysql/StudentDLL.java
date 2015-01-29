@@ -1869,7 +1869,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   // The only difference between T_UpdateScoredResponse and
   // T_UpdateScoredResponse2
   // is an additional scoreDimensions parameter in the latter one.
-  public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
+  public SingleDataResultSet T_UpdateScoredResponse_SP1 (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
       Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
 
 	String scoreDimentions = buildScoreInfoNode(score, "overall", scoreStatus);
@@ -1878,6 +1878,58 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         page, position, dateCreated, responseSequence, score, response, isSelected,
         isValid, scoreLatency, scoreStatus, scoreRationale, scoreDimentions, 1);
   }
+  
+  
+  /**
+   * 
+   * @param connection
+   * @param oppKey
+   * @param session
+   * @param browserId
+   * @param itemId
+   * @param page
+   * @param position
+   * @param dateCreated
+   * @param responseSequence
+   * @param score
+   * @param response
+   * @param isSelected
+   * @param isValid
+   * @param scoreLatency
+   * @param scoreStatus
+   * @param scoreRationale
+   * @throws ReturnStatusException
+   */
+  // This function is created to call mysql Stored procedure T_UpdateScoredResponse.
+  public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
+      Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
+
+    final String SQL_QUERY = "call T_UpdateScoredResponse(${oppkey}, ${session}, ${browserID}, ${itemID},${page}, ${position},${dateCreated}, ${responseSequence},${score}, ${response}, ${isSelected},${isValid},${scoreLatency},${scorestatus},${scoreRationale})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppKey);
+    params.put ("session", session);
+    params.put ("browserID", browserId);
+    params.put ("itemID", itemId);
+    params.put ("page", page);
+    params.put ("position", position);
+    params.put ("dateCreated", dateCreated);
+    params.put ("responseSequence", responseSequence);
+    params.put ("score", score);
+    params.put ("response", response);
+    params.put ("isSelected", isSelected);
+    params.put("isValid",isValid);
+    params.put ("scoreLatency", scoreLatency);
+    params.put ("scorestatus", scoreStatus);
+    params.put ("scoreRationale", scoreRationale);
+
+    Map<String, String> unquotedParms = new HashMap<String, String> ();
+//    unquotedParms.put ("rts", rts);
+    
+
+    SingleDataResultSet resultSet = executeStatement (connection, fixDataBaseNames (SQL_QUERY, unquotedParms), params, false).getResultSets ().next ();
+    return resultSet;
+  }
+  
 
   public SingleDataResultSet T_UpdateScoredResponse2_SP (SQLConnection connection, UUID oppKey, UUID session,
       UUID browserId, String itemId,

@@ -16,6 +16,7 @@ begin
 	drop temporary table if exists tmp_formitem;
 	create temporary table tmp_formitem (
 		select fgi.itemid
+			 , coalesce(substring_index(tfp.formpartitionid, '-', -1), 0)		as itsformkey
 			 , fgi.formposition
 			 , sf.segmentid 		as adminsubject
 			 , tfp.formpartitionid
@@ -34,8 +35,7 @@ begin
 		 where tf._fk_package = v_testpackagekey
 	);
 
-
-	insert into testformitem(_fk_item, formposition, _fk_adminsubject, _fk_testform, isactive)
+	insert into testformitem(_fk_item, _efk_itsformkey, formposition, _fk_adminsubject, _fk_testform, isactive)
 	select distinct *
 	  from tmp_formitem tmp
 	 where not exists (select 1

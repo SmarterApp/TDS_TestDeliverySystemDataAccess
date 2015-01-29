@@ -64,7 +64,7 @@ proc: begin
 	select v_testpackagekey
 		 , extractvalue(v_xml, concat(v_root, 'attribute::purpose'))
 		 , extractvalue(v_xml, concat(v_root, 'attribute::publisher'))
-		 , extractvalue(v_xml, concat(v_root, 'attribute::publishdate'))
+		 , STR_TO_DATE(extractvalue(v_xml, concat(v_root, 'attribute::publishdate')), '%b %d %Y %h:%i %p')
 		 , extractvalue(v_xml, concat(v_root, 'attribute::version'))
 		 , v_testkey
 		 , extractvalue(v_xml, concat(v_root, 'identifier/attribute::name'))

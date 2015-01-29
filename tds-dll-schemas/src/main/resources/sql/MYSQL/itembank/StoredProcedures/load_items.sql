@@ -27,8 +27,8 @@ begin
 
 	--  load the nonexistent items barbones conditionally first, then update from Loader_Items
 	insert into tblitem (_efk_itembank, _efk_Item, itemtype, filepath, filename, datelastupdated, itemid, _key, loadconfig)
-	select pkg._efk_itembank -- substring_index(testitemid, '-', 1)
-		 , null 			-- substring_index(testitemid, '-', -1)
+	select coalesce(substring_index(testitemid, '-', 1), pkg._efk_itembank)
+		 , coalesce(substring_index(testitemid, '-', -1), 0)
 		 , itemtype
 		 , filepath
 		 , filename

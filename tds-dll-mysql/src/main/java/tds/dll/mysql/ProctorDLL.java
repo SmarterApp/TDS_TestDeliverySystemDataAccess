@@ -302,92 +302,92 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet GetTesteeAttributes_SP_old (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException {
-
-    String attname = null;
-    String attType = null;
-    String RTSName = null;
-    String err = null;
-    _Ref<Long> testee = new _Ref<> ();
-    _Ref<String> attval = new _Ref<> ();
-    _Ref<Long> entityKey = new _Ref<> ();
-    _Ref<String> entityID = new _Ref<> ();
-    _Ref<String> entityName = new _Ref<> ();
-    SingleDataResultSet result = null;
-
-    DataBaseTable attributesTable = getDataBaseTable ("attributes").addColumn ("TDS_ID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("type", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
-        .addColumn ("atLogin", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("rtsName", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("label", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
-        .addColumn ("value", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("sortOrder", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.BIGINT)
-        .addColumn ("entityID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("showOnProctor", SQL_TYPE_To_JAVA_TYPE.BIT);
-    connection.createTemporaryTable (attributesTable);
-    Map<String, String> unquotedParms = new HashMap<String, String> ();
-    unquotedParms.put ("attributesTblName", attributesTable.getTableName ());
-
-    final String SQL_INSERT1 = "insert into ${attributesTblName} (TDS_ID, type, rtsName, label, sortOrder, atLogin, showOnProctor) "
-        + " select TDS_ID, type, RTSName, label, sortOrder, atlogin, showOnProctor  from ${ConfigDB}.client_testeeattribute where clientname = ${clientname};";
-    String finalQuery = fixDataBaseNames (SQL_INSERT1);
-    SqlParametersMaps parms = new SqlParametersMaps ().put ("clientname", clientName);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms, false).getUpdateCount ();
-    // System.err.println (insertedCnt); // for testing
-   
-    _rtsDll._GetRTSEntity_SP (connection, clientName, testeeId, "STUDENT", testee);
-    if (testee.get () == null) {
-      final String SQL_QUERY1 = "select * from ${attributesTblName};";
-      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms), null, false).getResultSets ().next ();
-      return result;
-    }
-    final String SQL_INSERT2 = "insert into ${attributesTblName} ( TDS_ID, type, value) values (${--RTS KEY--}, ${ENTITYKEY}, ltrim(convert(${testee}, CHAR)));";
-    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("testee", testee.get ()).put ("--RTS KEY--", "--RTS KEY--").put ("ENTITYKEY", "ENTITYKEY");
-    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms), parms1, false).getUpdateCount ();
-    // System.err.println (insertedCnt); // for testing
-
-    final String SQL_QUERY2 = "select TDS_ID from ${attributesTblName} where value is null limit 1";
-    while (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms), null, false))) {
-      final String SQL_QUERY3 = "select TDS_ID as attname, Type as attType, rtsName as RTSName from ${attributesTblName} where value is  null limit 1;";
-      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms), null, false).getResultSets ().next ();
-      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-      if (record != null) {
-        attname = record.<String> get ("attname");
-        attType = record.<String> get ("attType");
-        RTSName = record.<String> get ("RTSName");
-      }
-      if (DbComparator.isEqual ("attribute", attType)) {
-        attval.set (null);
-        _rtsDll._GetRTSAttribute_SP (connection, clientName, testee.get (), RTSName, attval);
-
-        final String SQL_UPDATE1 = "update ${attributesTblName} set value = case when ${attval} is null then ${NA} else ${attval} end where TDS_ID = ${attname};";
-        SqlParametersMaps parms2 = new SqlParametersMaps ().put ("attval", attval.get ()).put ("NA", "NA").put ("attname", attname);
-        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), parms2, false).getUpdateCount ();
-        // System.err.println (updateCnt); // for testing
-
-      } else if (DbComparator.isEqual ("relationship", attType)) {
-        entityKey.set (null);
-        entityID.set (null);
-        entityName.set (null);
-        _rtsDll._GetRTSRelationship_SP (connection, clientName, testee.get (), RTSName, entityKey, entityID, entityName);
-
-        final String SQL_UPDATE2 = "update ${attributesTblName} set value = case when ${entityKey} is null then ${NA} else ${entityName} end, entityKey = ${entityKey}, "
-            + " entityID = ${entityID} where TDS_ID = ${attname};";
-        SqlParametersMaps parms3 = new SqlParametersMaps ().put ("entityKey", entityKey.get ()).put ("NA", "NA").put ("entityName", entityName.get ()).put ("entityID", entityID.get ())
-            .put ("attname", attname);
-        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms), parms3, false).getUpdateCount ();
-        // System.err.println (updateCnt); // for testing
-      } else {
-        err = String.format ("Unknown attribute type: %s", attType);
-
-        final String SQL_DELETE = "delete from ${attributesTblName} where TDS_ID = ${attname};";
-        SqlParametersMaps parms4 = new SqlParametersMaps ().put ("attname", attname);
-        int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE, unquotedParms), parms4, false).getUpdateCount ();
-        // System.err.println (deletedCnt); // for testing
-        _commonDll._LogDBError_SP (connection, "GetTesteeAttributes", err, null, null, null, null, clientName, null);
-      }
-    }
-    final String SQL_QUERY4 = "select * from ${attributesTblName} order by type, sortOrder;";
-    result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms), null, false).getResultSets ().next ();
-    connection.dropTemporaryTable (attributesTable);
-
-    return result;
-  }
+//  public SingleDataResultSet GetTesteeAttributes_SP_old (SQLConnection connection, String clientName, String testeeId) throws ReturnStatusException {
+//
+//    String attname = null;
+//    String attType = null;
+//    String RTSName = null;
+//    String err = null;
+//    _Ref<Long> testee = new _Ref<> ();
+//    _Ref<String> attval = new _Ref<> ();
+//    _Ref<Long> entityKey = new _Ref<> ();
+//    _Ref<String> entityID = new _Ref<> ();
+//    _Ref<String> entityName = new _Ref<> ();
+//    SingleDataResultSet result = null;
+//
+//    DataBaseTable attributesTable = getDataBaseTable ("attributes").addColumn ("TDS_ID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("type", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
+//        .addColumn ("atLogin", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("rtsName", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("label", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
+//        .addColumn ("value", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("sortOrder", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.BIGINT)
+//        .addColumn ("entityID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("showOnProctor", SQL_TYPE_To_JAVA_TYPE.BIT);
+//    connection.createTemporaryTable (attributesTable);
+//    Map<String, String> unquotedParms = new HashMap<String, String> ();
+//    unquotedParms.put ("attributesTblName", attributesTable.getTableName ());
+//
+//    final String SQL_INSERT1 = "insert into ${attributesTblName} (TDS_ID, type, rtsName, label, sortOrder, atLogin, showOnProctor) "
+//        + " select TDS_ID, type, RTSName, label, sortOrder, atlogin, showOnProctor  from ${ConfigDB}.client_testeeattribute where clientname = ${clientname};";
+//    String finalQuery = fixDataBaseNames (SQL_INSERT1);
+//    SqlParametersMaps parms = new SqlParametersMaps ().put ("clientname", clientName);
+//    int insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms, false).getUpdateCount ();
+//    // System.err.println (insertedCnt); // for testing
+//   
+//    _rtsDll._GetRTSEntity_SP (connection, clientName, testeeId, "STUDENT", testee);
+//    if (testee.get () == null) {
+//      final String SQL_QUERY1 = "select * from ${attributesTblName};";
+//      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms), null, false).getResultSets ().next ();
+//      return result;
+//    }
+//    final String SQL_INSERT2 = "insert into ${attributesTblName} ( TDS_ID, type, value) values (${--RTS KEY--}, ${ENTITYKEY}, ltrim(convert(${testee}, CHAR)));";
+//    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("testee", testee.get ()).put ("--RTS KEY--", "--RTS KEY--").put ("ENTITYKEY", "ENTITYKEY");
+//    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms), parms1, false).getUpdateCount ();
+//    // System.err.println (insertedCnt); // for testing
+//
+//    final String SQL_QUERY2 = "select TDS_ID from ${attributesTblName} where value is null limit 1";
+//    while (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms), null, false))) {
+//      final String SQL_QUERY3 = "select TDS_ID as attname, Type as attType, rtsName as RTSName from ${attributesTblName} where value is  null limit 1;";
+//      result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms), null, false).getResultSets ().next ();
+//      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+//      if (record != null) {
+//        attname = record.<String> get ("attname");
+//        attType = record.<String> get ("attType");
+//        RTSName = record.<String> get ("RTSName");
+//      }
+//      if (DbComparator.isEqual ("attribute", attType)) {
+//        attval.set (null);
+//        _rtsDll._GetRTSAttribute_SP (connection, clientName, testee.get (), RTSName, attval);
+//
+//        final String SQL_UPDATE1 = "update ${attributesTblName} set value = case when ${attval} is null then ${NA} else ${attval} end where TDS_ID = ${attname};";
+//        SqlParametersMaps parms2 = new SqlParametersMaps ().put ("attval", attval.get ()).put ("NA", "NA").put ("attname", attname);
+//        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), parms2, false).getUpdateCount ();
+//        // System.err.println (updateCnt); // for testing
+//
+//      } else if (DbComparator.isEqual ("relationship", attType)) {
+//        entityKey.set (null);
+//        entityID.set (null);
+//        entityName.set (null);
+//        _rtsDll._GetRTSRelationship_SP (connection, clientName, testee.get (), RTSName, entityKey, entityID, entityName);
+//
+//        final String SQL_UPDATE2 = "update ${attributesTblName} set value = case when ${entityKey} is null then ${NA} else ${entityName} end, entityKey = ${entityKey}, "
+//            + " entityID = ${entityID} where TDS_ID = ${attname};";
+//        SqlParametersMaps parms3 = new SqlParametersMaps ().put ("entityKey", entityKey.get ()).put ("NA", "NA").put ("entityName", entityName.get ()).put ("entityID", entityID.get ())
+//            .put ("attname", attname);
+//        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms), parms3, false).getUpdateCount ();
+//        // System.err.println (updateCnt); // for testing
+//      } else {
+//        err = String.format ("Unknown attribute type: %s", attType);
+//
+//        final String SQL_DELETE = "delete from ${attributesTblName} where TDS_ID = ${attname};";
+//        SqlParametersMaps parms4 = new SqlParametersMaps ().put ("attname", attname);
+//        int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE, unquotedParms), parms4, false).getUpdateCount ();
+//        // System.err.println (deletedCnt); // for testing
+//        _commonDll._LogDBError_SP (connection, "GetTesteeAttributes", err, null, null, null, null, clientName, null);
+//      }
+//    }
+//    final String SQL_QUERY4 = "select * from ${attributesTblName} order by type, sortOrder;";
+//    result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms), null, false).getResultSets ().next ();
+//    connection.dropTemporaryTable (attributesTable);
+//
+//    return result;
+//  }
 
   /**
    * @param connection
@@ -507,13 +507,13 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
       return _commonDll._ReturnError_SP (connection, clientName, "P_ApproveAccommodations", error.get (), null, opportunityKey, null);
     }
     try {
-      _commonDll._UpdateOpportunityAccommodations_SP (connection, opportunityKey, segment, segmentAccoms, numitems, true, false, error, 1);
+      _commonDll._UpdateOpportunityAccommodations_SP (connection, opportunityKey, segment, segmentAccoms, numitems, true, false, error, 0);
       if (error.get () != null) {
         // we are having trouble with deadlocks on _Update so try one more time
         error.set (String.format ("Accommodations update failed. Making second attempt. %s", error.get ()));
         _commonDll._LogDBError_SP (connection, "P_ApproveAccommodations", error.get (), proctorKey, null, null, opportunityKey, null, sessionKey);
         error.set (null);
-        _commonDll._UpdateOpportunityAccommodations_SP (connection, opportunityKey, segment, segmentAccoms, numitems, true, false, error, 1);
+        _commonDll._UpdateOpportunityAccommodations_SP (connection, opportunityKey, segment, segmentAccoms, numitems, true, false, error, 0);
         if (error.get () != null) {
           _commonDll._LogDBError_SP (connection, "P_ApproveAccommodations", error.get (), proctorKey, null, null, opportunityKey, null, sessionKey);
           _commonDll._LogDBLatency_SP (connection, "P_ApproveAccommodations", now, proctorKey, true, 0, null, sessionKey, null, null);

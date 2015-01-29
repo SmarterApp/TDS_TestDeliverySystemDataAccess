@@ -24,9 +24,9 @@ begin
 
 	--  load the stimuli conditionally first
 	insert into tblstimulus (_efk_itembank, _efk_itskey, clientid, filepath, filename, datelastupdated, _key, loadconfig)
-	select pkg._efk_itembank -- substring_index(passageid, '-', 1)
-		 , null -- substring_index(passageid, '-', -1)
-		 , null -- substring_index(passageid, '-', -1)
+	select coalesce(substring_index(passageid, '-', 1), pkg._efk_itembank)
+		 , coalesce(substring_index(passageid, '-', -1), 0)
+		 , null
 		 , filepath
 		 , filename
 		 , now(3)

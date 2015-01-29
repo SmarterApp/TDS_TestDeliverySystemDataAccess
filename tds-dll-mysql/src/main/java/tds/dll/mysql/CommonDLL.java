@@ -65,7 +65,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   @Autowired
   private IReportingDLL       _reportingDll = null;
-
+  
   @Value ("${dbLockRetryAttemptMax:300}")
   private int                 gLockRetryAttemptMax;
 
@@ -909,75 +909,75 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   }
 
   // original port
-  public SingleDataResultSet _GetTesteeAttributes_SPV1 (SQLConnection connection, String clientname, Long testee) throws ReturnStatusException {
-
-    DataBaseTable attributesTable = getDataBaseTable ("gtaAttributes").addColumn ("attname", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
-        addColumn ("rtsname", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("attval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000).
-        addColumn ("done", SQL_TYPE_To_JAVA_TYPE.BIT);
-    connection.createTemporaryTable (attributesTable);
-
-    final String SQL_INSERT1 = "insert into ${attributes} (attname,  rtsName) select TDS_ID, RTSName "
-        + " from ${ConfigDB}.client_testeeattribute where clientname = ${clientname} and type = 'attribute'";
-    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
-    Map<String, String> unquotedParms1 = new HashMap<String, String> ();
-    unquotedParms1.put ("attributes", attributesTable.getTableName ());
-
-    final String query1 = fixDataBaseNames (SQL_INSERT1);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query1, unquotedParms1), parms1, false).getUpdateCount ();
-
-    final String SQL_QUERY2 = "select done from ${attributes} where done is null limit 1";
-    Map<String, String> unquotedParms2 = unquotedParms1;
-
-    while (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms2), null, false))) {
-
-      final String SQL_QUERY3 = "select attname, rtsName from ${attributes} where done is null limit 1";
-      Map<String, String> unquotedParms3 = unquotedParms1;
-
-      SingleDataResultSet result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms3), null, false).getResultSets ().next ();
-      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-      String attname = null;
-      String rtsname = null;
-      if (record != null) {
-        attname = record.<String> get ("attname");
-        rtsname = record.<String> get ("rtsname");
-      }
-
-      String attval = null;
-
-      if (testee > 0) {
-        _Ref<String> attvalRef = new _Ref<String> ();
-        _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, rtsname, attvalRef);
-        attval = attvalRef.get ();
-
-      } else {
-        attval = String.format ("GUEST %s", attname);
-      }
-
-      if (attval != null) {
-        final String SQL_UPDATE4 = "update ${attributes} set attval = ${attval}, done = 1 where attname = ${attname}";
-        SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("attname", attname).put ("attval", attval);
-        Map<String, String> unquotedParms4 = unquotedParms1;
-
-        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, false).getUpdateCount ();
-
-      } else {
-        String err = String.format ("Unknown attribute type:  %s", (attname == null ? "<NULL ATTRIBUTE>" : attname));
-
-        final String SQL_UPDATE5 = "update ${attributes} set done = 1 where attname = ${attname}";
-        SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("attname", attname);
-        Map<String, String> unquotedParms5 = unquotedParms1;
-
-        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE5, unquotedParms5), parms5, false).getUpdateCount ();
-        _LogDBError_SP (connection, "_GetTesteeAttributes", err, testee, null, null, null, clientname, null);
-      }
-    }
-    final String SQL_QUERY6 = "select attname as TDS_ID, attval from ${attributes}";
-    Map<String, String> unquotedParms6 = unquotedParms1;
-
-    SingleDataResultSet res = executeStatement (connection, fixDataBaseNames (SQL_QUERY6, unquotedParms6), null, false).getResultSets ().next ();
-    connection.dropTemporaryTable (attributesTable);
-    return res;
-  }
+//  public SingleDataResultSet _GetTesteeAttributes_SPV1 (SQLConnection connection, String clientname, Long testee) throws ReturnStatusException {
+//
+//    DataBaseTable attributesTable = getDataBaseTable ("gtaAttributes").addColumn ("attname", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
+//        addColumn ("rtsname", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("attval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 8000).
+//        addColumn ("done", SQL_TYPE_To_JAVA_TYPE.BIT);
+//    connection.createTemporaryTable (attributesTable);
+//
+//    final String SQL_INSERT1 = "insert into ${attributes} (attname,  rtsName) select TDS_ID, RTSName "
+//        + " from ${ConfigDB}.client_testeeattribute where clientname = ${clientname} and type = 'attribute'";
+//    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
+//    Map<String, String> unquotedParms1 = new HashMap<String, String> ();
+//    unquotedParms1.put ("attributes", attributesTable.getTableName ());
+//
+//    final String query1 = fixDataBaseNames (SQL_INSERT1);
+//    int insertedCnt = executeStatement (connection, fixDataBaseNames (query1, unquotedParms1), parms1, false).getUpdateCount ();
+//
+//    final String SQL_QUERY2 = "select done from ${attributes} where done is null limit 1";
+//    Map<String, String> unquotedParms2 = unquotedParms1;
+//
+//    while (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms2), null, false))) {
+//
+//      final String SQL_QUERY3 = "select attname, rtsName from ${attributes} where done is null limit 1";
+//      Map<String, String> unquotedParms3 = unquotedParms1;
+//
+//      SingleDataResultSet result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms3), null, false).getResultSets ().next ();
+//      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+//      String attname = null;
+//      String rtsname = null;
+//      if (record != null) {
+//        attname = record.<String> get ("attname");
+//        rtsname = record.<String> get ("rtsname");
+//      }
+//
+//      String attval = null;
+//
+//      if (testee > 0) {
+//        _Ref<String> attvalRef = new _Ref<String> ();
+//        _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, rtsname, attvalRef);
+//        attval = attvalRef.get ();
+//
+//      } else {
+//        attval = String.format ("GUEST %s", attname);
+//      }
+//
+//      if (attval != null) {
+//        final String SQL_UPDATE4 = "update ${attributes} set attval = ${attval}, done = 1 where attname = ${attname}";
+//        SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("attname", attname).put ("attval", attval);
+//        Map<String, String> unquotedParms4 = unquotedParms1;
+//
+//        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, false).getUpdateCount ();
+//
+//      } else {
+//        String err = String.format ("Unknown attribute type:  %s", (attname == null ? "<NULL ATTRIBUTE>" : attname));
+//
+//        final String SQL_UPDATE5 = "update ${attributes} set done = 1 where attname = ${attname}";
+//        SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("attname", attname);
+//        Map<String, String> unquotedParms5 = unquotedParms1;
+//
+//        int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE5, unquotedParms5), parms5, false).getUpdateCount ();
+//        _LogDBError_SP (connection, "_GetTesteeAttributes", err, testee, null, null, null, clientname, null);
+//      }
+//    }
+//    final String SQL_QUERY6 = "select attname as TDS_ID, attval from ${attributes}";
+//    Map<String, String> unquotedParms6 = unquotedParms1;
+//
+//    SingleDataResultSet res = executeStatement (connection, fixDataBaseNames (SQL_QUERY6, unquotedParms6), null, false).getResultSets ().next ();
+//    connection.dropTemporaryTable (attributesTable);
+//    return res;
+//  }
 
   // Optimization attempt
   public SingleDataResultSet _GetTesteeAttributes_SP (SQLConnection connection, String clientname, Long testee) throws ReturnStatusException {
@@ -1053,126 +1053,126 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   }
 
   // original port
-  public void _SetTesteeAttributes_SPV1 (SQLConnection connection, String clientname, UUID oppkey, Long testee, String context) throws ReturnStatusException {
-    if (testee < 0)
-      return;
-    Date starttime = _dateUtil.getDateWRetStatus (connection);
-
-    Boolean attsexist = null, relsexist = null;
-
-    DataBaseTable attsTable = getDataBaseTable ("staAtts").addColumn ("tdsId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("attrval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 500);
-
-    DataBaseTable relsTable = getDataBaseTable ("staRels").addColumn ("reltype", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
-        addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.BIGINT).addColumn ("tdsId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).
-        addColumn ("attrval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 500);
-
-    final String SQL_QUERY1 = "select _fk_TestOpportunity from testeeattribute where _fk_TestOpportunity = ${oppkey} and context = ${context} limit 1";
-    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("context", context);
-
-    if (exists (executeStatement (connection, SQL_QUERY1, parms1, false))) {
-      attsexist = true;
-    } else {
-      attsexist = false;
-    }
-
-    final String SQL_QUERY2 = "select _fk_TestOpportunity from testeerelationship where _fk_TestOpportunity = ${oppkey} and context = ${context} limit 1";
-    SqlParametersMaps parms2 = parms1;
-
-    if (exists (executeStatement (connection, SQL_QUERY2, parms2, false))) {
-      relsexist = true;
-    } else {
-      relsexist = false;
-    }
-    final String finalClientname = clientname;
-    final Long finalTestee = testee;
-    executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
-    {
-
-      @Override
-      public SingleDataResultSet execute (SQLConnection connection) throws ReturnStatusException {
-        SingleDataResultSet resultSet = _GetTesteeAttributes_SPV1 (connection, finalClientname, finalTestee);
-
-        resultSet.resetColumnName (1, "tdsID");
-        resultSet.resetColumnName (2, "attrval");
-        return resultSet;
-      }
-    }, attsTable, true);
-
-    String sofar = "First. ";
-
-    executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
-    {
-
-      @Override
-      public SingleDataResultSet execute (SQLConnection connection) throws ReturnStatusException {
-
-        SingleDataResultSet resultSet = _rtsDll._GetTesteeRelationships_SP (connection, finalClientname, finalTestee);
-
-        resultSet.resetColumnName (1, "reltype");
-        resultSet.resetColumnName (3, "tdsID");
-        // resultSet.resetColumnName (2, "entitykey");
-        resultSet.resetColumnName (4, "attrval");
-        return resultSet;
-      }
-    }, relsTable, true);
-
-    sofar = "Second. ";
-
-    try {
-      boolean preexistingAutoCommitMode = connection.getAutoCommit ();
-      connection.setAutoCommit (false);
-      if (DbComparator.isEqual (attsexist, true)) {
-        final String SQL_DELETE3 = "delete from testeeattribute where _fk_TestOpportunity = ${oppkey} and context = ${context}";
-        SqlParametersMaps parms3 = parms1;
-
-        int deletedCnt = executeStatement (connection, SQL_DELETE3, parms3, false).getUpdateCount ();
-        sofar = "Third. ";
-      }
-
-      final String SQL_INSERT4 = "insert into testeeattribute (_fk_TestOpportunity, context, TDS_ID, attributeValue, _date) "
-          + " select ${oppkey}, ${context}, tdsID, attrval, now(3) from ${atts}";
-      SqlParametersMaps parms4 = parms1;
-      Map<String, String> unquotedParms4 = new HashMap<String, String> ();
-      unquotedParms4.put ("atts", attsTable.getTableName ());
-
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms4), parms4, false).getUpdateCount ();
-
-      sofar = "Fourth. ";
-
-      if (DbComparator.isEqual (relsexist, true)) {
-        final String SQL_DELETE5 = "delete from testeerelationship where _fk_TestOpportunity = ${oppkey} and context = ${context}";
-        SqlParametersMaps parms5 = parms1;
-
-        int deletedCnt = executeStatement (connection, SQL_DELETE5, parms5, false).getUpdateCount ();
-        sofar = "Fifth. ";
-      }
-
-      final String SQL_INSERT6 = "insert into testeerelationship (_fk_TestOpportunity, context, relationship, TDS_ID, entitykey, attributeValue, _date)"
-          + " select ${oppkey}, ${context}, reltype, tdsID, entitykey, attrval, now(3) from ${rels}";
-      SqlParametersMaps parms6 = parms1;
-      Map<String, String> unquotedParms6 = new HashMap<String, String> ();
-      unquotedParms6.put ("rels", relsTable.getTableName ());
-
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT6, unquotedParms6), parms6, false).getUpdateCount ();
-      sofar = "Sixth. ";
-
-      connection.commit ();
-      connection.setAutoCommit (preexistingAutoCommitMode);
-
-    } catch (Exception re) {
-      try {
-        connection.rollback ();
-      } catch (SQLException e) {
-        _logger.error (String.format ("Problem rolling back transaction %s", e.getMessage ()));
-      }
-      String msg = String.format ("%s%s", sofar, re.getMessage ());
-      _LogDBError_SP (connection, "_SetTesteeAttributes", msg, testee, null, null, oppkey, clientname, null);
-    }
-    connection.dropTemporaryTable (attsTable);
-    connection.dropTemporaryTable (relsTable);
-
-    _LogDBLatency_SP (connection, "_SetTesteeAttributes", starttime, testee, true, null, oppkey, null, clientname, null);
-  }
+//  public void _SetTesteeAttributes_SPV1 (SQLConnection connection, String clientname, UUID oppkey, Long testee, String context) throws ReturnStatusException {
+//    if (testee < 0)
+//      return;
+//    Date starttime = _dateUtil.getDateWRetStatus (connection);
+//
+//    Boolean attsexist = null, relsexist = null;
+//
+//    DataBaseTable attsTable = getDataBaseTable ("staAtts").addColumn ("tdsId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("attrval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 500);
+//
+//    DataBaseTable relsTable = getDataBaseTable ("staRels").addColumn ("reltype", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
+//        addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.BIGINT).addColumn ("tdsId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).
+//        addColumn ("attrval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 500);
+//
+//    final String SQL_QUERY1 = "select _fk_TestOpportunity from testeeattribute where _fk_TestOpportunity = ${oppkey} and context = ${context} limit 1";
+//    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("context", context);
+//
+//    if (exists (executeStatement (connection, SQL_QUERY1, parms1, false))) {
+//      attsexist = true;
+//    } else {
+//      attsexist = false;
+//    }
+//
+//    final String SQL_QUERY2 = "select _fk_TestOpportunity from testeerelationship where _fk_TestOpportunity = ${oppkey} and context = ${context} limit 1";
+//    SqlParametersMaps parms2 = parms1;
+//
+//    if (exists (executeStatement (connection, SQL_QUERY2, parms2, false))) {
+//      relsexist = true;
+//    } else {
+//      relsexist = false;
+//    }
+//    final String finalClientname = clientname;
+//    final Long finalTestee = testee;
+//    executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
+//    {
+//
+//      @Override
+//      public SingleDataResultSet execute (SQLConnection connection) throws ReturnStatusException {
+//        SingleDataResultSet resultSet = _GetTesteeAttributes_SPV1 (connection, finalClientname, finalTestee);
+//
+//        resultSet.resetColumnName (1, "tdsID");
+//        resultSet.resetColumnName (2, "attrval");
+//        return resultSet;
+//      }
+//    }, attsTable, true);
+//
+//    String sofar = "First. ";
+//
+//    executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
+//    {
+//
+//      @Override
+//      public SingleDataResultSet execute (SQLConnection connection) throws ReturnStatusException {
+//
+//        SingleDataResultSet resultSet = _rtsDll._GetTesteeRelationships_SP (connection, finalClientname, finalTestee);
+//
+//        resultSet.resetColumnName (1, "reltype");
+//        resultSet.resetColumnName (3, "tdsID");
+//        // resultSet.resetColumnName (2, "entitykey");
+//        resultSet.resetColumnName (4, "attrval");
+//        return resultSet;
+//      }
+//    }, relsTable, true);
+//
+//    sofar = "Second. ";
+//
+//    try {
+//      boolean preexistingAutoCommitMode = connection.getAutoCommit ();
+//      connection.setAutoCommit (false);
+//      if (DbComparator.isEqual (attsexist, true)) {
+//        final String SQL_DELETE3 = "delete from testeeattribute where _fk_TestOpportunity = ${oppkey} and context = ${context}";
+//        SqlParametersMaps parms3 = parms1;
+//
+//        int deletedCnt = executeStatement (connection, SQL_DELETE3, parms3, false).getUpdateCount ();
+//        sofar = "Third. ";
+//      }
+//
+//      final String SQL_INSERT4 = "insert into testeeattribute (_fk_TestOpportunity, context, TDS_ID, attributeValue, _date) "
+//          + " select ${oppkey}, ${context}, tdsID, attrval, now(3) from ${atts}";
+//      SqlParametersMaps parms4 = parms1;
+//      Map<String, String> unquotedParms4 = new HashMap<String, String> ();
+//      unquotedParms4.put ("atts", attsTable.getTableName ());
+//
+//      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms4), parms4, false).getUpdateCount ();
+//
+//      sofar = "Fourth. ";
+//
+//      if (DbComparator.isEqual (relsexist, true)) {
+//        final String SQL_DELETE5 = "delete from testeerelationship where _fk_TestOpportunity = ${oppkey} and context = ${context}";
+//        SqlParametersMaps parms5 = parms1;
+//
+//        int deletedCnt = executeStatement (connection, SQL_DELETE5, parms5, false).getUpdateCount ();
+//        sofar = "Fifth. ";
+//      }
+//
+//      final String SQL_INSERT6 = "insert into testeerelationship (_fk_TestOpportunity, context, relationship, TDS_ID, entitykey, attributeValue, _date)"
+//          + " select ${oppkey}, ${context}, reltype, tdsID, entitykey, attrval, now(3) from ${rels}";
+//      SqlParametersMaps parms6 = parms1;
+//      Map<String, String> unquotedParms6 = new HashMap<String, String> ();
+//      unquotedParms6.put ("rels", relsTable.getTableName ());
+//
+//      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT6, unquotedParms6), parms6, false).getUpdateCount ();
+//      sofar = "Sixth. ";
+//
+//      connection.commit ();
+//      connection.setAutoCommit (preexistingAutoCommitMode);
+//
+//    } catch (Exception re) {
+//      try {
+//        connection.rollback ();
+//      } catch (SQLException e) {
+//        _logger.error (String.format ("Problem rolling back transaction %s", e.getMessage ()));
+//      }
+//      String msg = String.format ("%s%s", sofar, re.getMessage ());
+//      _LogDBError_SP (connection, "_SetTesteeAttributes", msg, testee, null, null, oppkey, clientname, null);
+//    }
+//    connection.dropTemporaryTable (attsTable);
+//    connection.dropTemporaryTable (relsTable);
+//
+//    _LogDBLatency_SP (connection, "_SetTesteeAttributes", starttime, testee, true, null, oppkey, null, clientname, null);
+//  }
 
   // optimization attempt
   public void _SetTesteeAttributes_SP (SQLConnection connection, String clientname, UUID oppkey, Long testee, String context) throws ReturnStatusException {
@@ -1199,7 +1199,8 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     } else {
       relsexist = false;
     }
-    // should use optimized version!
+    //TODO Elena : proposal to use getTesteeAttributesAsSet method from RtsDLLPackage here
+    // instead of _GetTesteeAttributes
     SingleDataResultSet resultSet1 = _GetTesteeAttributes_SP (connection, clientname, testee);
     resultSet1.addColumn ("_fk_TestOpportunity", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
     resultSet1.addColumn ("context", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
@@ -2651,8 +2652,8 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     connection.dropTemporaryTable (testKeyAccomsTbl);
     connection.dropTemporaryTable (splitAccomCodesTbl);
 
-    final DataBaseTable depsTable = getDataBaseTable ("deps").addColumn ("atype", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("aval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
-        .addColumn ("acode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("del", SQL_TYPE_To_JAVA_TYPE.BIT);
+    final DataBaseTable depsTable = getDataBaseTable ("deps").addColumn ("atype", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("aval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 128)
+        .addColumn ("acode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("del", SQL_TYPE_To_JAVA_TYPE.BIT);
     connection.createTemporaryTable (depsTable);
     Map<String, String> unquotedParms5 = new HashMap<String, String> ();
     unquotedParms5.put ("depsTableName", depsTable.getTableName ());
@@ -2843,7 +2844,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     // MA:A402;MA:A501;SS:A208;SS:A204;SS:A307;SS:A402;SS:A104;SS:A302;SS:A212;SS:A213;SS:A107;SS:A308;SS:A501;SS:A103;SS:A401;SS:A105;SS:A303;SS:A101;SS:A404;SC:ENU;RE:ENU-Braille;WR:ENU;SS:TDS_TTS0;MA:TDS_TTS_Item;SC:TDS_TTS0
     String[] split1 = _BuildTableAsArray (cset1, codeDelim.toString (), -1);
 
-    DataBaseTable tbl = getDataBaseTable ("sac").addColumn ("idx", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("code", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
+    DataBaseTable tbl = getDataBaseTable ("sac").addColumn ("idx", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("code", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100);
 
     final String[] split1Final = split1;
     executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
@@ -2856,7 +2857,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         if (split1Final != null) {
           for (String split : split1Final) {
             CaseInsensitiveMap<Object> record = new CaseInsensitiveMap<Object> ();
-            record.put ("code", (split.length () > 50 ? split.substring (0, 50) : split));
+            record.put ("code", (split.length () > 100 ? split.substring (0, 100) : split));
             record.put ("idx", idx++);
             resultList.add (record);
           }

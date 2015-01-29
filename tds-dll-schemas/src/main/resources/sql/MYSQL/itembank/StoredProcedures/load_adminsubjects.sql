@@ -15,37 +15,63 @@ begin
     
 	declare v_issegmented bit;
 
+	drop temporary table if exists tmp_tblalgprop;
+	create temporary table tmp_tblalgprop (
+		propname varchar(1000)
+	);
+
+	insert into tmp_tblalgprop values ('ftstartpos');
+	insert into tmp_tblalgprop values ('ftendpos');
+	insert into tmp_tblalgprop values ('bpweight');
+	insert into tmp_tblalgprop values ('startability');
+	insert into tmp_tblalgprop values ('startinfo');
+	insert into tmp_tblalgprop values ('cset1size');
+	insert into tmp_tblalgprop values ('cset1order');
+	insert into tmp_tblalgprop values ('cset2random');
+	insert into tmp_tblalgprop values ('cset2initialrandom');
+	insert into tmp_tblalgprop values ('abilityoffset');
+	insert into tmp_tblalgprop values ('itemweight');
+	insert into tmp_tblalgprop values ('precisiontarget');
+	insert into tmp_tblalgprop values ('adaptivecut');
+	insert into tmp_tblalgprop values ('toocloseses');
+	insert into tmp_tblalgprop values ('slope');
+	insert into tmp_tblalgprop values ('intercept');
+	
+
 	-- create temp table to host data during data gathering and processing
 	drop temporary table if exists tmp_tblsetofadminsubjects;
 	create temporary table tmp_tblsetofadminsubjects (
 		_key varchar(250)
-	  , _fk_testadmin varchar(150)
-	  , _fk_subject varchar(150)
-	  , testid varchar(255)
-	  , startability float
-	  , startinfo float 
-	  , minitems int 
-	  , maxitems int
-	  , slope int
-	  , intercept int
-	  , ftstartpos int
-	  , ftendpos int
-	  , ftminitems int
-	  , ftmaxitems int
+	  , _fk_testadmin 	varchar(150)
+	  , _fk_subject 	varchar(150)
+	  , testid 			varchar(255)
+	  , startability 	float
+	  , startinfo 		float 
+	  , minitems 		int 
+	  , maxitems 		int
+	  , slope 			float
+	  , intercept 		float
+	  , ftstartpos 		int
+	  , ftendpos 		int
+	  , ftminitems 		int
+	  , ftmaxitems 		int
 	  , selectionalgorithm varchar(50)
 	  , blueprintweight float
-	  , cset1size int
-	  , cset2random int
+	  , cset1size 		int
+	  , cset2random 	int
 	  , cset2initialrandom int
-	  , virtualtest varchar(200)
-	  , testposition int
-	  , issegmented bit
-	  , itemweight float
-	  , abilityoffset float
-	  , cset1order varchar(50)
-	  , version bigint
-	  , contract varchar(100)
-	  , testtype varchar(60)
+	  , virtualtest 	varchar(200)
+	  , testposition 	int
+	  , issegmented 	bit
+	  , itemweight 		float
+	  , abilityoffset 	float
+	  , cset1order 		varchar(50)
+	  , version 		bigint
+	  , contract 		varchar(100)
+	  , testtype 		varchar(60)
+	  , precisiontarget	float
+	  , adaptivecut		float
+	  , toocloseses		float
 	);
 
 
@@ -125,6 +151,11 @@ begin
 			 , max(if(sisp.propname = 'cset2initialrandom', sisp.propvalue, null)) as cset2initialrandom
 			 , max(if(sisp.propname = 'abilityoffset', sisp.propvalue, null)) as abilityoffset
 			 , max(if(sisp.propname = 'itemweight', sisp.propvalue, null)) as itemweight
+			 , max(if(sisp.propname = 'slope', sisp.propvalue, null)) as slope
+			 , max(if(sisp.propname = 'intercept', sisp.propvalue, null)) as intercept
+			 , max(if(sisp.propname = 'precisiontarget', sisp.propvalue, null)) as precisiontarget
+			 , max(if(sisp.propname = 'adaptivecut', sisp.propvalue, null)) as adaptivecut
+			 , max(if(sisp.propname = 'toocloseses', sisp.propvalue, null)) as toocloseses
 		  from tmp_tblsetofadminsubjects tmp
 		  join loader_segmentitemselectionproperties sisp on sisp.segmentid = tmp._key and tmp._key = sisp.bpelementid
 		 where sisp._fk_package = v_testpackagekey
@@ -135,15 +166,20 @@ begin
 	  join tmp_testproperties tp on tp.bpelementid = tmp._key
 	   set tmp.ftstartpos 	   = tp.ftstartpos 
 		 , tmp.ftendpos 	   = tp.ftendpos
-		 , tmp.blueprintweight = tp.bpweight
+		 , tmp.blueprintweight = coalesce(tp.bpweight, 5.0)
 		 , tmp.startability    = tp.startability
 		 , tmp.startinfo	   = tp.startinfo
-		 , tmp.cset1size	   = tp.cset1size
-		 , tmp.cset1order	   = tp.cset1order
-		 , tmp.cset2random	   = tp.cset2random
-		 , tmp.cset2initialrandom = tp.cset2initialrandom
-		 , tmp.abilityoffset   = tp.abilityoffset
-		 , tmp.itemweight	   = tp.itemweight
+		 , tmp.cset1size	   = coalesce(tp.cset1size, 20)
+		 , tmp.cset1order	   = coalesce(tp.cset1order, 'ABILITY')
+		 , tmp.cset2random	   = coalesce(tp.cset2random, 1)
+		 , tmp.cset2initialrandom = coalesce(tp.cset2initialrandom, 5)
+		 , tmp.abilityoffset   = coalesce(tp.abilityoffset, 0.0)
+		 , tmp.itemweight	   = coalesce(tp.itemweight, 5.0)
+		 , tmp.slope			= tp.slope
+		 , tmp.intercept		= tp.intercept
+		 , tmp.precisiontarget  = tp.precisiontarget
+		 , tmp.adaptivecut		= tp.adaptivecut
+		 , tmp.toocloseses		= tp.toocloseses
 	;
 
 
@@ -191,12 +227,17 @@ begin
 		 , sas.updateconfig = tmp.version 
 		 , sas.contract = tmp.contract
 		 , sas.testtype = tmp.testtype
+		 , sas.precisiontarget = tmp.precisiontarget
+		 , sas.adaptivecut = tmp.adaptivecut
+		 , sas.toocloseses = tmp.toocloseses
+		 , sas.slope = tmp.slope
+		 , sas.intercept = tmp.intercept
 	;
 
 
 	-- check if test or segment already exists
-	insert into tblsetofadminsubjects (_key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, loadconfig, contract, testtype)
-	select _key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, version, contract, testtype 
+	insert into tblsetofadminsubjects (_key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, loadconfig, contract, testtype, precisiontarget, adaptivecut, toocloseses)
+	select _key, _fk_testadmin, _fk_subject, testid, startability, startinfo, minitems, maxitems, slope, intercept, ftstartpos, ftendpos, ftminitems, ftmaxitems, selectionalgorithm, blueprintweight, cset1size, cset2random, cset2initialrandom, virtualtest, testposition, issegmented, itemweight, abilityoffset, cset1order, version, contract, testtype, precisiontarget, adaptivecut, toocloseses 
 	  from tmp_tblsetofadminsubjects tmp
 	 where not exists ( select 1 
 						  from tblsetofadminsubjects sas
@@ -221,9 +262,25 @@ begin
 						 where _fk_adminsubject = _key);
 
 
+	-- for all properties that do not have a column defined/created in tblsetofadminsubjects tables
+	-- insert them into tblitemselectionparm
+	insert into tblitemselectionparm
+	select tmp._key
+		 , tmp.testid
+		 , sisp.propname
+		 , sisp.propvalue
+		 , sisp.proplabel
+		 , unhex(REPLACE(UUID(), '-', ''))
+	  from tmp_tblsetofadminsubjects tmp
+	  join loader_segmentitemselectionproperties sisp on sisp.segmentid = tmp._key and tmp._key = sisp.bpelementid
+	 where propname not in (select propname from tmp_tblalgprop)
+	   and selectionalgorithm like 'adaptive%';
+
+
 	-- clean-up
 	drop temporary table tmp_tblsetofadminsubjects;
 	drop temporary table tmp_testproperties;
+	drop temporary table tmp_tblalgprop;
 
 end $$
 

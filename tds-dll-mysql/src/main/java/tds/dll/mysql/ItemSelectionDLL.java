@@ -2235,31 +2235,6 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		return _studentDll.GetInitialAbility_FN(connection, test);
 	}
 
-	// this function from ITEMBANK table
-	// there is this function in StudentDLL
-	// public Float GetInitialAbility_FN (SQLConnection connection, String
-	// testkey) throws ReturnStatusException {
-	//
-	// SingleDataResultSet res;
-	// DbResultRecord record;
-	// Float ability = null;
-	//
-	// final String SQL_QUERY = "select StartAbility as ability "
-	// + " from ${ItemBankDB}.tblsetofadminsubjects where _key = ${testkey} ";
-	//
-	// SqlParametersMaps parameters = new SqlParametersMaps ().put ("testkey",
-	// testkey);
-	// String query = fixDataBaseNames (SQL_QUERY);
-	// res = executeStatement (connection, query, parameters,
-	// false).getResultSets ().next ();
-	// record = res.getCount () > 0 ? res.getRecords ().next () : null;
-	// if (record != null) {
-	// ability = record.<Float> get ("ability");
-	// }
-	//
-	// return ability;
-	// }
-
 	/**
 	 * -- At the start of a new test opportunity, establish the custom itempool
 	 * to use for a segment's non-fieldtest items -- It is the responsibility of
@@ -2364,6 +2339,18 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			}
 		}
 		return itemstring;
+	}
+	
+	// ======================Adaptive2 Algorithm and OffGradeItems================
+	// _AA_ItemPoolString_2014 (@oppkey, @segmentKey)
+	
+	public String _AA_ItemPoolString_2014_FN(SQLConnection connection, UUID oppkey,
+			String segmentKey) throws ReturnStatusException {
+		//
+		// Temporary solution TODO !!!
+		//
+		return _AA_ItemPoolString_FN(connection, oppkey, segmentKey);
+		
 	}
 
 	// ======================Adaptive2 Algorithm==================================
@@ -2781,8 +2768,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		return new MultiDataResultSet(resultsSets);
 	}
 
-	// -- Collect all test-level historical data needed to perform adaptive item
-	// selection
+	// -- Collect all test-level historical data needed to perform adaptive item selection
 	// -- Has the side-effect of updating existing data where needed (i.e.
 	// TestopportunitySegment.itempool and TestOpportunity.itemgroupString,
 	// initialAbility)
@@ -2929,7 +2915,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		return new MultiDataResultSet(resultsSets);
 	}
-
+	
 	/**
 	 * -- ============================================= -- GetInitialAbility is
 	 * used by the testee app to attempt to get the initial ability estimates
@@ -3459,7 +3445,142 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		return new MultiDataResultSet(resultsSets);
 	}
+	
+	/**
+	 * 
+	 * This "stored procedure" is from .NET code:AIROnline2013/​scripts/​offgrade item selection_LA.sql
+	 * !!!! It contains new tables:
+	 * 		TestoppItem
+	 * 		TestoppItemGroup
+	 * 		TestoppItemResponse
+	 * 
+	 *  My Hypotesis is: it is the same as AA_GetDataHistory2_LA2_SP !!!
+	 *  
+	 	-- Collect all test-level historical data needed to perform adaptive item selection
+		-- Has the side-effect of updating existing data where needed (i.e. TestopportunitySegment.itempool and TestOpportunity.itemgroupString, initialAbility)
+		-- 11/2012: Larry Albright
+		-- Updated for Satellite use
+		-- 7/2014: Call new _AA_ItemPoolString_2014 which applies test subscriber item pool exclusions
+		-- 9/2014: Added reporting of offgrade items status to first recordset (initialAbility, itempool)
+	 */
+	public MultiDataResultSet AA_GetDataHistory2014_SP(SQLConnection connection,
+			UUID oppkey, String segmentKey) throws ReturnStatusException {
+		Date startTime = _dateUtil.getDateWRetStatus(connection);
 
+		String clientname = null;
+		String itempool = null;
+		String algorithm = null;
+		String offgrade = null;
+		Long testee = null;
+		String subject = null;
+		String testID = null;
+		Float startability = null;
+
+		List<SingleDataResultSet> resultsSets = new ArrayList<SingleDataResultSet>();
+		SingleDataResultSet res;
+		DbResultRecord record;
+
+		final String SQL_QUERY = "select clientname, _efk_Testee, subject "
+				+ ", _efk_TestID, initialAbility "
+				+ " from testopportunity where _Key = ${oppkey} ";
+
+		SqlParametersMaps parameters = new SqlParametersMaps().put("oppkey",
+				oppkey);
+
+		res = executeStatement(connection, SQL_QUERY, parameters, false)
+				.getResultSets().next();
+		record = res.getCount() > 0 ? res.getRecords().next() : null;
+		if (record != null) {
+			clientname = subject = record.<String> get("clientname");
+			testee = record.<Long> get("_efk_Testee");
+			subject = record.<String> get("subject");
+			testID = record.<String> get("_efk_TestID");
+			startability = record.<Float> get("initialAbility");
+		}
+
+		final String SQL_QUERY2 = " select itempool, algorithm"
+				+ ", offgradeitems as offgrade "
+				+ " from testopportunitysegment   "
+				+ " where _fk_TestOpportunity = ${oppkey} and _efk_Segment = ${segmentKey} ";
+
+		parameters.put("segmentKey", segmentKey);
+		res = executeStatement(connection, SQL_QUERY2, parameters, true)
+				.getResultSets().next();
+		record = res.getCount() > 0 ? res.getRecords().next() : null;
+		if (record != null) {
+			itempool = record.<String> get("itempool");
+			algorithm = record.<String> get("algorithm");
+			offgrade = record.<String> get("offgrade");
+		}
+		if (itempool == null && algorithm != null
+				&& DbComparator.containsIgnoreCase(algorithm, ADAPTIVE)) {
+		      //-- use 2014 version to be consistent with changes made to _SAT_InitializeTestSegments
+		      //  _AA_ItemPoolString_2014 (@oppkey, @segmentKey)
+		 
+			itempool = _AA_ItemPoolString_2014_FN(connection, oppkey, segmentKey);
+			//
+			final String SQL_QUERY3 = " update testopportunitysegment set itempool = ${itempool} "
+					+ " where _Key = ${oppkey} ";
+			parameters.put("itempool", itempool);
+			executeStatement(connection, SQL_QUERY3, parameters, false);
+		}
+
+
+		List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
+		CaseInsensitiveMap<Object> rcrd = new CaseInsensitiveMap<Object>();
+		rcrd.put("initialAbility", startability);
+		rcrd.put("itempool", itempool);
+		rcrd.put("offgrade", offgrade);
+		resultList.add(rcrd);
+		SingleDataResultSet rs = new SingleDataResultSet();
+		rs.addColumn("initialAbility", SQL_TYPE_To_JAVA_TYPE.FLOAT);
+		rs.addColumn("itempool", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+		rs.addColumn("offgrade", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+		rs.addRecords(resultList);
+		resultsSets.add(rs);
+		
+		//-- BIG CHANGE: Counting on TesteeHistory for info about other tests taken this student
+		
+		final String SQL_QUERY6 = " select _fk_TestOpportunity as oppkey, dateChanged as dateStarted, itemgroupString"
+				+ " from testeehistory "
+				+ " where clientname = ${clientname} and _efk_Testee = ${testee} and subject = ${subject}"
+				+ " and _fk_TestOpportunity <> ${oppkey} and length(coalesce(itemgroupString, '')) > 0"
+				+ " order by dateStarted";
+
+		parameters.put("testee", testee).put("clientname", clientname);
+		parameters.put("subject", subject);
+		SingleDataResultSet res1 = executeStatement(connection, SQL_QUERY6,
+				parameters, true).getResultSets().next();
+		resultsSets.add(res1);
+		
+		//-- placeholder for backward compatibility from the days when field test items were preselected at test creation time
+		//-- AA should be able to deal with itemgroups it can't locate
+		String na = "\'NA\'";
+		final String SQL_QUERY7 = " select ${NA} as FTGroupID";
+		parameters.put("NA", na);
+		SingleDataResultSet res2 = executeStatement(connection, SQL_QUERY7,
+				parameters, false).getResultSets().next();
+		resultsSets.add(res2);
+
+		// -- Collect the entire set of item responses on all segments
+		// -- 1/2014: LEA: Added R.scoreDimensions for adaptive2
+		final String SQL_QUERY8 = " select G.segment as segmentPosition, G.segmentID, G.page, I.position,"
+				+ " G.groupID, I._efk_Itemkey as itemID, R.score, I.isFieldTest, R.scoreDimensions"
+				+ " from testoppitem I "
+				+ " join testoppitemgroup G on G._fk_TestOpportunity = ${oppkey} and I._fk_OppItemGroup = G._Key"
+				+ " join testoppitemresponse R on R._fk_TestOpportunity =${oppkey} and R._Key = I._fk_Response"
+				+ " where I._fk_TestOpportunity = ${oppkey} and I._efk_ItemKey is not null ";
+
+		SingleDataResultSet res3 = executeStatement(connection, SQL_QUERY8,
+				parameters, true).getResultSets().next();
+		resultsSets.add(res3);
+
+		_commonDll._LogDBLatency_SP(connection, "AA_GetDataHistory2014_SP",
+				startTime, null, true, null, oppkey);
+
+		return new MultiDataResultSet(resultsSets);
+	}
+	
 	//-- NEW for 2014-15.  TASK: "Off Grade Items"
 	@Override
 	public SingleDataResultSet AA_AddOffgradeItems_SP(SQLConnection connection,
@@ -3528,6 +3649,9 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			record = resItr.next();
 			segkey = record.<String> get("segkey");
 			poolstring = null;
+			// AK: In the file AIROnline2013/​scripts/​offgrade item selection_LA.sql
+			// in this place AA_AddOffgradeItems_SP uses _AA_ItemPoolString_2014_FN
+			// TODO ?
 			poolstring = _AA_ItemPoolString_FN(connection, oppkey, segkey);
 			if(poolstring == null)
 			{

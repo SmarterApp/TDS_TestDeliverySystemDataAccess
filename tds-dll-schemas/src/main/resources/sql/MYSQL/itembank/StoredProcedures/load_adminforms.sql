@@ -22,8 +22,8 @@ begin
 			 , prop.propvalue			as lang				-- substring_index(substring_index(tf.testformid, ':', -1), '-', -1) 
 			 , tfp.formpartitionid
 			 , tfp.formpartitionname
-			 , pkg._efk_itembank  		as itsbankkey 
-			 , null as itskey 
+			 , coalesce(substring_index(tfp.formpartitionid, '-', -1), pkg._efk_itembank)	as itsbankkey 
+			 , coalesce(substring_index(tfp.formpartitionid, '-', -1), 0)					as itskey 			 
 			 , tfp.version
 		  from loader_testpackage pkg 
 		  join loader_testformpartition tfp on tfp._fk_package = pkg.packagekey

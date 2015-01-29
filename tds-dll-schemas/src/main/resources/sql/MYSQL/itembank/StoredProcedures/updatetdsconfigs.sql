@@ -416,9 +416,9 @@ begin
             and c.propname = p.propname and c.propvalue = p.propvalue and c.item_in = 0);
 
 	-- link up the non-language itempool constraints with an accommodation whose configuration must be finished manually
-    insert into configs.client_testtooltype (clientname, `context`, contexttype, toolname, allowchange, isselectable, isvisible
+    insert into configs.client_testtooltype (clientname, dateentered, `context`, contexttype, toolname, allowchange, isselectable, isvisible
             , studentcontrol, isfunctional, rtsfieldname, isrequired, tideselectable, tideselectablebysubject)
-    select distinct p.clientname, p.testid, 'TEST', p.tooltype, allowchange, 0, 0
+    select distinct p.clientname, now(3), p.testid, 'TEST', p.tooltype, allowchange, 0, 0
 		 , 0, 0, rtsfieldname, 0, tideselectable, tideselectablebysubject
     from configs.client_test_itemconstraint p
 	join configs.tds_testtooltype l on l.toolname = p.tooltype

@@ -982,6 +982,37 @@ VALUES ('SBAC_PT', 'TTS Tracking', 'TDS_TTSTracking1', 'Tracking On', b'0', b'0'
 'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
 'TEST', 'ALL', NULL);
 
+-- add TTS tracking for SBAC-Mathematics-3 (label Grade 3 MATH)
+insert into configs.client_testtooltype 
+(`clientname`, `toolname`, `allowchange`, `tideselectable`, `rtsfieldname`, 
+`isrequired`, `tideselectablebysubject`, 
+`isselectable`, `isvisible`, 
+`studentcontrol`, `tooldescription`, `sortorder`, `dateentered`, 
+`origin`, `source`, `contexttype`, `context`, `dependsontooltype`, `disableonguestsession`, 
+`isfunctional`, `testmode`)
+ VALUES
+	('SBAC_PT', 'TTS Tracking', b'1', b'0', 'TDSAcc-TTSTracking', 
+	 b'0', b'0',
+	 b'1', b'1', b'0', NULL, 0, '2013-12-13 11:40:22.120',
+	  'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
+	  'TEST', 'SBAC-Mathematics-3', NULL, b'0', b'1', 'ALL');
+	  
+INSERT IGNORE INTO `client_testtool` 
+(`clientname`, `type`, `code`, `value`, `isdefault`, `allowcombine`, `valuedescription`, 
+`context`, `sortorder`, `origin`, `source`, `contexttype`, `testmode`, `equivalentclientcode`) 
+VALUES ('SBAC_PT', 'TTS Tracking', 'TDS_TTSTracking0', 'Tracking Off', b'1', b'0', 
+'Tracking Off', 'SBAC-Mathematics-3', 0, 
+'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
+'TEST', 'ALL', NULL);
+
+INSERT IGNORE INTO `client_testtool` 
+(`clientname`, `type`, `code`, `value`, `isdefault`, `allowcombine`, `valuedescription`, 
+`context`, `sortorder`, `origin`, `source`, `contexttype`, `testmode`, `equivalentclientcode`) 
+VALUES ('SBAC_PT', 'TTS Tracking', 'TDS_TTSTracking1', 'Tracking On', b'0', b'0', 
+'Tracking On', 'SBAC-Mathematics-3', 1, 
+'TDSCore_Staging_Configs_2013', 'TDSCore_Staging_Configs_2013', 
+'TEST', 'ALL', NULL);
+
 -- an addional tool dependency rec to enable TTS for ESN language for test labeled:'Grades 3 - 5 MATH'
 -- this testid is 'SBAC Math 3-MATH-3'
 -- client_testtooltype and client_testtool should be properly populated already!
@@ -990,6 +1021,16 @@ INSERT IGNORE INTO `client_tooldependencies`
 `thentype`, `thenvalue`, `clientname`, `_key`, `testmode`) VALUES
 ('SBAC Math 3-MATH-3', 'TEST', 'Language', 'ESN', b'0',
 'TTS', 'TDS_TTS_Item', 'SBAC_PT', _binary 0x4E75B84D560C4F6F8EBA134DCF83FC13, 'ALL');
+
+-- adding stim and items TTS option for SBAC-ELA-11
+-- option for TTS items only already exists 
+INSERT IGNORE INTO `client_tooldependencies` 
+(`context`, `contexttype`, `iftype`, `ifvalue`, `isdefault`, 
+`thentype`, `thenvalue`, `clientname`, `_key`, `testmode`) VALUES
+('SBAC-ELA-11', 'TEST', 'Language', 'ENU', b'0',
+'TTS', 'TDS_TTS_Stim&TDS_TTS_Item', 'SBAC_PT', _binary 0x35864A9720AA45BD91162A984BC65E94, 'ALL');
+
+
 	
 	  
 
