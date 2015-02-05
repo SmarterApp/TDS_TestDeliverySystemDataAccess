@@ -887,4 +887,9 @@ public SingleDataResultSet R_GetDistrictSchools_SP (SQLConnection connection, St
     return null;
   }
 
+  @Override
+  public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientname, long testee) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

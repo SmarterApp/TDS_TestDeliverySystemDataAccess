@@ -939,6 +939,11 @@ public class RtsDLL extends AbstractDLL implements IRtsDLL
     public String getTrTestId (SQLConnection connection, String testeeId, String testKey) {
       return null;
     }
-
+    
+    @Override
+    public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientname, long testee) {
+      // TODO Auto-generated method stub
+      return null;
+    }
 }
 

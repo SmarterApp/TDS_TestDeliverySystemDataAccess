@@ -33,7 +33,8 @@ begin
 
     if (v_oppkey is not null) then 
 	begin
-        select v_language = acccode, v_subject = subject, v_testee = _efk_testee, v_client = clientname
+        select acccode, `subject`, _efk_testee, clientname
+		into v_language, v_subject, v_testee, v_client
         from testopportunity o, testeeaccommodations a
         where o._key = v_oppkey 
 			and a._fk_testopportunity = v_oppkey 

@@ -266,5 +266,13 @@ public interface IRtsDLL
   * @return TR Test ID
   */
   public String getTrTestId (SQLConnection connection, String testeeId, String testKey);
+
+  /**
+   * @param connection
+   * @param clientname
+   * @param testee
+   * @return
+   */
+  public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientname, long testee);
   
 }

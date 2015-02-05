@@ -1,6 +1,6 @@
-# Welcome to the TDSDLLDev Modules
+# Welcome to the TDSDLL Modules
 
-The TDSDLLDev is group of shared modules which can be used by other projects to access and manipulate databases. TDSDLLDev contains business level logic of database reads and updates most commonly perfomed by stored procedures.
+The TDSDLL is group of shared modules which can be used by other projects to access and manipulate databases. TDSDLL contains business level logic of database reads and updates most commonly perfomed by stored procedures.
 
 
 ## License ##
@@ -39,11 +39,8 @@ We would be happy to receive feedback on its capabilities, problems, or future e
 
   tds-dll-schemas contains sql scripts to create databases and applicable tables, indexes, constraints, triggers, stored procedures on these databases: archive, configs, itembank, session, corestandards, permissions.
 
-
-
 ## Setup
 In general, build the code and deploy the JAR file.
-
 
 ### Build Order
 
@@ -54,7 +51,7 @@ If building all components from scratch the following build order is needed:
 
 
 ## Dependencies
-TDSDLLDev has a number of direct dependencies that are necessary for it to function.  These dependencies are already built into the Maven POM files.
+TDSDLL has a number of direct dependencies that are necessary for it to function.  These dependencies are already built into the Maven POM files.
 
 ### Compile Time Dependencies
 * shared-db

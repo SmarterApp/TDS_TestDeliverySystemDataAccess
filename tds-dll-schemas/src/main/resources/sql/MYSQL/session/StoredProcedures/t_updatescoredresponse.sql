@@ -178,8 +178,8 @@ proc: begin
         where _fk_testopportunity = v_oppkey and position = v_position and responsesequence <= v_responsesequence;
         
 		if (v_audit <> 0 ) then
-            insert into testeeresponseaudit(_fk_testopportunity, position, scoremark, sequence, response, sessionkey, browserkey, isselected, isvalid, score, scorelatency, scoringdate, scoreddate, _efk_item)
-            select v_oppkey, v_position, v_scoremark, v_responsesequence, v_response, v_session, v_browserid, v_isselected, v_isvalid, v_thescore, v_scorelatency, v_scoringdate, v_scoreddate, v_itemid;
+            insert into testeeresponseaudit(_fk_testopportunity, position, scoremark, sequence, response, sessionkey, browserkey, isselected, isvalid, score, scorelatency, scoringdate, scoreddate, _efk_item, _date)
+            select v_oppkey, v_position, v_scoremark, v_responsesequence, v_response, v_session, v_browserid, v_isselected, v_isvalid, v_thescore, v_scorelatency, v_scoringdate, v_scoreddate, v_itemid, now(3);
 		end if;
 	end;
     end if;
@@ -196,7 +196,7 @@ proc: begin
 	-- return the responsecount so student app can coordinate with proctor app
     select 'updated' as `status`, 1 as `number`, v_reason as reason, v_scoremark as scoremark, v_responsecount as responsecount, v_abortsim as abortsim;
 
-    call archive._logdblatency (v_procname, v_starttime); -- , null, 1, v_position, v_oppkey, v_session,  v_clientname);
+    call _logdblatency (v_procname, v_starttime, null, 1, v_position, v_oppkey, v_session, v_clientname, null);
 
 end $$
 

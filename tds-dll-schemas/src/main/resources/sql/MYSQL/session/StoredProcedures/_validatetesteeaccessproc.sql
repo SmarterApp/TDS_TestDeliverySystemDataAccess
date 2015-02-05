@@ -79,7 +79,7 @@ proc: begin
 	where clientname = v_clientname and _efk_testid is null;
 
 	if (v_checkin is not null and v_checkin > 0 and date_add(v_datevisited, interval v_checkin minute) < v_now) then
-		insert into sessionaudit (_fk_session, accesstype, browserkey, dateaccessed)
+		insert into archive.sessionaudit (_fk_session, accesstype, browserkey, dateaccessed)
         select v_session, 'TACheckin TIMEOUT', v_sessionbrowser, now(3);
 
         call p_pausesession(v_session, v_proctor, v_sessionbrowser);

@@ -30,8 +30,8 @@ begin
 		where _key = v_session;
 	end if;
 
-	insert into archive.systemerrors (procname, errormessage, _efk_testee, _efk_testid, opportunity, application, _fk_testopportunity, _fk_session, clientname)
-	values (v_procname, v_msg, v_testee, v_test, v_opportunity, 'database', v_testopp, v_session, v_clientname);
+	insert into archive.systemerrors (procname, errormessage, _efk_testee, _efk_testid, opportunity, application, _fk_testopportunity, _fk_session, clientname, daterecorded)
+	values (v_procname, v_msg, v_testee, v_test, v_opportunity, 'database', v_testopp, v_session, v_clientname, now(3));
 
 
 end $$

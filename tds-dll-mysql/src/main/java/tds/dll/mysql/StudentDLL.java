@@ -847,6 +847,23 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   }
 
   public SingleDataResultSet T_GetOpportunityItems_SP (SQLConnection connection, UUID oppKey) throws ReturnStatusException {
+    final String SQL_QUERY = "call t_getopportunityitems (${oppkey})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppKey);
+
+    SingleDataResultSet result = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return result;
+  }
+  
+  /**
+   *     This is the Java version of t_getopportunityitems  stored procedure. This method is not used now. 
+   *     It is only needed when we want to migrate the Mysql stored procedure t_getopportunityitems  to java.
+   * @param connection
+   * @param oppKey
+   * @return
+   * @throws ReturnStatusException
+   */
+  public SingleDataResultSet T_GetOpportunityItems_SP_Java (SQLConnection connection, UUID oppKey) throws ReturnStatusException {
     SingleDataResultSet result = null;
 
     Date today = _dateUtil.getDateWRetStatus (connection);
@@ -1499,8 +1516,16 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return executeStatement (connection, fixDataBaseNames (SQL_QUERY), parameters, false).getResultSets ().next ();
 
   }
-
-  public SingleDataResultSet T_ValidateAccess_SP (SQLConnection connection, UUID oppkey, UUID session, UUID browserId) throws ReturnStatusException {
+  /**
+   *     This is the Java version of T_ValidateAccess stored procedure. This method is not used now. It is only needed when we want to migrate the Mysql stored procedure T_ValidateAccess to java.
+   * @param connection
+   * @param oppkey
+   * @param session
+   * @param browserId
+   * @return
+   * @throws ReturnStatusException
+   */
+  public SingleDataResultSet T_ValidateAccess_SP_Java (SQLConnection connection, UUID oppkey, UUID session, UUID browserId) throws ReturnStatusException {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     _Ref<String> message = new _Ref<String> ();
     SingleDataResultSet result = null;
@@ -1518,6 +1543,18 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     _commonDll._LogDBLatency_SP (connection, "T_ValidateAccess", starttime, null, true, null, null, session, null, null);
     return result;
+  }
+  
+  
+  public SingleDataResultSet T_ValidateAccess_SP (SQLConnection connection, UUID oppkey, UUID session, UUID browserId) throws ReturnStatusException {
+    final String SQL_QUERY = "call t_validateaccess(${oppkey}, ${session}, ${browserID})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppkey);
+    params.put ("session", session);
+    params.put ("browserID", browserId);
+    
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
   }
 
   public void T_RecordToolsUsed_SP (SQLConnection connection, UUID oppkey, String toolsused) throws ReturnStatusException {
@@ -1848,6 +1885,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   }
 
   /**
+   * This is the Java version of T_updatescoredresponse stored procedure. This method is not used now. It is only needed when we want to migrate the Mysql stored procedure T_updatescoredresponse to java.
    * @param connection
    * @param oppKey
    * @param session
@@ -1869,7 +1907,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   // The only difference between T_UpdateScoredResponse and
   // T_UpdateScoredResponse2
   // is an additional scoreDimensions parameter in the latter one.
-  public SingleDataResultSet T_UpdateScoredResponse_SP1 (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
+  public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
       Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
 
 	String scoreDimentions = buildScoreInfoNode(score, "overall", scoreStatus);
@@ -1901,7 +1939,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @throws ReturnStatusException
    */
   // This function is created to call mysql Stored procedure T_UpdateScoredResponse.
-  public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
+  public SingleDataResultSet T_UpdateScoredResponse_SP_MYSQL (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
       Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
 
     final String SQL_QUERY = "call T_UpdateScoredResponse(${oppkey}, ${session}, ${browserID}, ${itemID},${page}, ${position},${dateCreated}, ${responseSequence},${score}, ${response}, ${isSelected},${isValid},${scoreLatency},${scorestatus},${scoreRationale})";
@@ -8435,6 +8473,34 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return (new MultiDataResultSet (resultsSets));
   }
 
+  public MultiDataResultSet T_InsertItems_SP_Mysql (SQLConnection connection, UUID oppKey, UUID sessionKey, UUID browserId, Integer segment, 
+      String segmentId, Integer page, String groupId, String itemKeys, Character delimiter, Integer groupItemsRequired, Float groupB,
+      Integer debug, Boolean noinsert) throws ReturnStatusException {
+    final String SQL_QUERY = "call T_InsertItems(${oppkey}, ${session}, ${browserID}, ${segment},${segmentId}, "
+        + "${page},${groupId}, ${itemKeys},${delimiter}, ${groupItemsRequired}, ${groupB},${debug},${noinsert})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppKey);
+    params.put ("session", sessionKey);
+    params.put ("browserID", browserId);
+    params.put ("segment", segment);
+    params.put ("segmentId", segmentId);
+    params.put ("page", page);
+    params.put ("groupId", groupId);
+    params.put ("itemKeys", itemKeys);
+    params.put ("delimiter", String.valueOf (delimiter));
+    params.put ("groupItemsRequired", groupItemsRequired);
+    params.put ("groupB", groupB);
+    params.put ("debug", debug);
+    params.put ("noinsert", noinsert);
+
+    MultiDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false);
+    return resultSet;
+    
+    
+  }
+  /**
+   * This is the Java version of T_InsertItems stored procedure. This method is not used now. It is only needed when we want to migrate the Mysql stored procedure T_InsertItems  to java.
+   */
 //Optimization attempt
  public MultiDataResultSet T_InsertItems_SP (SQLConnection connection, UUID oppKey, UUID sessionKey, UUID browserId, Integer segment, String segmentId, Integer page, String groupId,
      String itemKeys, Character delimiter, Integer groupItemsRequired, Float groupB, Integer debug, Boolean noinsert) throws ReturnStatusException {
@@ -9613,7 +9679,15 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return rs;
   }
 
-  public MultiDataResultSet T_GetSession_SP (SQLConnection connection, String clientname, String sessionId) throws ReturnStatusException {
+  /***
+   *     This is the Java version of t_getsession stored procedure. This method is not used now. It is only needed when we want to migrate the Mysql stored procedure t_getsession  to java.
+   * @param connection
+   * @param clientname
+   * @param sessionId
+   * @return
+   * @throws ReturnStatusException
+   */
+  public MultiDataResultSet T_GetSession_SP_Java (SQLConnection connection, String clientname, String sessionId) throws ReturnStatusException {
 
     List<SingleDataResultSet> resultsSets = new ArrayList<SingleDataResultSet> ();
     Date today =  _dateUtil.getDateWRetStatus (connection);
@@ -9733,6 +9807,20 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     _commonDll._LogDBLatency_SP (connection, "T_GetSession", today, 0L, true, null, null, null, clientname, null);
 
     return new MultiDataResultSet (resultsSets);
+  }
+  
+  /***
+   * This method makes call to t_getsession mysql stored procedure.
+   */
+  public MultiDataResultSet T_GetSession_SP (SQLConnection connection, String clientname, String sessionId) throws ReturnStatusException {
+
+    final String SQL_QUERY = "call t_getsession(${clientname}, ${sessionId})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("clientname", clientname);
+    params.put ("sessionId", sessionId);
+
+    MultiDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false);
+    return resultSet;
   }
 
   public SingleDataResultSet T_GetResponseRationales_SP (SQLConnection connection, UUID oppkey, UUID sessionKey, UUID browserKey) throws ReturnStatusException {
@@ -10506,6 +10594,21 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   }
 
   public SingleDataResultSet T_IsTestComplete_SP (SQLConnection connection, UUID oppkey) throws ReturnStatusException {
+
+    final String SQL_QUERY = "call t_istestcomplete (${oppkey})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppkey);
+
+
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+
+  }
+  
+  /**
+   * This is the Java version of t_istestcomplete stored procedure. This method is not used now. It is only needed when we want to migrate the Mysql stored procedure t_istestcomplete  to java.
+   */
+  public SingleDataResultSet T_IsTestComplete_SP_Java (SQLConnection connection, UUID oppkey) throws ReturnStatusException {
 
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     Long incomplete = 0L;
@@ -11398,7 +11501,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     return path;
   }
-
   /**
    * Description of T_GetOpportunityAccommodations_SP (SQLConnection connection,
    * UUID oppkey, UUID session, UUID browserId) This Stored procedure gets the
@@ -11415,6 +11517,39 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @return result - MultiDataResultset
    */
   public SingleDataResultSet T_GetOpportunityAccommodations_SP (SQLConnection connection, UUID oppkey, UUID session, UUID browserId)
+      throws ReturnStatusException {
+    final String SQL_QUERY = "call t_getopportunityaccommodations (${oppkey}, ${session}, ${browserID})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppkey);
+    params.put ("session", session);
+    params.put ("browserID", browserId);
+
+    
+
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+  }
+  
+  /**
+   * 
+   * This is the Java version of t_getopportunityaccommodations stored procedure. This method is not used now. It is only needed when we want 
+   * to migrate the Mysql stored procedure t_getopportunityaccommodations to java.
+   * 
+   * Description of T_GetOpportunityAccommodations_SP (SQLConnection connection,
+   * UUID oppkey, UUID session, UUID browserId) This Stored procedure gets the
+   * following inputs - connection, oppkey, session and browser ID and returns a
+   * Single dataresult set which contains - Segment, AccType, accCode,
+   * isApproved and recordUsage
+   * 
+   * @param connection
+   *          - connection object
+   * @param oppkey
+   *          - oppkey(UUID)
+   * @param session
+   *          - session(UUID)
+   * @return result - MultiDataResultset
+   */
+  public SingleDataResultSet T_GetOpportunityAccommodations_SP_Java (SQLConnection connection, UUID oppkey, UUID session, UUID browserId)
       throws ReturnStatusException {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     _Ref<String> message = new _Ref<String> ();
@@ -11440,7 +11575,27 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return rs;
   }
 
+  public SingleDataResultSet T_GetItemGroup_SP (SQLConnection connection, UUID oppkey, int pageNumber, String groupID, String dateCreated, 
+      UUID session, UUID browserId, boolean validateAccess)
+      throws ReturnStatusException {
+    
+    final String SQL_QUERY = "call t_getitemgroup(${oppkey}, ${pageNumber}, ${groupID}, ${dateCreated},${session}, ${browserId},${validateAccess})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppkey);
+    params.put ("session", session);
+    params.put ("browserID", browserId);
+    params.put ("pageNumber", pageNumber);
+    params.put ("groupID", groupID);
+    params.put ("dateCreated", dateCreated);
+    params.put ("validateAccess", validateAccess);
+
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+  }
   /**
+   *     This is the Java version of t_getitemgroup stored procedure. This method is not used now. 
+   *     It is only needed when we want to migrate the Mysql stored procedure t_getitemgroup to java.
+   *     
    * Description of T_GetItemGroup_SP (SQLConnection connection, UUID oppkey,
    * int pageNumber, String groupID, String dateCreated, UUID session, UUID
    * browserId, boolean validateAccess )
@@ -11464,7 +11619,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @return result - MultiDataResultset
    */
   // Original port
-  public SingleDataResultSet T_GetItemGroup_SP (SQLConnection connection, UUID oppkey, int pageNumber, String groupID, String dateCreated, UUID session, UUID browserId, boolean validateAccess)
+  public SingleDataResultSet T_GetItemGroup_SP_Java (SQLConnection connection, UUID oppkey, int pageNumber, String groupID, String dateCreated, UUID session, UUID browserId, boolean validateAccess)
       throws ReturnStatusException {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     String testkey = null;

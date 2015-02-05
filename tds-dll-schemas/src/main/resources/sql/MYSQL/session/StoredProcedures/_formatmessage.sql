@@ -31,14 +31,14 @@ proc: begin
     create temporary table tmp_tblargs (
 		indx int
 	  , arg varchar(1000)
-	);
+	) engine = memory;
 
     if (tmp_tblargstring is not null) then
 	begin
 		/* Call _buildtable stored procedure 
 		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
 		drop temporary table if exists tblout_buildtable;
-		create temporary table tblout_buildtable(idx int, record varchar(255));
+		create temporary table tblout_buildtable(idx int, record varchar(255))engine = memory;
 			  
 		call _buildtable(tmp_tblargstring, ',');
 
@@ -52,7 +52,7 @@ proc: begin
 
     if (v_msgkey is null) then begin  -- no official message
                   
-        set v_msg = v_appkey + ' [-----]';
+        set v_msg = concat(v_appkey, ' [-----]');
         
         -- begin try
            insert into _missingmessages(application, contexttype, `context`, appkey, message) 
@@ -92,6 +92,11 @@ proc: begin
 	end while;
     
 	set v_msg = concat(v_msg, ' [', cast(v_msgid as char(10)), ']');
+
+
+	-- clean-up
+	drop temporary table tmp_tblargs;
+	drop temporary table tblout_buildtable;
 
 
 end $$

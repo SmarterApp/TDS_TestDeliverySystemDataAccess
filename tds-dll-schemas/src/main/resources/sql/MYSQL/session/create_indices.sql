@@ -167,9 +167,6 @@ create unique index `ix_sessionid`
 create index `ix_sessionproctor`
 	on `session`(`_efk_proctor`, `clientname`);
 
-create index `ix_syncresponseitem`
-	on `testeeresponse`(`_fk_testopportunity`, `_efk_itemkey`, `geosyncid`, `position`);
-
 create index `ix_testeeid`
 	on `testopportunity_readonly`(`testeeid`);
 

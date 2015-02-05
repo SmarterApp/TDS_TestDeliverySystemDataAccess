@@ -255,6 +255,13 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
               result.put ("TDS_ID", "DistrictID");
               result.put ("attval", rtsRecord.get ("entityId"));
               resultList.add (result);
+              
+              result = new CaseInsensitiveMap<Object> ();
+              result.put ("relationType", "District");
+              result.put ("entityKey", rtsRecord.get ("entityKey"));
+              result.put ("TDS_ID", "DistrictName");
+              result.put ("attval", rtsRecord.get ("entityName"));
+              resultList.add (result);
           }
           rtsRecord = packageReader.getRtsRecord ("ENRLINST-STUDENT");
           if (rtsRecord != null) {
@@ -264,8 +271,30 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
               result.put ("TDS_ID",  "SchoolID"); 
               result.put ("attval", rtsRecord.get ("entityId"));
               resultList.add (result);
+              
+              result = new CaseInsensitiveMap<Object> ();
+              result.put ("relationType", "School");
+              result.put ("entityKey", rtsRecord.get ("entityKey"));
+              result.put ("TDS_ID",  "SchoolName"); 
+              result.put ("attval", rtsRecord.get ("entityName"));
+              resultList.add (result);
             }
-       
+          rtsRecord = packageReader.getRtsRecord ("STATE-STUDENT");
+          if (rtsRecord != null) {
+            CaseInsensitiveMap<Object> result = new CaseInsensitiveMap<Object> ();
+            result.put ("relationType", "State");
+            result.put ("entityKey", rtsRecord.get ("entityKey"));
+            result.put ("TDS_ID",  "StateAbbreviation"); 
+            result.put ("attval", rtsRecord.get ("entityId"));
+            resultList.add (result);   
+            
+            result = new CaseInsensitiveMap<Object> ();
+            result.put ("relationType", "State");
+            result.put ("entityKey", rtsRecord.get ("entityKey"));
+            result.put ("TDS_ID",  "StateName"); 
+            result.put ("attval", rtsRecord.get ("entityName"));
+            resultList.add (result);  
+          }
         }
       } catch (RtsPackageReaderException e) {
         _logger.error (e.getMessage (), e);
@@ -650,7 +679,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
          result.put ("rtsKey", userKey);
          result.put ("TDS_Role", roleAssociation.getRole ());
          result.put ("InstitutionKey", roleAssociation.getAssociatedEntityId ());
-         result.put ("InstitutionName", roleAssociation.getAssociatedEntityId ());  //TODO: change this once ART returns it
+         result.put ("InstitutionName", roleAssociation.getAssociatedEntityName ());
          
          result.put ("InstitutionID", roleAssociation.getAssociatedEntityId ());
          result.put ("InstitutionType", roleAssociation.getLevel ());
@@ -1130,6 +1159,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           StudentPackage studentPackage = studentReader.getPackage (StudentPackage.class);
           Student student = studentPackage.getStudent ();
           attributes = new HashMap<> ();
+
           attributes.put ("LastName", studentReader.getFieldValue ("LglLNm"));
           attributes.put ("FirstName", studentReader.getFieldValue ("LglFNm"));
           attributes.put ("MiddleName", student.getMiddleName ());
@@ -1164,6 +1194,199 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   }
 
   @Override
+  public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientName, long testeeKey) {
+    
+    SingleDataResultSet result1 = new SingleDataResultSet ();
+    Map<String, String> attributes = null;
+    
+    List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
+    try {
+      byte[] packageObject = getStudentPackageByKeyAndClientName (connection, testeeKey, clientName);
+      if (packageObject != null) {
+        IRtsPackageReader studentReader = new StudentPackageReader ();
+        if (studentReader.read (packageObject)) {
+          StudentPackage studentPackage = studentReader.getPackage (StudentPackage.class);
+          Student student = studentPackage.getStudent ();
+                 
+          CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "LastName");         
+          rcd.put ("attval", studentReader.getFieldValue ("LglLNm"));         
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "FirstName");         
+          rcd.put ("attval", studentReader.getFieldValue ("LglFNm"));         
+          resultList.add (rcd);
+  
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "MiddleName");         
+          rcd.put ("attval", student.getMiddleName ());          
+          resultList.add (rcd);
+  
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "SSID");         
+          rcd.put ("attval", student.getStudentIdentifier ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "DOB");         
+          rcd.put ("attval", studentReader.getFieldValue ("BirthDtTxt"));          
+          resultList.add (rcd);
+                    
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "Gender");         
+          rcd.put ("attval", studentReader.getFieldValue ("Gndr"));          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "HispanicOrLatinoEthnicity");         
+          rcd.put ("attval", student.getHispanicOrLatinoEthnicity ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "AmericanIndianOrAlaskaNative");         
+          rcd.put ("attval", student.getAmericanIndianOrAlaskaNative ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "Asian");         
+          rcd.put ("attval", student.getAsian ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "BlackOrAfricanAmerican");         
+          rcd.put ("attval", student.getBlackOrAfricanAmerican ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "White");         
+          rcd.put ("attval", student.getWhite ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "NativeHawaiianOrOtherPacificIslander");         
+          rcd.put ("attval", student.getNativeHawaiianOrOtherPacificIslander ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "DemographicRaceTwoOrMoreRaces");         
+          rcd.put ("attval", student.getDemographicRaceTwoOrMoreRaces ());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "IDEAIndicator");         
+          rcd.put ("attval", student.getIDEAIndicator());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "LEPStatus");         
+          rcd.put ("attval", student.getLEPStatus());          
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "Section504Status");         
+          rcd.put ("attval", student.getSection504Status());          
+          resultList.add (rcd);
+  
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "EconomicDisadvantageStatus");         
+          rcd.put ("attval", student.getEconomicDisadvantageStatus());          
+          resultList.add (rcd);
+          
+          // SB-512
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "GradeLevelWhenAssessed");         
+          rcd.put ("attval", student.getGradeLevelWhenAssessed());          
+          resultList.add (rcd);
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "LEPExitDate");             
+          if (student.getLEPExitDate () == null) {         
+            rcd.put ("attval", "");                              
+          } else {      
+            rcd.put ("attval", DateTime.getFormattedDate (student.getLEPExitDate (), "yyyy-MM-dd"));          
+          }
+          resultList.add (rcd); 
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "AlternateSSID");         
+          rcd.put ("attval", student.getAlternateSSID ());          
+          resultList.add (rcd);
+
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "MigrantStatus");   
+          if (student.getMigrantStatus () == null) {        
+            rcd.put ("attval", "");         
+          } else {
+            rcd.put ("attval", student.getMigrantStatus ());                 
+          }
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "LanguageCode");   
+          if (student.getLanguageCode () == null) {        
+            rcd.put ("attval", "");         
+          } else {
+            rcd.put ("attval", student.getLanguageCode ());                 
+          }
+          resultList.add (rcd);
+
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "EnglishLanguageProficiencLevel");   
+          if (student.getEnglishLanguageProficiencyLevel () == null) {        
+            rcd.put ("attval", "");         
+          } else {
+            rcd.put ("attval", student.getEnglishLanguageProficiencyLevel ());                 
+          }
+          resultList.add (rcd);
+
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "FirstEntryDateIntoUSSchool");   
+          if (student.getFirstEntryDateIntoUSSchool () == null) {        
+            rcd.put ("attval", "");         
+          } else { 
+            rcd.put ("attval", DateTime.getFormattedDate (student.getFirstEntryDateIntoUSSchool (), "yyyy-MM-dd"));                 
+          }
+          resultList.add (rcd);          
+
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "LimitedEnglishProficiencyEntryDate");   
+          if (student.getLimitedEnglishProficiencyEntryDate () == null) {        
+            rcd.put ("attval", "");         
+          } else {
+            rcd.put ("attval", DateTime.getFormattedDate (student.getLimitedEnglishProficiencyEntryDate (), "yyyy-MM-dd"));                 
+          }
+          resultList.add (rcd);
+
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "TitleIIILanguageInstructionProgramType");   
+          if (student.getTitleIIILanguageInstructionProgramType () == null) {        
+            rcd.put ("attval", "");         
+          } else {
+            rcd.put ("attval", student.getTitleIIILanguageInstructionProgramType ());                 
+          }
+          resultList.add (rcd);
+          
+          rcd = new CaseInsensitiveMap<Object> ();
+          rcd.put ("tds_id", "PrimaryDisabilityType");   
+          if (student.getPrimaryDisabilityType () == null) {        
+            rcd.put ("attval", "");         
+          } else {
+            rcd.put ("attval", student.getPrimaryDisabilityType ());                 
+          }
+          resultList.add (rcd);           
+        }
+      }
+      result1.addColumn ("tds_id", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+      result1.addColumn ("attval", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+      result1.addRecords (resultList);
+      
+    } catch (RtsPackageReaderException | ReturnStatusException e) {
+      _logger.error (e.getMessage (), e);
+    } 
+    return result1;
+  }
+
+  @Override
   public Map<String, String> getTesteeRelationships (SQLConnection connection, String clientName, long testeeKey) {
     Map<String, String> attributes = null;
     try {
@@ -1189,7 +1412,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return attributes;
   }
 
-  public String getTrTestId (SQLConnection connection,  String testeeId, String testKey) {
+  public String getTrTestId (SQLConnection connection, String testeeId, String testKey) {
     try {
       _Ref<Long> testeeKey = new _Ref<> ();
       _GetRTSEntity_SP(connection, _clientName, testeeId, "STUDENT",  testeeKey);

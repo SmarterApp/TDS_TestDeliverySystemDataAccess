@@ -5,7 +5,7 @@ create table `auditaccommodations`  (
 	`datealtered`        	datetime(3) not null, -- constraint `df__auditacco__datea__2e11baa1`  default (getdate()),
 	`accvalue`           	varchar(250) null,
 	`hostname`           	varchar(50) null, -- constraint `df__auditacco__hostn__2f05deda`  default (host_name()),
-	`dbname`             	varchar(50) not null -- constraint `df__auditacco__dbnam__4ab81af0`  default (db_name()) 
+	`dbname`             	varchar(50) null
 	)default charset = UTF8;
 
 create table `opportunityaudit`  ( 
@@ -18,7 +18,7 @@ create table `opportunityaudit`  (
 	`_fk_browser`        	varbinary(16) null,
 	`comment`            	text null,
 	`actor`              	varchar(100) null,
-	`dbname`             	varchar(50) not null, -- constraint `df__opportuni__dbnam__4f7cd00d`  default (db_name()),
+	`dbname`             	varchar(50) null, -- constraint `df__opportuni__dbnam__4f7cd00d`  default (db_name()),
 	`satellite`          	varchar(200) null 
 	)default charset = UTF8;
 
@@ -36,7 +36,7 @@ create table `opportunityclient`  (
 	`macaddress`         	varchar(255) null,
 	`localip`            	varchar(255) null,
 	`texttospeech`       	varchar(100) null,
-	`dbname`             	varchar(255) not null -- constraint `df__opportuni__dbnam__52593cb8`  default (db_name()) 
+	`dbname`             	varchar(255) null
 	)default charset = UTF8;
 
 create table `serverlatency`  ( 
@@ -54,7 +54,7 @@ create table `serverlatency`  (
 	`pagelist`           	varchar(200) null,
 	`itemlist`           	varchar(1000) null,
 	`clientname`         	varchar(100) null,
-	`dbname`             	varchar(50) not null -- constraint `df__serverlat__dbnam__5fb337d6`  default (db_name()) 
+	`dbname`             	varchar(50) null
 	)default charset = UTF8;
 
 create table `serverlatencyarchive`  ( 
@@ -75,7 +75,7 @@ create table `serverlatencyarchive`  (
 	`source`             	varchar(50) null, -- constraint `df__serverlat__sourc__276edeb3`  default (db_name()),
 	`_fk_testopportunity`	varbinary(16) null,
 	`datearchived`       	datetime(3) not null, -- constraint `df__serverlat__dater__37a5467c`  default (getdate()),
-	`dbname`             	varchar(50) not null -- constraint `df__serverlat__dbnam__60a75c0f`  default (db_name()) 
+	`dbname`             	varchar(50) null 
 	)default charset = UTF8;
 
 create table `sessionaudit`  ( 
@@ -84,7 +84,7 @@ create table `sessionaudit`  (
 	`accesstype`  	varchar(50) not null,
 	`hostname`    	nchar(50) null, -- constraint `df_sessionaudit_hostname`  default (host_name()),
 	`browserkey`  	varbinary(16) not null,
-	`dbname`      	varchar(50) not null  -- constraint `df__sessionau__dbnam__5be2a6f2`  default (db_name()) 
+	`dbname`      	varchar(50) null
 	)default charset = UTF8;
 
 create table `systemclient`  ( 
@@ -95,7 +95,7 @@ create table `systemclient`  (
 	`proxyip`     	varchar(16) null,
 	`useragent`   	varchar(255) null,
 	`daterecorded`	datetime(3) not null, -- constraint `df_systemclient_daterecorded`  default (getdate()),
-	`dbname`      	varchar(50) not null  -- constraint `df__systemcli__dbnam__5aee82b9`  default (db_name()) 
+	`dbname`      	varchar(50) null
 	)default charset = UTF8;
 
 create table `systemerrors`  ( 
@@ -113,7 +113,7 @@ create table `systemerrors`  (
 	`_fk_testopportunity` 	varbinary(16) null,
 	`clientname`          	varchar(100) null,
 	`_fk_session`         	varbinary(16) null,
-	`dbname`              	varchar(50) not null -- constraint `df__systemerr__dbnam__619b8048`  default (db_name()) 
+	`dbname`              	varchar(50) null
 	)default charset = UTF8;
 
 create table `systemerrorsarchive`  ( 
@@ -132,7 +132,7 @@ create table `systemerrorsarchive`  (
 	`environment`         	varchar(50) null,
 	`source`              	varchar(50) null, -- constraint `df__systemerr__sourc__29572725`  default (db_name()),
 	`datearchived`        	datetime(3) not null, -- constraint `df__systemerr__datea__38996ab5`  default (getdate()),
-	`dbname`              	varchar(50) not null, -- constraint `df__systemerr__dbnam__628fa481`  default (db_name()),
+	`dbname`              	varchar(50) null,
 	`_fk_testopportunity` 	varbinary(16) null,
 	`_fk_session`         	varbinary(16) null 
 	)default charset = UTF8;
@@ -146,7 +146,7 @@ create table `testopportunityscores_audit`  (
 	`isofficial`         	bit null,
 	`_date`              	datetime(3) null, -- constraint `df__testoppor___date__141cde74`  default (getdate()),
 	`subject`            	varchar(100) null,
-	`dbname`             	varchar(50) not null -- constraint `df__testoppor__dbnam__5812160e`  default (db_name()) 
+	`dbname`             	varchar(50) null
 	)default charset = UTF8;
 
 create table `_dblatency`  ( 
@@ -160,7 +160,7 @@ create table `_dblatency`  (
 	`_fk_testopportunity`	varbinary(16) null,
 	`clientname`         	varchar(100) null,
 	`_fk_session`        	varbinary(16) null,
-	`dbname`             	varchar(50) not null, -- constraint `df___dblatenc__dbnam__5cd6cb2b`  default (db_name()),
+	`dbname`             	varchar(50) null,
 	`comment`            	varchar(500) null 
 	)default charset = UTF8;
 
@@ -176,7 +176,7 @@ create table `_dblatencyarchive`  (
 	`environment`        	varchar(50) null,
 	`source`             	varchar(50) null, -- constraint `df___dblatenc__sourc__24927208`  default (db_name()),
 	`datearchived`       	datetime(3) not null, -- constraint `df___dblatenc__dater__36b12243`  default (getdate()),
-	`dbname`             	varchar(50) not null, -- constraint `df___dblatenc__dbnam__5dcaef64`  default (db_name()),
+	`dbname`             	varchar(50) null,
 	`_fk_session`        	varbinary(16) null,
 	`_fk_testopportunity`	varbinary(16) null 
 	)default charset = UTF8;
@@ -193,6 +193,6 @@ create table `_dblatencyreports`  (
 	`environment` 	varchar(50) null,
 	`source`      	varchar(50) null, -- constraint `df___dblatenc__sourc__25869641`  default (db_name()),
 	`daterecorded`	datetime(3) not null, -- constraint `df___dblatenc__dater__35bcfe0a`  default (getdate()),
-	`dbname`      	varchar(50) not null -- constraint `df___dblatenc__dbnam__5ebf139d`  default (db_name()) 
+	`dbname`      	varchar(50) null
 	)default charset = UTF8;
 

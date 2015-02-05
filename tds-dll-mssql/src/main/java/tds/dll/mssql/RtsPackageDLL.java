@@ -968,4 +968,9 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return null;
   }
 
+  @Override
+  public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientname, long testee) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

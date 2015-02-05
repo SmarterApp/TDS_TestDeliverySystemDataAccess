@@ -61,7 +61,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 	final static String EMPTY = "";
 	final static String LIKESTRING1 = "I-";
 	final static String LIKESTRING2 = "\'(Delaware)%Read%\'";
-	final static String LANGUAGE = "\'Language\'";
+	final static String LANGUAGE = "Language";
 
 	/**
 	 * Comments from C#: public void GetItemCandidates(string oppkey, ref string
@@ -2262,8 +2262,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		SingleDataResultSet res;
 		DbResultRecord record;
 
-		final String SQL_QUERY = " select _efk_TestID as testID, clientname, _fk_Session as session"
-				+ "from testopportunity where _key = @oppkey ";
+		final String SQL_QUERY = " select _efk_TestID as testID, clientname, _fk_Session as session "
+				+ " from testopportunity where _key = ${oppkey} ";
 
 		SqlParametersMaps parameters = new SqlParametersMaps().put("oppkey",
 				oppkey);
@@ -2277,7 +2277,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		}
 
 		final String SQL_QUERY1 = " select AccCode as language from testeeaccommodations "
-				+ " where _fk_TestOPportunity = ${oppkey} and AccType = ${language} ";
+				+ " where _fk_TestOpportunity = ${oppkey} and AccType = ${language} ";
 
 		parameters.put("language", LANGUAGE);
 
@@ -2291,30 +2291,31 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ " from ${ItemBankDB}.tblsetofadminitems I  "
 				+ ", ${ConfigDB}.client_test_itemconstraint C1  ,"
 				+ " testeeaccommodations A1  , ${ItemBankDB}.tblitemprops P1  "
-				+ " where I._fk_AdminSUbject = ${segmentKey) "
+				+ " where I._fk_AdminSUbject = ${segmentKey} "
 				+ " and C1.Clientname = ${clientname} and C1.testID =${testID} and C1.item_in = 1 "
 				+ " and A1._fk_TestOpportunity = ${oppkey} and A1.AccType = C1.ToolType "
 				+ " and A1.AccCode = C1.ToolValue "
-				+ " and P1._fk_AdminSubject =${segmentKey) and P1._fk_Item  = I._fk_Item "
+				+ " and P1._fk_AdminSubject =${segmentKey} and P1._fk_Item  = I._fk_Item "
 				+ " and P1.Propname = C1.propname and P1.Propvalue = C1.Propvalue and P1.isActive = 1 "
-				+ " and not exist "
-				+ "  (select * from ${ConfigDB}.client_test_itemconstraint C2  "
+				+ " and not exists "
+				+ " (select * from ${ConfigDB}.client_test_itemconstraint C2  "
 				+ ", testeeaccommodations A2  ,  ${ItemBankDB}.tblitemprops P2   "
 				+ " where A2._fk_TestOpportunity = ${oppkey} "
 				+ " and C2.Clientname = ${clientname} and C2.testID = ${testID} and C2.item_in = 0 "
 				+ " and A2.AccType = C2.ToolType and A2.AccCode = C2.ToolValue "
-				+ " and P2._fk_AdminSubject = ${segmentKey) and P2._fk_Item  = I._fk_Item "
+				+ " and P2._fk_AdminSubject = ${segmentKey} and P2._fk_Item  = I._fk_Item "
 				+ " and P2.Propname = C2.propname and P2.Propvalue = C2.Propvalue and P2.isActive = 1 "
 				+ " )"
 				// -- there should be the same number of records per item as
 				// there are
 				// item_in constraints, check in the 'having' clause
 				+ " group by I._fk_ITem "
+				+ " having count(*) = "
 				+ " (select count(*) from ${ConfigDB}.client_test_itemconstraint C1  "
 				+ ", testeeaccommodations A1  "
 				+ " where C1.Clientname =  ${clientname} and C1.testID = ${testID} and C1.item_in = 1 "
 				+ " and A1._fk_TestOpportunity = ${oppkey} and A1.AccType = C1.ToolType "
-				+ " and A1.AccCode = C1.ToolValue " + "  )";
+				+ " and A1.AccCode = C1.ToolValue  )";
 
 		parameters.put("segmentKey", segmentKey).put("clientname", clientname)
 				.put("testID", testID);
@@ -3590,14 +3591,16 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		Date startTime = _dateUtil.getDateWRetStatus(connection);
 
 		SingleDataResultSet outRes = null;
+		SingleDataResultSet res1;
 
-		final String outQuery = "select ${status} as status, ${reason} as reson";
+		final String outQuery = "select ${status} as status, ${reason} as reason";
 
 		SqlParametersMaps parameters = new SqlParametersMaps().put("oppkey",
 				oppkey);
 		String accType = "TDSPoolFilter";
 		String accCode1 = poolfilterProperty + " IN";
 		String accCode2 = poolfilterProperty + " OUT";
+		String itempool = null;
 
 		final String query = "select * from testeeaccommodations "
 				+ " where _fk_TestOpportunity = ${oppkey} and AccType = ${accType} and AccCode = ${accCode1}";
@@ -3653,27 +3656,33 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			// in this place AA_AddOffgradeItems_SP uses _AA_ItemPoolString_2014_FN
 			// TODO ?
 			poolstring = _AA_ItemPoolString_FN(connection, oppkey, segkey);
-			if(poolstring == null)
-			{
-				poolstring = "";
+			
+			final String query45 = "select itempool from TestOpportunitySegment where _fk_TestOpportunity = ${oppkey} and _efk_Segment = ${segkey}";
+			parameters.put("segkey", segkey);
+			res1 = executeStatement(connection, query45, parameters, true).getResultSets().next();
+			record = res1.getCount() > 0 ? res1.getRecords().next() : null;
+			if (record != null) {
+				itempool = record.<String> get("itempool");
 			}
-			else
+
+			if(poolstring != null)
 			{
-				poolstring = "," + poolstring;
+				itempool = itempool + "," + poolstring;
 			}
-			final String query5 = "update TestOpportunitySegment set itempool = itempool +  ${poolstring}, "
+			final String query5 = "update TestOpportunitySegment set itempool =  ${itempool}, "
 					+ " offgradeItems = ${poolfilterProperty} "
 					+ " where _fk_TestOpportunity = ${oppkey} and _efk_Segment = ${segkey}";
-			parameters.put("poolstring", poolstring);
+			parameters.put("itempool", itempool);
 			updateCnt = executeStatement(connection, query5, parameters, true).getUpdateCount();
 		}
 		
-		final String query6 = "insert into OpportunityAudit (_fk_TestOpportunity, AccessType, comment) "
-				+ " values (${oppkey}, ${setoffgrade}, ${poolfilterProperty})";
-		parameters.put("setoffgrade", "SET OFFGRADE");
-		int insertCnt = executeStatement(connection, query6, parameters, true).getUpdateCount();
+		String sessionDB = getTdsSettings ().getTDSSessionDBName ();
+		final String query6 = "insert into ${ArchiveDB}.OpportunityAudit (_fk_TestOpportunity, AccessType, comment, dateaccessed, dbname) "
+				+ " values (${oppkey}, ${setoffgrade}, ${poolfilterProperty}, now(3), ${sessionDB})";
+		parameters.put("setoffgrade", "SET OFFGRADE").put("sessionDB", sessionDB);
+		int insertCnt = executeStatement(connection, fixDataBaseNames(query6), parameters, true).getUpdateCount();
 
-		parameters.put("status", "success").put("reason", null);
+		parameters.put("status", "success").put("reason", ""); // empty String not null
 		outRes = executeStatement(connection, outQuery, parameters, true).getResultSets().next();
 		
 		_commonDll._LogDBLatency_SP(connection, "AA_AddOffgradeItems_SP",

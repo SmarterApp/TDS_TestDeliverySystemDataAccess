@@ -1201,7 +1201,8 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     }
     //TODO Elena : proposal to use getTesteeAttributesAsSet method from RtsDLLPackage here
     // instead of _GetTesteeAttributes
-    SingleDataResultSet resultSet1 = _GetTesteeAttributes_SP (connection, clientname, testee);
+    //SingleDataResultSet resultSet1 = _GetTesteeAttributes_SP (connection, clientname, testee);
+    SingleDataResultSet resultSet1 = _rtsDll.getTesteeAttributesAsSet (connection, clientname, testee);
     resultSet1.addColumn ("_fk_TestOpportunity", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
     resultSet1.addColumn ("context", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
     resultSet1.addColumn ("_date", SQL_TYPE_To_JAVA_TYPE.DATETIME);
@@ -1253,8 +1254,15 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         sofar = "Fifth. ";
       }
 
+      //TODO. Elena: note that we ignore entitytype value from resultset,
+      // i.e. value read from r_stidentpackage table and  use 0 to insert into
+      // testeerelationship.entitykey column
+      // It is done because entitykey from r_stidentpackage may be not  numeric and
+      // testeerelationship.entitykey is a bigint.
+      // This testeerelationship.entitykey value is read and used only once, 
+      // in T_RecordClientLatency  method which is obsolete.
       final String SQL_INSERT6 = "insert into testeerelationship (_fk_TestOpportunity, context, relationship, TDS_ID, entitykey, attributeValue, _date)"
-          + " values ( ${_fk_TestOpportunity}, ${context}, ${relationtype}, ${tds_ID}, ${entitykey}, ${attval}, ${_date} )";
+          + " values ( ${_fk_TestOpportunity}, ${context}, ${relationtype}, ${tds_ID}, 0, ${attval}, ${_date} )";
       // select relationType, entityKey, attname as TDS_ID, attval
 
       insertedCnt = insertBatch (connection, SQL_INSERT6, resultSet2, null);
@@ -2380,10 +2388,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   public SingleDataResultSet SubmitQAReport_SP (SQLConnection connection, UUID oppkey, String statusChange) throws ReturnStatusException
   {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
-    // BufferedWriter writer = null;
-    //String xmlFile = null;
-    //String file = null;
-    //SingleDataResultSet res = null;
+    String xmlFile = null;
+    String file = null;
+    SingleDataResultSet res = null;
     String status = null;
 
     final String cmd = "select status from testopportunity where _Key = ${oppkey}";
@@ -2405,6 +2412,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     int insertedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
     
     _LogDBLatency_SP (connection, "SubmitQAReport", starttime, null, true, null, oppkey);
+    
     return ReturnStatusReason ("success", null);
 
 //    String currentRes = null;
@@ -2416,11 +2424,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 //    }
 //
 //    try {
-//
-//      // String userdir = System.getProperty ("user.dir");
-//      // file = userdir + "\\testlogs\\XML-Reports\\XML-Report";
-//      // xmlFile = file + oppkey.toString ();
-//      // xmlFile = xmlFile + ".xml";
 //      String dir = getTdsSettings ().getTDSReportsRootDirectory ();
 //      if (dir == null) {
 //        throw new Exception ("No TDSReportingRootDirectory configured in property file!");

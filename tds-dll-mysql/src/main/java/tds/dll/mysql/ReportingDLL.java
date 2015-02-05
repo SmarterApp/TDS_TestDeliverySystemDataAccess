@@ -394,17 +394,21 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       String finalContextDate 	= formatXSDateTime(getContextDate(connection, oppkey, FINAL));
 
       context = INITIAL;
-      strBuilder.append(getTesteeAttributes(_rtsReporting.getTesteeAttributes(connection, clientname, testee), context, initialContextDate));	      
+      //strBuilder.append(getTesteeAttributes(_rtsReporting.getTesteeAttributes(connection, clientname, testee), context, initialContextDate));	 
+      strBuilder.append(getTesteeAttributes(readTesteeAttributes(connection, oppkey, context), context, initialContextDate));        
 
       context = FINAL;	      
-      strBuilder.append(getTesteeAttributes(_rtsReporting.getTesteeAttributes(connection, clientname, testee), context, finalContextDate));
+      //strBuilder.append(getTesteeAttributes(_rtsReporting.getTesteeAttributes(connection, clientname, testee), context, finalContextDate));
+      strBuilder.append(getTesteeAttributes(readTesteeAttributes(connection, oppkey, context), context, finalContextDate));
 
       context = INITIAL;
-      strBuilder.append(getTesteeRelationships(_rtsReporting.getTesteeRelationships(connection, clientname, testee), context, initialContextDate));
+      //strBuilder.append(getTesteeRelationships(_rtsReporting.getTesteeRelationships(connection, clientname, testee), context, initialContextDate));
+      strBuilder.append(getTesteeRelationships(readTesteeRelationships(connection, oppkey, context), context, initialContextDate));
 
       context = FINAL;	      
-      strBuilder.append(getTesteeRelationships(_rtsReporting.getTesteeRelationships(connection, clientname, testee), context, finalContextDate));
-      
+      //strBuilder.append(getTesteeRelationships(_rtsReporting.getTesteeRelationships(connection, clientname, testee), context, finalContextDate));
+      strBuilder.append(getTesteeRelationships(readTesteeRelationships(connection, oppkey, context), context, finalContextDate));
+     
       strBuilder.append ("</").append(TESTEE_NODE_NAME).append(">");
 
     } catch (Exception e)
@@ -1944,13 +1948,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 				  "Section504Status",
 				  "EconomicDisadvantageStatus",
 				  "MigrantStatus",
-				  "ConfirmationCode",
+//				  "ConfirmationCode",
 				  "LanguageCode",
 				  "EnglishLanguageProficiencLevel",
 				  "FirstEntryDateIntoUSSchool",
 				  "LimitedEnglishProficiencyEntryDate",
 				  "LEPExitDate",
-				  //"GradeLevelWhenAssessed",
 				  "TitleIIILanguageInstructionProgramType",
 				  "PrimaryDisabilityType"
 				  ));
@@ -1958,8 +1961,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		  new2OldAttrNames.put("Birthdate","DOB");
 		  new2OldAttrNames.put("Sex", "Gender");//
 		  new2OldAttrNames.put("LastOrSurname","LastName");
-		  //new2OldAttrNames.put("StudentIdentifier","SSID");
-		  new2OldAttrNames.put("AlternateSSID", "SSID");//
+		  new2OldAttrNames.put("StudentIdentifier","SSID");
+		  //new2OldAttrNames.put("AlternateSSID", "SSID");//
 		  
 		  Set<String> attrNames = testeeAttributes.keySet();
 		  String mapKey = null;
@@ -2087,7 +2090,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   protected String getContextDate(SQLConnection connection, UUID oppkey, String context) throws ReturnStatusException
   {
 	  String contextDate = "";
-      String query = "select _date as date from session.testeerelationship where context = ${context} and _fk_testopportunity = ${oppkey} limit 1";
+      String query = "select _date as date from testeerelationship where context = ${context} and _fk_testopportunity = ${oppkey} limit 1";
       SqlParametersMaps parameters = new SqlParametersMaps ().put ("oppkey", oppkey).put("context", context);
       SingleDataResultSet result = executeStatement (connection, query, parameters, false).getResultSets ().next ();
       DbResultRecord record = result.getCount () > 0 ? result.getRecords ().next () : null;
@@ -2414,5 +2417,35 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
 	    	  academicYear = "";	      
 	      }
 	      return academicYear;
+  }
+  
+  protected Map<String, String> readTesteeAttributes (SQLConnection con, UUID oppkey, String context) throws ReturnStatusException {
+    Map<String, String> attributes = new HashMap<> ();
+    
+    final String query = "select tds_id, attributevalue from testeeattribute where _fk_testopportunity = ${oppkey}"
+        + " and context = ${context}";
+    SqlParametersMaps parameters = new SqlParametersMaps ().put ("oppkey", oppkey).put("context", context);
+    SingleDataResultSet result = executeStatement (con, query, parameters, false).getResultSets ().next ();
+    Iterator<DbResultRecord> records = result.getRecords ();
+    while (records.hasNext ()) {
+      DbResultRecord record = records.next ();
+      attributes.put (record.<String>get("tds_id"), record.<String> get("attributevalue"));     
+    }
+    return attributes;
+  }
+  
+  protected Map<String, String> readTesteeRelationships (SQLConnection con, UUID oppkey, String context) throws ReturnStatusException {
+    Map<String, String> attributes = new HashMap<> ();
+    
+    final String query = "select tds_id, attributevalue from testeerelationship where _fk_testopportunity = ${oppkey}"
+        + " and context = ${context}";
+    SqlParametersMaps parameters = new SqlParametersMaps ().put ("oppkey", oppkey).put("context", context);
+    SingleDataResultSet result = executeStatement (con, query, parameters, false).getResultSets ().next ();
+    Iterator<DbResultRecord> records = result.getRecords ();
+    while (records.hasNext ()) {
+      DbResultRecord record = records.next ();
+      attributes.put (record.<String>get("tds_id"), record.<String> get("attributevalue"));     
+    }
+    return attributes;
   }
 }
