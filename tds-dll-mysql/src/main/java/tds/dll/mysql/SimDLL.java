@@ -3006,6 +3006,99 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         .put ("name", name).put ("value", value).put ("label", label);
     executeStatement (connection, cmd, parms, false);
   }
+    
+  @Override
+  public MultiDataResultSet SIM_GetSessionForPublish (SQLConnection connection, UUID sessionKey)
+      throws ReturnStatusException {
+    List<SingleDataResultSet> resultsets = new ArrayList<SingleDataResultSet> ();
+
+    SqlParametersMaps parms = (new SqlParametersMaps ())
+        .put ("sessionkey", sessionKey)
+        .put ("strand", "Strand").put ("contentlevel", "ContentLevel").put ("affinitygroup", "AffinityGroup");
+
+    // Session information
+    final String cmd1 = " select S._efk_proctor, S.proctorid,  S.proctorname, S.sessionid, S.status, "
+        + " S.name, S.description, S.datecreated, S.clientname, S.sim_language "
+        + " from session S "
+        + " where S._key=${sessionkey} ";
+
+    SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms, false).getResultSets ().next ();
+    resultsets.add (rs1);
+
+    // Session test information
+    final String cmd2 = " select S._efk_adminsubject, S._efk_testid, s.iterations, S.opportunities, "
+        + " S.meanproficiency, S.sdproficiency, S.strandcorrelation, S.handscoreitemtypes "
+        + " from sessiontests S "
+        + " where S._fk_session=${sessionkey} ";
+
+    SingleDataResultSet rs2 = executeStatement (connection, cmd2, parms, false).getResultSets ().next ();
+    resultsets.add (rs2);
+
+    // Segment information
+    final String cmd3 = " select S._efk_adminsubject, S._efk_segment, S.startability, S.startinfo, "
+        + " S.minitems, S.maxitems, S.ftstartpos, S.ftendpos, S.ftminitems, S.ftmaxitems, "
+        + " S.formselection, S.blueprintweight, S.cset1size, S.cset2random, S.cset2initialrandom, "
+        + " S.loadconfig, S.updateconfig, S.itemweight, S.abilityoffset, S.rcabilityweight, S.abilityweight, "
+        + " S.precisiontargetnotmetweight, S.precisiontargetmetweight, S.precisiontarget, S.adaptivecut, "
+        + " S.toocloseses, S.terminationmincount, S.terminationoverallinfo, S.terminationrcinfo, "
+        + " S.terminationtooclose, S.terminationflagsand, S.segmentposition, S.segmentid, S.selectionalgorithm, "
+        + " S.cset1order, A._efk_blueprint, ${ItembankDB}.testbankkey(S._efk_adminsubject) as bankkey, S.segmentid "
+        + " from sim_segment S, ${ItembankDB}.tblsetofadminsubjects A"
+        + " where S._fk_session = ${sessionkey} and S._efk_segment = A._key ";
+    SingleDataResultSet rs3 = executeStatement (connection, fixDataBaseNames (cmd3), parms, false).getResultSets ().next ();
+    resultsets.add (rs3);
+
+    // Strand or ContentLevel information
+    final String cmd4 = "select S._efk_segment, S.contentlevel, S.minitems, S.maxitems, S.adaptivecut, "
+        + " S.startability, S.startinfo, S.scalar, S.isstrictmax, S.bpweight, S.abilityweight, "
+        + " S.precisiontargetnotmetweight, S.precisiontargetmetweight, S.precisiontarget, S1.name, "
+        + " CASE S1.treeLevel when 1 then 'Strand' else 'ContentLevel'end as objectType "
+        + " from sim_segmentcontentlevel S, ${ItembankDB}.tblstrand S1 "
+        + " where S._fk_Session = ${sessionkey} and S.contentlevel=S1._Key ";
+    SingleDataResultSet rs4 = executeStatement (connection, fixDataBaseNames (cmd4), parms, false).getResultSets ().next ();
+    resultsets.add (rs4);
+
+    // Affinity Group
+    final String cmd5 = "select S._efk_segment, S.contentlevel, S.minitems, S.maxitems, "
+        + " S.adaptivecut, S.startability, S.startinfo, S.scalar, S.isstrictmax, S.bpweight, "
+        + " S.abilityweight, S.precisiontargetnotmetweight, S.precisiontargetmetweight, S.precisiontarget, "
+        + " S.contentlevel, ${affinitygroup} as objectType "
+        + " from sim_segmentcontentlevel S, ${ItembankDB}.affinitygroup A"
+        + " where S._fk_Session = ${sessionkey} and S.contentlevel = A.groupid and S._efk_segment = A._fk_adminsubject";
+    SingleDataResultSet rs5 = executeStatement (connection, fixDataBaseNames (cmd5), parms, false).getResultSets ().next ();
+    resultsets.add (rs5);
+
+    // Item Groups
+    final String cmd6 = "select S._efk_segment, S.groupid, S.maxitems, T._efk_itskey "
+        + " from sim_itemgroup S, ${ItembankDB}.tbladminstimulus A, ${ItembankDB}.tblStimulus T "
+        + " where S._fk_session = ${sessionkey} and  S._efk_segment= A._fk_adminsubject and "
+        + " S.groupid = A.groupid and A._fk_stimulus = T._key ";
+    SingleDataResultSet rs6 = executeStatement (connection, fixDataBaseNames (cmd6), parms, false).getResultSets ().next ();
+    resultsets.add (rs6);
+
+    // Items
+    final String cmd7 = "select S._efk_segment, S._efk_item, S.isactive, S.isrequired, "
+        + " S.isfieldtest, S.strand, S.groupid, I._efk_item "
+        + " from sim_segmentitem S, ${ItembankDB}.tblSetofAdminItems A, ${ItembankDB}.tblItem I "
+        + " where S._fk_session = ${sessionkey} and S._efk_segment = A._fk_adminsubject and "
+        + " S._efk_item = A._fk_item and A._fk_item = I._key";
+    SingleDataResultSet rs7 = executeStatement (connection, fixDataBaseNames (cmd7), parms, false).getResultSets ().next ();
+    resultsets.add (rs7);
+
+    return new MultiDataResultSet (resultsets);
+  }
+  
+  @Override
+  public SingleDataResultSet SIM_GetSessionTestPackage (SQLConnection connection, UUID sessionKey, String testKey)
+      throws ReturnStatusException {
+    final String cmd = "select T._key, T.testpackage as testpackage "
+        + " from ${ItembankDB}.tbltestpackage T, ${ItembankDB}.tbladminsubjecttestpackage A, sim_sessiontestpackage S "
+        + " where A._fk_adminsubject = ${testkey} and A._fk_testpackage = T._key and T._key = S._fk_testpackage limit 1";
+    SqlParametersMaps parms = (new SqlParametersMaps ())
+        .put ("sessionkey", sessionKey).put ("testkey", testKey);
+    SingleDataResultSet rs = executeStatement (connection,  fixDataBaseNames (cmd), parms, false).getResultSets ().next ();
+    return rs;    
+  }
 
   private String getClientnameFromSession (SQLConnection connection, UUID session) throws ReturnStatusException {
     String client = null;
@@ -3075,5 +3168,5 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       _logger.error (String.format ("SIM_CreateItemSelectionParameters failed: %s", e.getMessage ()));
       throw new ReturnStatusException (e);
     }
-  }
+  }  
 }

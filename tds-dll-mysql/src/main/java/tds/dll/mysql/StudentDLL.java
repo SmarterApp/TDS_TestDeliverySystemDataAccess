@@ -40,10 +40,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import tds.dll.api.ICommonDLL;
 import tds.dll.api.IReportingDLL;
 import tds.dll.api.IRtsDLL;
 import tds.dll.api.IStudentDLL;
-import tds.dll.api.ICommonDLL;
 import tds.dll.api.LogDBErrorArgs;
 import tds.dll.api.LogDBLatencyArgs;
 import tds.dll.api.ReturnErrorArgs;
@@ -225,7 +225,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms = new SqlParametersMaps ().put ("sessionKey", sessionKey).put ("oppkey", oppKey).put ("itempage", itempage)
         .put ("itemposition", itemposition).put ("requestType", requestType).put ("requestValue", requestValue).put ("requestParameters", requestParameters)
         .put ("requestDescription", requestDescription);
-    int insertedCnt = executeStatement (connection, SQL_INSERT, parms, false).getUpdateCount ();
+    executeStatement (connection, SQL_INSERT, parms, false).getUpdateCount ();
     // System.err.println (insertedCnt); // for testing
   }
 
@@ -268,7 +268,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   // commented because its code is inlined in IB_ListTests
   public DataBaseTable ListClientTests_FN (SQLConnection connection, String clientName, Integer sessionType) throws ReturnStatusException {
 
-    Date now = _dateUtil.getDateWRetStatus (connection);
     final DataBaseTable clientTestsTable = getDataBaseTable ("ClientTests").addColumn ("TestId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("GradeCode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
         .addColumn ("Subject", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("LanguageCode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("Language", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255)
         .addColumn ("selectionAlgorithm", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("DisplayName", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("SortOrder", SQL_TYPE_To_JAVA_TYPE.INT)
@@ -1130,7 +1129,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
 
         MultiDataResultSet sets = executeStatement (connection, fixDataBaseNames (SQL_INSERT), parms, false);
-        int insertCnt = sets.getUpdateCount ();
+        sets.getUpdateCount ();
         _commonDll.P_PauseSession_SP (connection, session, proctor, sessionBrowser);
         message.set ("The session is not available for testing, please check with your test administrator.");
         return;
@@ -1291,7 +1290,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
       SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("visitDate", visitDate).put ("now", starttime).put ("visitCount", visitCount).put ("oppkey", oppkey).put ("itempage", itempage);
 
-      int updateCnt = executeStatement (connection, SQL_QUERY6, parms6, false).getUpdateCount ();
+      executeStatement (connection, SQL_QUERY6, parms6, false).getUpdateCount ();
     }
     if (toolsUsed != null) {
       DataBaseTable tmpTbl = _commonDll._BuildTable_FN (connection, "xyz", toolsUsed, ";");
@@ -1304,7 +1303,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms.put ("tmpTblName", tmpTbl.getTableName ());
       SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("itempage", itempage).put ("groupId", groupId);
 
-      int insertCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT8, unquotedParms), parms7, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT8, unquotedParms), parms7, false).getUpdateCount ();
 
       connection.dropTemporaryTable (tmpTbl);
     }
@@ -1460,14 +1459,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms4.put ("tmpTblName", tbl.getTableName ());
 
     SqlParametersMaps parms4 = parms1;
-    int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, false).getUpdateCount ();
 
     final String SQL_UPDATE5 = "update ${tmpTblName} set contentsize = (select sum(contentsize) from ${ItemBankDB}.tblitem I, ${ItemBankDB}.tblsetofadminitems A "
         + " where A._fk_AdminSubject = segmentKey and A.groupID = GID and A._fk_Item = I._Key)";
     final String query = fixDataBaseNames (SQL_UPDATE5);
     Map<String, String> unquotedParms5 = unquotedParms4;
     SqlParametersMaps parms5 = parms1;
-    updateCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms5), parms5, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms5), parms5, false).getUpdateCount ();
 
     final String SQL_INSERT6 = "insert into clientlatency ( _fk_TestOpportunity, _fk_session, _fk_browser,  page, NumItems, "
         + " VisitCount, VisitTime, CreateDate, LoadDate, LoadTime, RequestTime, LoadAttempts,"
@@ -1478,7 +1477,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("session", session).put ("browser", browser);
     parms6.put ("siteKey", siteKey).put ("siteID", siteId).put ("siteName", siteName).put ("clientname", clientname);
 
-    int insertCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT6, unquotedParms6), parms6, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT6, unquotedParms6), parms6, false).getUpdateCount ();
 
     final String SQL_UPDATE7 = "update testeeresponse T, ${tmpTblName} set T.dateLastVisited = coalesce(visitDate, ${now}), "
         + " T.visitCount = visitCount + numvisits "
@@ -1486,7 +1485,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms7 = unquotedParms4;
     SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("now", starttime).put ("oppkey", oppkey);
 
-    updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE7, unquotedParms7), parms7, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE7, unquotedParms7), parms7, false).getUpdateCount ();
 
     connection.dropTemporaryTable (tbl);
 
@@ -1617,7 +1616,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms1.put ("tmpTblName", tbl.getTableName ());
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
 
-    int insertCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms1), parms1, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms1), parms1, false).getUpdateCount ();
     connection.dropTemporaryTable (tbl);
     _commonDll._LogDBLatency_SP (connection, "", starttime, null, true, null, oppkey);
 
@@ -1747,12 +1746,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + "scoreRationale=null, scoreAttempts=0, _fk_responseSession=null, dateLastVisited = null, visitCount = 0 "
         + " where _fk_TestOpportunity = ${oppkey} and position = ${position}";
     SqlParametersMaps parms3 = parms2;
-    int updatedCnt = executeStatement (connection, SQL_UPDATE3, parms3, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE3, parms3, false).getUpdateCount ();
 
     final String SQL_UPDATE4 = "update testopportunity set numresponses = "
         + "(select count(*) from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateSubmitted is not null) where _key = ${oppkey}";
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
-    updatedCnt = executeStatement (connection, SQL_UPDATE4, parms4, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE4, parms4, false).getUpdateCount ();
 
     // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
     String sessionDB = getTdsSettings ().getTDSSessionDBName ();
@@ -1760,7 +1759,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " values ( ${oppkey}, 'Remove Response', ${comment}, now(3), ${localhost}, ${dbname})";
     SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("oppkey", oppkey)
         .put ("comment", String.format ("Removed item response at position %d", position)).put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT5), parms5, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT5), parms5, false).getUpdateCount ();
 
     return null;
   }
@@ -1790,7 +1789,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     final String SQL_UPDATE1 = "update testeeresponse set Mark = ${mark} where _fk_TestOpportunity = ${oppkey} and position = ${position} and _efk_ITSItem is not null";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("mark", mark).put ("oppkey", oppkey).put ("position", position);
-    int updatedCnt = executeStatement (connection, SQL_UPDATE1, parms1, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE1, parms1, false).getUpdateCount ();
 
     SingleDataResultSet rs = _commonDll.ReturnStatusReason ("success", null);
     return rs;
@@ -1820,12 +1819,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       return _commonDll._ReturnError_SP (connection, null, "T_SetOpportunityStatus", validatedRef.get (), null, oppkey, "_ValidateTesteeAccess", "failed");
     }
 
-    // TODO Elena testing
-    // long st = System.currentTimeMillis();
     SingleDataResultSet result = _commonDll.SetOpportunityStatus_SP (connection, oppkey, status, false, "testee", comment);
-    // long diff = System.currentTimeMillis() - st;
-    // System.out.println (String.format
-    // ("SetOpportunityStatus latency: %d millisec, status %s", diff, status));
     return result;
   }
 
@@ -1872,14 +1866,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     final String SQL_UPDATE = "update testopportunity set waitingForSegment = ${segment} where _Key = ${oppkey};";
     SqlParametersMaps parms2 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("segment", segment);
-    int updateCnt = executeStatement (connection, SQL_UPDATE, parms2, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE, parms2, false).getUpdateCount ();
 
     // TODO Elena testing
     // long st = System.currentTimeMillis();
     SingleDataResultSet rs = _commonDll.SetOpportunityStatus_SP (connection, oppKey, action);
     // long diff = System.currentTimeMillis() - st;
-    // System.out.println (String.format
-    // ("SetOpportunityStatus latency: %d millisec, status %s", diff, action));
 
     return rs;
   }
@@ -2138,22 +2130,22 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       parms5.put ("isValid", isValid);
       parms5.put ("browserID", browserId);
       parms5.put ("responseSequence", responseSequence);
-      int updateCnt = executeStatement (connection, SQL_UPDATE, parms5, false).getUpdateCount ();
+      executeStatement (connection, SQL_UPDATE, parms5, false).getUpdateCount ();
     } else {
       String tmp = null;
-      if (methodVersion == 1)
+//      if (methodVersion == 1)
+//        tmp = "Update testeeresponse set IsSelected = ${isSelected}, IsValid = ${isValid}, _fk_ResponseSession = ${session}, _fk_Browser = ${browserID}, " +
+//            " scoreMark = ${scoremark}, NumUpdates =  NumUpdates + 1, DateSubmitted = ${now}, Response = ${response}, responseSequence = ${responseSequence}, responseLength = length(${response})," +
+//            " Score = ${thescore}, DateFirstResponse = COALESCE(DateFirstResponse, ${now}), ScoreLatency = ScoreLatency + ${scoreLatency}, scorestatus = ${scorestatus}, scoringDate = ${scoringDate},"
+//            +
+//            " scoreRationale = ${scoreRationale}, scoredDate = ${scoredDate} "
+//            + " where _fk_TestOpportunity = ${oppkey} and position = ${position} and responseSequence <= ${responseSequence};";
+//      else
         tmp = "Update testeeresponse set IsSelected = ${isSelected}, IsValid = ${isValid}, _fk_ResponseSession = ${session}, _fk_Browser = ${browserID}, " +
             " scoreMark = ${scoremark}, NumUpdates =  NumUpdates + 1, DateSubmitted = ${now}, Response = ${response}, responseSequence = ${responseSequence}, responseLength = length(${response})," +
             " Score = ${thescore}, DateFirstResponse = COALESCE(DateFirstResponse, ${now}), ScoreLatency = ScoreLatency + ${scoreLatency}, scorestatus = ${scorestatus}, scoringDate = ${scoringDate},"
             +
-            " scoreRationale = ${scoreRationale}, scoredDate = ${scoredDate} "
-            + " where _fk_TestOpportunity = ${oppkey} and position = ${position} and responseSequence <= ${responseSequence};";
-      else
-        tmp = "Update testeeresponse set IsSelected = ${isSelected}, IsValid = ${isValid}, _fk_ResponseSession = ${session}, _fk_Browser = ${browserID}, " +
-            " scoreMark = ${scoremark}, NumUpdates =  NumUpdates + 1, DateSubmitted = ${now}, Response = ${response}, responseSequence = ${responseSequence}, responseLength = length(${response})," +
-            " Score = ${thescore}, DateFirstResponse = COALESCE(DateFirstResponse, ${now}), ScoreLatency = ScoreLatency + ${scoreLatency}, scorestatus = ${scorestatus}, scoringDate = ${scoringDate},"
-            +
-            " scoreRationale = ${scoreRationale}, scoredDate = ${scoredDate},scoreDimensions = ${scoreDimensions} "
+            " scoreRationale = ${scoreRationale}, scoredDate = ${scoredDate}, scoreDimensions = ${scoreDimensions} "
             + " where _fk_TestOpportunity = ${oppkey} and position = ${position} and responseSequence <= ${responseSequence};";
 
       final String SQL_UPDATE1 = tmp;
@@ -2174,7 +2166,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       parms6.put ("scoredDate", scoredDate);
       parms6.put ("oppkey", oppKey);
       parms6.put ("position", position).put ("scoreDimensions", scoreDimensions);
-      int updateCnt = executeStatement (connection, SQL_UPDATE1, parms6, false).getUpdateCount ();
+      executeStatement (connection, SQL_UPDATE1, parms6, false).getUpdateCount ();
 
       if (DbComparator.notEqual (audit, 0)) {
         final String SQL_INSERT = "INSERT INTO  testeeresponseaudit(_fk_TestOpportunity, position, scoremark, sequence, response, sessionKey, browserKey, isSelected, isValid, "
@@ -2196,7 +2188,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         parms7.put ("scoringDate", scoringDate);
         parms7.put ("scoredDate", scoredDate);
         parms7.put ("itemID", itemId);
-        int insertedCnt = executeStatement (connection, SQL_INSERT, parms7, false).getUpdateCount ();
+        executeStatement (connection, SQL_INSERT, parms7, false).getUpdateCount ();
       }
     }
     final String SQL_QUERY5 = "select count(*) as responseCount from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateFirstResponse is not null;";
@@ -2208,7 +2200,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     final String SQL_UPDATE2 = "update testopportunity set numResponses = ${responseCount} where _Key = ${oppkey};";
     SqlParametersMaps parms9 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("responseCount", responseCount);
-    int updateCnt = executeStatement (connection, SQL_UPDATE2, parms9, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE2, parms9, false).getUpdateCount ();
 
     List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
     CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object> ();
@@ -2365,7 +2357,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " where clientname = ${clientname}  and OTHEROPP._efk_Testee = ${testee} and OTHEROPP.subject = ${subject} and OTHEROPP.dateDeleted is null"
         + " and OTHEROPP.dateScored is not null and OTHEROPP._Key <> ${oppkey} and OTHEROPP._Key = SCORE._fk_TestOpportunity and SCORE.UseForAbility = 1 and SCORE.value is not null;";
     SqlParametersMaps parameters3 = new SqlParametersMaps ().put ("clientname", clientName).put ("testee", testee).put ("subject", subject).put ("oppkey", oppKey);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms), parameters3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms), parameters3, false).getUpdateCount ();
 
     // first, try to find a previous opportunity on this exact same test.
     final String SQL_QUERY4 = "select max(scored) as maxdate from  ${abilitiesTableName} where test = ${test};";
@@ -2477,15 +2469,15 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String SQL_INSERT_TEMP = "insert into ${tbl} ( position) values ( ${position})";
     Map<String, String> unqpar = new HashMap<> ();
     unqpar.put ("tbl", tbl.getTableName ());
-    int insertCntTmp = insertBatch (connection, fixDataBaseNames (SQL_INSERT_TEMP, unqpar), rs, null);
+    insertBatch (connection, fixDataBaseNames (SQL_INSERT_TEMP, unqpar), rs, null);
 
     // final String SQL_INSERT =
     // "insert into testeeresponse (_fk_TestOpportunity, Position) values (${testoppkey}, ${position})";
-    // int insertCnt = insertBatch (connection, SQL_INSERT, rs, null);
+    // insertBatch (connection, SQL_INSERT, rs, null);
 
     final String SQL_INSERT = "insert into testeeresponse (_fk_TestOpportunity, Position) select ${testoppkey}, position from ${tbl}";
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("testoppkey", testoppKey);
-    int insertCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT, unqpar), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT, unqpar), parms2, false).getUpdateCount ();
 
     connection.dropTemporaryTable (tbl);
     _commonDll._LogDBLatency_SP (connection, "_CreateResponseSet", now, null, true, null, testoppKey);
@@ -2531,11 +2523,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     Map<String, String> unqpar = new HashMap<> ();
     unqpar.put ("tbl", tbl.getTableName ());
-    int insertCntTmp = executeStatement (connection, fixDataBaseNames (query1, unqpar), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query1, unqpar), null, false).getUpdateCount ();
 
     final String SQL_INSERT = "insert into testeeresponse (_fk_TestOpportunity, Position) select ${testoppkey}, position from ${tbl}";
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("testoppkey", testoppKey);
-    int insertCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT, unqpar), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT, unqpar), parms2, false).getUpdateCount ();
 
     connection.dropTemporaryTable (tbl);
     _commonDll._LogDBLatency_SP (connection, "_CreateResponseSet", now, null, true, null, testoppKey);
@@ -2679,7 +2671,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms.put ("tblName", testOppItempoolTable.getTableName ());
     SqlParametersMaps parameters = (new SqlParametersMaps ()).put ("clientname", clientName).put ("oppkey", oppKey).put ("segmentKey", segmentKey).put ("testID", testId)
         .put ("fieldTest", fieldTest);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parameters, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parameters, true).getUpdateCount ();
 
     return testOppItempoolTable;
   }
@@ -2725,7 +2717,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("poolTable", poolTable.getTableName ());
     unquotedParms.put ("temporaryTableName", buildTable.getTableName ());
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), null, false).getUpdateCount ();
 
     if (sessionKey == null) {
       final String SQL_UPDATE1 = "update ${poolTable} P, ${ItemBankDB}.tblsetofadminitems I set P.isFT = isFieldTest, P.isActive = I.isActive, P.strand = strandname  " +
@@ -2734,7 +2726,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms1 = new HashMap<String, String> ();
       unquotedParms1.put ("poolTable", poolTable.getTableName ());
       SqlParametersMaps parms1 = new SqlParametersMaps ().put ("segmentKey", segmentKey);
-      int updateCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms1, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms1, false).getUpdateCount ();
 
       final String SQL_INSERT2 = "insert into ${bluePrintTable} (strand, minItems, maxItems, poolcnt) " +
           " select _fk_Strand, minitems, maxItems, (select count(*) from ${poolTable} where strand = _fk_strand and isFT = 0 and isActive = 1) from ${ItemBankDB}.tbladminstrand" +
@@ -2744,7 +2736,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms2.put ("poolTable", poolTable.getTableName ());
       unquotedParms2.put ("bluePrintTable", bluePrintTable.getTableName ());
       SqlParametersMaps parms2 = parms1;
-      insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms2), parms2, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query, unquotedParms2), parms2, false).getUpdateCount ();
 
       final String SQL_QUERY1 = "select minitems as testlen from ${ItemBankDB}.tblsetofadminsubjects where _Key = ${segmentKey};";
       query = fixDataBaseNames (SQL_QUERY1);
@@ -2760,7 +2752,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms3 = new HashMap<String, String> ();
       unquotedParms3.put ("poolTable", poolTable.getTableName ());
       SqlParametersMaps parms4 = new SqlParametersMaps ().put ("sessionkey", sessionKey).put ("segmentKey", segmentKey);
-      int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms3), parms4, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms3), parms4, false).getUpdateCount ();
 
       final String SQL_INSERT3 = "insert into ${bluePrintTable} (strand, minItems, maxItems, poolcnt) " +
           " select contentLevel, minitems, maxItems, (select count(*) from ${poolTable} where strand = contentLevel and isFT = 0 and isActive = 1) " +
@@ -2769,7 +2761,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms4.put ("poolTable", poolTable.getTableName ());
       unquotedParms4.put ("bluePrintTable", bluePrintTable.getTableName ());
       SqlParametersMaps parms5 = parms4;
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms4), parms5, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms4), parms5, false).getUpdateCount ();
 
       final String SQL_QUERY2 = "select minitems as testlen from sim_segment where _fk_Session = ${sessionkey} and _efk_Segment = ${segmentKey};";
       SqlParametersMaps parms6 = parms4;
@@ -2872,7 +2864,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("poolTable", poolTable.getTableName ());
 
-    int insertedCnt = insertBatch (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), rs, null);
+    insertBatch (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), rs, null);
 
     if (sessionKey == null) {
       final String SQL_UPDATE1 = "update ${poolTable} P, ${ItemBankDB}.tblsetofadminitems I set P.isFT = isFieldTest, P.isActive = I.isActive, P.strand = strandname  " +
@@ -2881,7 +2873,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms1 = new HashMap<String, String> ();
       unquotedParms1.put ("poolTable", poolTable.getTableName ());
       SqlParametersMaps parms1 = new SqlParametersMaps ().put ("segmentKey", segmentKey);
-      int updateCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms1, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms1, false).getUpdateCount ();
 
       final String SQL_INSERT2 = "insert into ${bluePrintTable} (strand, minItems, maxItems, poolcnt) " +
           " select _fk_Strand, minitems, maxItems, (select count(*) from ${poolTable} where strand = _fk_strand and isFT = 0 and isActive = 1) from ${ItemBankDB}.tbladminstrand" +
@@ -2891,7 +2883,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms2.put ("poolTable", poolTable.getTableName ());
       unquotedParms2.put ("bluePrintTable", bluePrintTable.getTableName ());
       SqlParametersMaps parms2 = parms1;
-      insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms2), parms2, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query, unquotedParms2), parms2, false).getUpdateCount ();
 
       final String SQL_QUERY1 = "select case when selectionAlgorithm = 'adaptive2' then maxitems else minitems end as testlen from ${ItemBankDB}.tblsetofadminsubjects where _Key = ${segmentKey}";
       // final String SQL_QUERY1 =
@@ -2909,7 +2901,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms3 = new HashMap<String, String> ();
       unquotedParms3.put ("poolTable", poolTable.getTableName ());
       SqlParametersMaps parms4 = new SqlParametersMaps ().put ("sessionkey", sessionKey).put ("segmentKey", segmentKey);
-      int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms3), parms4, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms3), parms4, false).getUpdateCount ();
 
       final String SQL_INSERT3 = "insert into ${bluePrintTable} (strand, minItems, maxItems, poolcnt) " +
           " select contentLevel, minitems, maxItems, (select count(*) from ${poolTable} where strand = contentLevel and isFT = 0 and isActive = 1) " +
@@ -2918,7 +2910,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms4.put ("poolTable", poolTable.getTableName ());
       unquotedParms4.put ("bluePrintTable", bluePrintTable.getTableName ());
       SqlParametersMaps parms5 = parms4;
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms4), parms5, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms4), parms5, false).getUpdateCount ();
 
       final String SQL_QUERY2 = "select case when selectionAlgorithm = 'adaptive2' then maxitems else minitems end as testlen from sim_segment where _fk_Session = ${sessionkey} and _efk_Segment = ${segmentKey}";
       // final String SQL_QUERY2 =
@@ -2952,7 +2944,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       strandCount = (tmp == null ? null : tmp.intValue ());
     }
     if (DbComparator.lessThan ((testlen.get () - shortfall), strandCount)) {
-      newlen = testlen.get () - shortfall;
+    	// test offgrade items: TODO check
+      newlen = (testlen.get () - shortfall > 0)? testlen.get () - shortfall: testlen.get ();
     } else {
       newlen = strandCount;
     }
@@ -3142,7 +3135,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     SingleDataResultSet res = _FT_Prioritize_2012_SP (connection, testOppKey, testKey);
     final String SQL_INSERT_TEMP = "insert into ${itemsTableName} (grpkey, grp, block, numitems, tier, admins) values (${grpkey}, ${groupID}, ${blockID}, ${activeItems}, ${tier}, ${admins})";
-    int insertCntTmp = insertBatch (connection, fixDataBaseNames (SQL_INSERT_TEMP, unquotedParms), res, null);
+    insertBatch (connection, fixDataBaseNames (SQL_INSERT_TEMP, unquotedParms), res, null);
 
     final String SQL_INDEX = "create index tix_ftitems on ${itemsTableName} (grpkey);";
     Map<String, String> unquotedparms = new HashMap<String, String> ();
@@ -3151,7 +3144,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     final String SQL_UPDATE1 = "update ${itemsTableName} set  selected = 0, used = 0;";
     unquotedParms.put ("itemsTableName", itemsTable.getTableName ());
-    int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), null, false).getUpdateCount ();
     // System.err.println (updateCnt);
 
     if (debug == 1) {
@@ -3164,7 +3157,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String SQL_DELETE1 = "delete from ${itemsTableName} where grp in (select groupID from ft_opportunityitem F, testopportunity O" +
         " where O._efk_Testee = ${testee} and O.clientname = ${clientname} and O.subject = ${subject} and F._fk_TestOpportunity = O._Key);";
     SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("testee", testee).put ("clientname", clientName).put ("subject", subject);
-    int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms), parms6, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms), parms6, true).getUpdateCount ();
     // System.err.println (deletedCnt);
 
     if (DbComparator.greaterOrEqual (debug, 1)) {
@@ -3199,7 +3192,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         " select Cohort, ItemRatio, ItemRatio * ${maxitems}, 0 from ${ItemBankDB}.testcohort where _fk_AdminSubject = ${testkey};";
     String query = fixDataBaseNames (SQL_INSERT1);
     SqlParametersMaps parms8 = new SqlParametersMaps ().put ("maxitems", maxItems).put ("testkey", testKey);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms8, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms8, false).getUpdateCount ();
     // System.err.println (insertedCnt);
 
     final String SQL_QUERY8 = "select  cohortindex from ${cohortsTableName} limit 1";
@@ -3207,7 +3200,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (!exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquotedParms5), null, false))) {
       final String SQL_INSERT2 = "insert into ${cohortsTableName} (cohortindex, ratio, targetcount, itemcount) values (1, 1, ${maxitems}, 0);";
       SqlParametersMaps parms9 = new SqlParametersMaps ().put ("maxitems", maxItems);
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms1), parms9, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms1), parms9, false).getUpdateCount ();
     }
     if (DbComparator.notEqual (debug, 0)) {
       final String SQL_QUERY9 = "select 'cohorts', * from ${cohortsTableName} ;";
@@ -3224,7 +3217,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     while (DbComparator.lessThan (ftCount.get (), minItems) && exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY10, unquotedParms), null, false))) {
       // reinitialize the working variable in the cohorts table
       final String SQL_UPDATE2 = "update ${cohortsTableName} set groupcount = 0;";
-      updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms1), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms1), null, false).getUpdateCount ();
 
       final String SQL_QUERY11 = "select max(tier) as tier from ${itemsTableName} where used = 0;";
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquotedParms), null, false).getResultSets ().next ();
@@ -3264,7 +3257,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       // remove this item group from further consideration
       final String SQL_UPDATE3 = "update ${itemsTableName} set used = 1 where grpkey = ${grpkey};";
       SqlParametersMaps parms13 = new SqlParametersMaps ().put ("grpkey", grpkey);
-      updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms), parms13, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms), parms13, false).getUpdateCount ();
 
       // record the cohort counts in this item group's items. Note that a single
       // item group may have items from different cohorts.
@@ -3273,7 +3266,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           " and P._fk_Item = I._fk_Item and P._fk_AdminSUbject = ${testkey} and I.testCohort = cohortIndex);";
       query = fixDataBaseNames (SQL_UPDATE4);
       SqlParametersMaps parms14 = new SqlParametersMaps ().put ("testkey", testKey).put ("grpkey", grpkey).put ("Language", "Language").put ("lang", language);
-      updateCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms14, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query, unquotedParms1), parms14, false).getUpdateCount ();
 
       final String SQL_QUERY15 = "select  cohortindex from ${cohortsTableName} where groupcount > 0 and itemcount < targetcount limit 1";
       if (!exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY15, unquotedParms1), null, false))) {
@@ -3311,12 +3304,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             " numintervals = ${numitems} where grpkey = ${grpkey};";
         SqlParametersMaps parms16 = new SqlParametersMaps ().put ("nextpos", nextPos).put ("intervalIndex", intervalIndex).put ("intervalSize", intervalSize).put ("numitems", numitems)
             .put ("grpkey", grpkey);
-        updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE5, unquotedParms), parms16, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_UPDATE5, unquotedParms), parms16, false).getUpdateCount ();
 
         // indicate that all blocks related to this group are 'used'
         final String SQL_UPDATE6 = " update ${itemsTableName} set used = 1 where grp = ${grp};";
         SqlParametersMaps parms17 = new SqlParametersMaps ().put ("grp", grp);
-        updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE6, unquotedParms), parms17, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_UPDATE6, unquotedParms), parms17, false).getUpdateCount ();
 
         // record impact of this itemgroup selection on algorithm variables
         ftCount.set (ftCount.get () + numitems);
@@ -3333,12 +3326,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         // itemcount = itemcount + 0, because groupcount is universally set to 0
         // at the top of this loop
         final String SQL_UPDATE7 = "update ${cohortsTableName} set itemcount = itemcount + groupcount;";
-        updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE7, unquotedParms1), null, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_UPDATE7, unquotedParms1), null, false).getUpdateCount ();
       }
     }
     if (debug == 0) {
       final String SQL_DELETE2 = "delete from ${itemsTableName} where selected = 0;";
-      deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE2, unquotedParms), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_DELETE2, unquotedParms), null, false).getUpdateCount ();
     }
     String msg = null;
     if (DbComparator.isEqual (noinsert, 1)) {
@@ -3359,7 +3352,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
               + " intervalSize, numIntervals, ${now}, 0, now(3)  from ${itemsTableName} where selected = 1 ";
           SqlParametersMaps parms18 = new SqlParametersMaps ().put ("testoppkey", testOppKey).put ("session", session).put ("testkey", testKey).put ("parentTest", parentTest)
               .put ("segment", segment).put ("segmentID", segmentId).put ("language", language).put ("now", now);
-          insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms), parms18, false).getUpdateCount ();
+          executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms), parms18, false).getUpdateCount ();
         }
         final String SQL_QUERY19 = "select convert(sum(numitems), SIGNED) as ftcount from ft_opportunityitem "
             + " where _fk_TestOpportunity = ${testoppkey} and _efk_FieldTest = ${testkey} and coalesce(deleted, 0) = 0;";
@@ -3397,13 +3390,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             + "  and _efk_ParentTest = ${parentTest} and _fk_Session = ${session})";
         Map<String, String> unquotedParms22 = unquotedParms;
         SqlParametersMaps parms21 = new SqlParametersMaps ().put ("testkey", testKey).put ("parentTest", parentTest).put ("clientname", clientName).put ("session", session);
-        insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms22), parms21, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms22), parms21, false).getUpdateCount ();
 
         final String SQL_UPDATE8 = "update ft_groupsamples F, ${itemsTableName} I set F.SampleSize = F.Samplesize + 1 where I.selected = 1 and F._efk_AdminSubject = ${testkey} " +
             " and F.groupkey = I.grpkey and F._fk_Session = ${session};";
         Map<String, String> unquotedParms23 = unquotedParms;
         SqlParametersMaps parms22 = new SqlParametersMaps ().put ("testkey", testKey).put ("session", session);
-        updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE8, unquotedParms23), parms22, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_UPDATE8, unquotedParms23), parms22, false).getUpdateCount ();
       }
     } catch (Exception re) {
       msg = re.getMessage ();
@@ -3467,7 +3460,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms.put ("tblName", sim_testOppItempoolTable.getTableName ());
     SqlParametersMaps parameters = (new SqlParametersMaps ()).put ("clientname", clientName).put ("oppkey", oppKey).put ("segmentKey", segmentKey).put ("testID", testId)
         .put ("fieldTest", fieldTest).put ("session", session);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parameters, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parameters, true).getUpdateCount ();
 
     return sim_testOppItempoolTable;
   }
@@ -3524,14 +3517,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms = new HashMap<String, String> ();
       unquotedParms.put ("groupsTable", groupsTable.getTableName ());
       unquotedParms.put ("toipTableName", toipTable.getTableName ());
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), null, false).getUpdateCount ();
     } else {
       final String SQL_INSERT2 = "insert into ${groupsTable} (gkey, GID, BID, active) select groupKey, groupID, blockID, count(*) as itemCount" +
           " from ${stoipTableName} where isActive = 1 group by groupKey, groupID, blockID;";
       Map<String, String> unquotedParms1 = new HashMap<String, String> ();
       unquotedParms1.put ("groupsTable", groupsTable.getTableName ());
       unquotedParms1.put ("stoipTableName", stoipTable.getTableName ());
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms1), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms1), null, false).getUpdateCount ();
     }
 
     final String SQL_INDEX = "create index _ix_ftgroups on ${groupsTable} (gkey);";
@@ -3555,7 +3548,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms3.put ("groupsTable", groupsTable.getTableName ());
       unquotedParms3.put ("p_itemsTable", p_itemsTable.getTableName ());
       SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("tier", tier).put ("testkey", testKey);
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms3), parms2, true).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms3), parms2, true).getUpdateCount ();
     } else {
       final String SQL_INSERT4 = "insert into ${p_itemsTable} (grpkey, groupID, blockID, activeItems, tier, admins)"
           + " select  gkey, GID, BID, active, ${tier}, count(*) as admins from ft_opportunityitem O,  ${groupsTable} G where O._efk_FieldTest = ${testkey} "
@@ -3564,7 +3557,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms4.put ("groupsTable", groupsTable.getTableName ());
       unquotedParms4.put ("p_itemsTable", p_itemsTable.getTableName ());
       SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("tier", tier).put ("testkey", testKey).put ("session", session);
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms4), parms3, true).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms4), parms3, true).getUpdateCount ();
     }
 
     final String SQL_INDEX1 = "create index _ix_ftitems on ${p_itemsTable} (grpkey);";
@@ -3585,7 +3578,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms6.put ("groupsTable", groupsTable.getTableName ());
     unquotedParms6.put ("p_itemsTable", p_itemsTable.getTableName ());
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("tier", tier);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT5, unquotedParms6), parms4, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT5, unquotedParms6), parms4, false).getUpdateCount ();
 
     _commonDll._LogDBLatency_SP (connection, "_FT_Prioritize_2012", starttime, null, true, null, oppKey, null, clientName, null);
 
@@ -3612,7 +3605,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    */
 
   public DataBaseTable GetTestFormWindows_FN (SQLConnection connection, String clientname, String testId, Integer sessionType) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date now = _dateUtil.getDateWRetStatus (connection);
 
     DataBaseTable tbl = getDataBaseTable ("testformwindows").addColumn ("windowID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("windowMax", SQL_TYPE_To_JAVA_TYPE.INT).
@@ -3666,8 +3658,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms.put ("tblName", tbl.getTableName ());
 
     final String query = fixDataBaseNames (SQL_INSERT);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
-    _logger.info ("<<<<<<<<< GetTestFormWindows_FN Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
     return tbl;
   }
 
@@ -4036,7 +4027,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms2 = new HashMap<String, String> ();
     unquotedParms2.put ("assignedTblName", assignedTbl.getTableName ());
 
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
 
     DataBaseTable formsTbl = getDataBaseTable ("stfpForms").addColumn ("_formkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("id", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 150).
         addColumn ("itemcnt", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("formcnt", SQL_TYPE_To_JAVA_TYPE.INT);
@@ -4050,7 +4041,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms3.put ("formTblName", formsTbl.getTableName ());
 
     final String query3 = fixDataBaseNames (SQL_INSERT3);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
 
     final String SQL_UPDATE4 = "update  ${formTblName} set formcnt = (select count(*)  from testopportunity, testopportunitysegment "
         + " where clientname = ${clientname} and _fk_TestOpportunity = _Key and _efk_Segment = ${testkey} and FormKey = _formkey "
@@ -4058,7 +4049,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms4 = unquotedParms3;
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("clientname", clientname).put ("environment", environment).put ("session", session);
 
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
 
     final String SQL_QUERY5 = "select  ID as formId, itemcnt, _formkey as formkey from ${formTblName} F, ${assignedTblName} A "
         + " where F._formkey = A.frmkey order by A.cnt, formcnt, rand()  limit 1";
@@ -4141,7 +4132,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms2 = new HashMap<String, String> ();
     unquotedParms2.put ("assignedTblName", assignedTbl.getTableName ());
 
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
 
     DataBaseTable formsTbl = getDataBaseTable ("stfpForms").addColumn ("_formkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("id", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 150).
         addColumn ("itemcnt", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("formcnt", SQL_TYPE_To_JAVA_TYPE.INT);
@@ -4155,7 +4146,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms3.put ("formTblName", formsTbl.getTableName ());
 
     final String query3 = fixDataBaseNames (SQL_INSERT3);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
 
     final String SQL_UPDATE4 = "update  ${formTblName} set formcnt = (select count(*)  from testopportunity, testopportunitysegment "
         + " where clientname = ${clientname} and _fk_TestOpportunity = _Key and _efk_Segment = ${testkey} and FormKey = _formkey "
@@ -4163,7 +4154,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms4 = unquotedParms3;
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("clientname", clientname).put ("environment", environment).put ("session", session);
 
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
 
     final String SQL_QUERY5 = "select  ID as formId, itemcnt, _formkey as formkey from ${formTblName} F, ${assignedTblName} A "
         + " where F._formkey = A.frmkey order by A.cnt, formcnt, rand()  limit 1";
@@ -4235,7 +4226,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         put ("now", now).put ("formCohort", formCohort);
 
     final String query2 = fixDataBaseNames (SQL_INSERT2);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query2, unquotedParms2), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query2, unquotedParms2), parms2, false).getUpdateCount ();
 
     final String SQL_QUERY3 = "select count(*)  as formcount from  ${formsTblName}";
     Map<String, String> unquotedParms3 = unquotedParms2;
@@ -4277,7 +4268,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("environment", environment).
         put ("session", session).put ("testee", testee).put ("clientname", clientname);
 
-    int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE5, unquotedParms5), parms5, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE5, unquotedParms5), parms5, true).getUpdateCount ();
 
     final String SQL_QUERY6 = "select  _formkey as formkey, id as formID, itemcnt as formLength from ${formsTblName} order by usercnt, formcnt, RAND() limit 1";
     Map<String, String> unquotedParms6 = unquotedParms2;
@@ -4590,7 +4581,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             " where _fk_Session = ${session} and _efk_AdminSubject = ${testkey}; ";
         SqlParametersMaps parms4 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("session", session).put ("testkey", testKey).put ("IsPermeable", -1).put ("IsSatisfied", false)
             .put ("_date", now);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms4, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms4, false).getUpdateCount ();
 
         sessionPoolKey = session;
 
@@ -4599,14 +4590,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             + " select ${oppkey}, _Key, testID, testPosition, selectionAlgorithm, maxItems, ${IsPermeable}, ${IsSatisfied}, ${_date} from ${ItemBankDB}.tblsetofadminsubjects SS where VirtualTest = ${testkey};";
         String finalQuery = fixDataBaseNames (SQL_INSERT2);
         SqlParametersMaps parms5 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("testkey", testKey).put ("IsPermeable", -1).put ("IsSatisfied", false).put ("_date", now);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms5, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms5, false).getUpdateCount ();
 
       } else { // not segmented, so make the test its own segment
         final String SQL_INSERT3 = "insert into ${segmentsTableName} (_fk_TestOpportunity, _efk_Segment, segmentID, SegmentPosition, algorithm, opItemCnt, IsPermeable, IsSatisfied, _date) " +
             " select ${oppkey}, ${testkey}, TestID, 1, selectionAlgorithm, maxItems, ${IsPermeable}, ${IsSatisfied}, ${_date}  from ${ItemBankDB}.tblsetofadminsubjects SS where _Key = ${testkey}; ";
         String finalQuery = fixDataBaseNames (SQL_INSERT3);
         SqlParametersMaps parms6 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("testkey", testKey).put ("IsPermeable", -1).put ("IsSatisfied", false).put ("_date", now);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms6, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms), parms6, false).getUpdateCount ();
         // System.err.println (insertedCnt);
       }
       if (debug == true) {
@@ -4656,7 +4647,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             // don't leave garbage around if we failed to do everything
             final String SQL_DELETE1 = "delete from ${segmentsTableName} where _fk_TestOpportunity = ${oppkey}; ";
             SqlParametersMaps parms9 = new SqlParametersMaps ().put ("oppkey", oppKey);
-            int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms), parms9, false).getUpdateCount ();
+            executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms), parms9, false).getUpdateCount ();
             return (new MultiDataResultSet (resultsets));
           }
           poolcountRef.set (formlengthRef.get ());
@@ -4702,7 +4693,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         parms11.put ("oppkey", oppKey);
         parms11.put ("testkey", testKey);
         parms11.put ("pos", pos);
-        int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), parms11, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), parms11, false).getUpdateCount ();
         // System.err.println (updatedCnt);
 
         segpos += 1;
@@ -4733,7 +4724,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             + " _date, dateExited, itempool, poolcount "
             + " FROM ${segmentsTableName} where not exists (select * from testopportunitysegment where _fk_TestOpportunity = ${Oppkey});";
         SqlParametersMaps parms13 = new SqlParametersMaps ().put ("oppkey", oppKey);
-           int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms), parms13, false).getUpdateCount ();
+           executeStatement (connection, fixDataBaseNames (SQL_INSERT4, unquotedParms), parms13, false).getUpdateCount ();
           // System.err.println (insertedCnt);
       }
       connection.dropTemporaryTable (segmentsTable);
@@ -4775,14 +4766,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     _GetInitialAbility_SP (connection, oppKey, abilityRef);
     final String SQL_INSERT1 = "insert into testoppabilityestimate (_fk_TestOpportunity, strand, estimate, itemPos, _date) values (${oppkey}, ${OVERALL}, ${ability}, 0, now(3))";
     SqlParametersMaps parms1 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("OVERALL", "OVERALL").put ("ability", abilityRef.get ());
-    int insertedCnt = executeStatement (connection, SQL_INSERT1, parms1, false).getUpdateCount ();
+    executeStatement (connection, SQL_INSERT1, parms1, false).getUpdateCount ();
 
     final String SQL_INSERT2 = "insert into testoppabilityestimate (_fk_TestOpportunity, strand, estimate, itemPos, _date)"
         + " select ${oppkey}, _fk_Strand, ${ability}, 0, now(3) from ${ItemBankDB}.tbladminstrand S, testopportunity O "
         + " where O._key = ${oppkey} and O._efk_AdminSubject = S._fk_AdminSubject and S.startAbility is not null;";
     String finalQuery = fixDataBaseNames (SQL_INSERT2);
     SqlParametersMaps parms2 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("ability", abilityRef.get ());
-    insertedCnt = executeStatement (connection, finalQuery, parms2, false).getUpdateCount ();
+    executeStatement (connection, finalQuery, parms2, false).getUpdateCount ();
 
     final String SQL_QUERY1 = "select convert(sum(opItemCnt), SIGNED) + convert(sum(ftItemCnt), SIGNED) as testLength from testopportunitysegment where _fk_TestOpportunity = ${oppkey};";
     SqlParametersMaps parms3 = new SqlParametersMaps ().put ("oppkey", oppKey);
@@ -4799,7 +4790,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         " Stage = ${inprogress}, DateChanged = ${today}, maxitems = ${testlength}, waitingForSegment = null where _Key = ${oppkey}; ";
     SqlParametersMaps parms4 = new SqlParametersMaps ().put ("started", "started").put ("today", starttime).put ("inprogress", "inprogress").put ("testlength", testLength.get ())
         .put ("oppkey", oppKey);
-    int updatedCnt = executeStatement (connection, SQL_UPDATE1, parms4, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE1, parms4, false).getUpdateCount ();
 
     _commonDll._LogDBLatency_SP (connection, "_InitializeOpportunity", starttime, null, true, null, oppKey);
   }
@@ -4901,7 +4892,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         " and exists (select * from testeeresponse R1  where R1._fk_TestOpportunity = ${oppkey} and dateLastVisited is not null and R.groupID = R1.groupID and R1.isFieldTest = 0)" +
         " and exists (select * from testeeresponse R2 where R2._fk_TestOpportunity = ${oppkey} and dateSubmitted is null and R.groupID = R2.groupID and R2.isFieldTest = 0);";
     SqlParametersMaps parms2 = parms1;
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms2, false).getUpdateCount ();
     // System.err.println (insertedCnt);
 
     final String SQL_QUERY2 = "select  page from ${itemsTableName} limit 1";
@@ -4911,7 +4902,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
 
     final String SQL_UPDATE1 = "update ${itemsTableName} set required = 1 where groupRequired = -1;";
-    int updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), null, false).getUpdateCount ();
 
     DataBaseTable groupsTable = getDataBaseTable ("groups").addColumn ("page", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("GID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
         .addColumn ("itemsRequired", SQL_TYPE_To_JAVA_TYPE.INT)
@@ -4925,14 +4916,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms2 = new HashMap<String, String> ();
     unquotedParms2.put ("groupsTableName", groupsTable.getTableName ());
     unquotedParms2.put ("itemsTableName", itemsTable.getTableName ());
-    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms2), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms2), null, false).getUpdateCount ();
 
     final String SQL_UPDATE2 = "update ${groupsTableName} set maxRequired = itemCount where maxRequired > itemCount or maxRequired = -1;";
-    updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms1), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms1), null, false).getUpdateCount ();
 
     final String SQL_UPDATE3 = "update ${itemsTableName} I, ${groupsTableName} G set I.required = 1 where I.groupID = G.GID and G.maxrequired = G.itemCount;";
     Map<String, String> unquotedParms3 = unquotedParms2;
-    updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms3), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms3), null, false).getUpdateCount ();
 
     Integer firstPage = null;
     Integer lastPage = null;
@@ -4948,7 +4939,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms5.put ("groupsTableName", groupsTable.getTableName ());
     unquotedParms5.put ("itemsTableName", itemsTable.getTableName ());
     unquotedParms5.put ("pagesTableName", pagesTable.getTableName ());
-    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms5), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms5), null, false).getUpdateCount ();
 
     final String SQL_QUERY3 = "select min(page) as firstpage, max(page) as lastpage from ${pagesTableName};";
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms4), null, false).getResultSets ().next ();
@@ -4991,7 +4982,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         " and R._fk_TestOpportunity = ${oppkey} and R.page > ${lastPage} and H.groupID = R.groupID;";
     SqlParametersMaps parms4 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("lastpage", lastPage).
         put ("oppkeyStr", oppKey.toString ());
-    updateCnt = executeStatement (connection, SQL_UPDATE4, parms4, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE4, parms4, false).getUpdateCount ();
 
     // treat any items found above as administered but recyclable
     final String SQL_UPDATE5 = "update testeeitemhistory H,testeeresponse R set H.deleted = 1 " +
@@ -4999,7 +4990,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         " and R._fk_TestOpportunity = ${oppkey} and R.page between ${firstpage} and ${lastpage} and R.groupID = H.groupID;";
     SqlParametersMaps parms5 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("firstpage", firstPage).
         put ("lastpage", lastPage).put ("oppkeyStr", oppKey.toString ());
-    updateCnt = executeStatement (connection, SQL_UPDATE5, parms5, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE5, parms5, false).getUpdateCount ();
 
     final String SQL_UPDATE6 = "UPDATE testeeresponse SET _efk_ITSItem=null, _efk_ITSBank=null, _fk_Session=null, OpportunityRestart=0, Page=null," +
         " Answer=null, ScorePoint=null, Format=null, IsFieldTest=0, DateGenerated=null, DateSubmitted=null, DateFirstResponse=null," +
@@ -5009,19 +5000,19 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         " scoreAttempts=0, _efk_ItemKey=null, _fk_responseSession=null, segment=0, contentLevel=null, segmentID=null, groupB = null, itemB = null, " +
         " dateLastVisited = null, visitCount = 0 where _fk_TestOpportunity = ${oppkey} and page >= ${firstPage}; ";
     SqlParametersMaps parms6 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("firstpage", firstPage);
-    updateCnt = executeStatement (connection, SQL_UPDATE6, parms6, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE6, parms6, false).getUpdateCount ();
 
     Boolean isSatisfied = _AA_IsSegmentSatisfied_FN (connection, oppKey, segment);
 
     // update the segment completion status if necessary
     final String SQL_UPDATE7 = "update testopportunitysegment set IsSatisfied = ${isSatisfied} where _fk_TestOpportunity = ${oppkey};";
     SqlParametersMaps parms7 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("isSatisfied", isSatisfied);
-    updateCnt = executeStatement (connection, SQL_UPDATE7, parms7, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE7, parms7, false).getUpdateCount ();
 
     final String SQL_UPDATE8 = "update testopportunity set numitems = (select count(*) from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateGenerated is not null), "
         + " numresponses = (select count(*) from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateSubmitted is not null) where _key = ${oppkey};";
     SqlParametersMaps parms8 = parms1;
-    updateCnt = executeStatement (connection, SQL_UPDATE8, parms8, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE8, parms8, false).getUpdateCount ();
 
     // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
     String sessionDB = getTdsSettings ().getTDSSessionDBName ();
@@ -5030,7 +5021,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     String finalQuery = fixDataBaseNames (SQL_INSERT4);
     SqlParametersMaps parms9 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("RemoveUnanswered", "RemoveUnanswered").
         put ("firstpage", firstPage.toString ()).put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
-    insertedCnt = executeStatement (connection, finalQuery, parms9, false).getUpdateCount ();
+    executeStatement (connection, finalQuery, parms9, false).getUpdateCount ();
 
     _commonDll._LogDBLatency_SP (connection, "_RemoveUnanswered", starttime, null, false, null, oppKey);
 
@@ -5053,15 +5044,15 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     final String SQL_INSERT1 = "insert into ${fromTimesTableName} (lastTime) select datePaused from testopportunity where _key = ${oppkey};";
     SqlParametersMaps parms1 = new SqlParametersMaps ().put ("oppkey", oppKey);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms1, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms1, false).getUpdateCount ();
 
     final String SQL_INSERT2 = "insert into ${fromTimesTableName} (lasttime) select  max(DateSubmitted) from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateSubmitted is not null;";
     SqlParametersMaps parms2 = parms1;
-    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms), parms2, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms), parms2, true).getUpdateCount ();
 
     final String SQL_INSERT3 = "insert into ${fromTimesTableName} (lasttime) select max(DateGenerated) from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateGenerated is not null;";
     SqlParametersMaps parms3 = parms1;
-    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms), parms3, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms), parms3, true).getUpdateCount ();
 
     final String SQL_QUERY = "select max(lasttime) as fromtime from ${fromTimesTableName};";
     SingleDataResultSet result = executeStatement (connection, fixDataBaseNames (SQL_QUERY, unquotedParms), null, false).getResultSets ().next ();
@@ -5096,18 +5087,18 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " sum(case when IsRequired = 1 and IsValid = 1 then 1 else 0 end)"
         + "  from testeeresponse  where _fk_TestOpportunity = ${oppkey} and DateGenerated is not null group by page, groupItemsRequired;";
     SqlParametersMaps parms = new SqlParametersMaps ().put ("oppkey", oppKey);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms, true).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms), parms, true).getUpdateCount ();
 
     final String SQL_UPDATE1 = "update ${unfinishedTableName} set groupRequired = numitems where groupRequired = -1;";
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms), null, false).getUpdateCount ();
 
     final String SQL_UPDATE2 = "update ${unfinishedTableName} set IsVisible = 1 where requiredResponses < requiredItems or validCount < groupRequired ;";
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms), null, false).getUpdateCount ();
 
     if (doUpdate == true) {
       final String SQL_UPDATE3 = "update testeeresponse set OpportunityRestart = ${newRestart} where _fk_TestOpportunity = ${oppkey} and Page in (select page from ${unfinishedTableName} where IsVisible = 1);";
       SqlParametersMaps parms1 = new SqlParametersMaps ().put ("newRestart", newRestart).put ("oppkey", oppKey);
-      updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms), parms1, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms), parms1, false).getUpdateCount ();
       return result;
     } else {
       final String SQL_QUERY = "select * from ${unfinishedTableName};";
@@ -5318,7 +5309,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       finalQuery = fixDataBaseNames (SQL_INSERT1);
       SqlParametersMaps parms7 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("sessionkey", sessionKey).put ("host", localhostname).
           put ("browserID", browserId).put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
-      int insertedCnt = executeStatement (connection, finalQuery, parms7, false).getUpdateCount ();
+      executeStatement (connection, finalQuery, parms7, false).getUpdateCount ();
 
       final String SQL_QUERY7 = "select bigtoint(1) as startPosition, ${started} as status, bigtoint(0) as restart, "
           + " bigtoint(${testLength}) as TestLength, cast(null AS CHAR) as reason, "
@@ -5359,7 +5350,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " GracePeriodRestarts = ${gpRestarts}, maxitems = ${testlength}, waitingForSegment = null where _key = ${oppkey}";
     SqlParametersMaps parms9 = new SqlParametersMaps ().put ("started", "started").put ("rcnt", rcnt).put ("now", now).put ("gpRestarts", gpRestarts).put ("testlength", testLength)
         .put ("oppkey", oppKey);
-    int updatedCnt = executeStatement (connection, SQL_UPDATE1, parms9, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE1, parms9, false).getUpdateCount ();
 
     // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
     String sessionDB = getTdsSettings ().getTDSSessionDBName ();
@@ -5368,17 +5359,17 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     finalQuery = fixDataBaseNames (SQL_INSERT2);
     SqlParametersMaps parms10 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("sessionkey", sessionKey).put ("host", localhostname).put ("restart", "restart ")
         .put ("rcnt", String.format ("%d", rcnt + 1)).put ("browserID", browserId).put ("dbname", sessionDB);
-    int insertedCnt = executeStatement (connection, finalQuery, parms10, false).getUpdateCount ();
+    executeStatement (connection, finalQuery, parms10, false).getUpdateCount ();
 
     if (DbComparator.isEqual (sessionType, 1)) {
       final String SQL_UPDATE2 = "update testeeresponse set OpportunityRestart = ${rcnt} + 1 where _fk_TestOpportunity = ${oppkey};";
       SqlParametersMaps parms11 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("rcnt", rcnt);
-      updatedCnt = executeStatement (connection, SQL_UPDATE2, parms11, false).getUpdateCount ();
+      executeStatement (connection, SQL_UPDATE2, parms11, false).getUpdateCount ();
 
     } else if (DbComparator.lessThan (minutesDiff (fromTime, now), delay)) {
       final String SQL_UPDATE3 = "update testeeresponse set OpportunityRestart = ${rcnt} + 1 where _fk_TestOpportunity = ${oppkey} and OpportunityRestart = ${rcnt};";
       SqlParametersMaps parms12 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("rcnt", rcnt);
-      updatedCnt = executeStatement (connection, SQL_UPDATE3, parms12, false).getUpdateCount ();
+      executeStatement (connection, SQL_UPDATE3, parms12, false).getUpdateCount ();
 
     } else if (DbComparator.isEqual (removeUnanswered, true)) {
       _RemoveUnanswered_SP (connection, oppKey);
@@ -5646,13 +5637,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public SingleDataResultSet _GetTesteeTestModes_SP (SQLConnection connection, String clientname, String testID, Long testee, Integer sessionType,
       String modeList) throws ReturnStatusException {
-    long startTime= System.currentTimeMillis ();
-    
     Date starttime = _dateUtil.getDateWRetStatus (connection);
 
     SingleDataResultSet result = null;
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.1 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // guest testees have no RTS data. If allowed into the system this far, then
     // provide them all modes
     if (testee < 0) {
@@ -5663,7 +5651,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (ctwTbl);
       return result;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.2 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // It is an error for @require = 1 and @modeField = null, however, it is
     // also highly unlikely since both fields have default values in TDSCONFIGS
     String tideId = null;
@@ -5683,7 +5670,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       requiremode = record.<Boolean> get ("requiremode");
       requiremodeWindow = record.<Boolean> get ("requiremodeWindow");
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.3 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- this block sets up debugging capabilities by simulating conditions we
     // expect to find in the RTS
     if (modeList != null) {
@@ -5700,11 +5686,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, modeField, modeListRef);
       modeList = modeListRef.get ();
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.4 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     DataBaseTable modesTbl = getDataBaseTable ("gttmModes").addColumn ("rtsval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
         .addColumn ("asgnMode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
     connection.createTemporaryTable (modesTbl);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.5 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // TODO Elena: I added tideId check below since it does not have sense to
     // look for like records without it.
 
@@ -5712,7 +5696,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Character delim = ';';
       final String[] rows = _commonDll._BuildTableAsArray (modeList, delim.toString (), -1);
       final String tideIdFinal = tideId;
-      _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.6 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
       executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
       {
         @Override
@@ -5758,7 +5741,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         }
       }, modesTbl, false); // temp table already created
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.7 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     Map<String, String> unquotedParms3 = new HashMap<String, String> ();
     unquotedParms3.put ("modesTbl", modesTbl.getTableName ());
     unquotedParms3.put ("ctwTbl", ctwTbl.getTableName ());
@@ -5768,7 +5750,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           + " where WID = windowID and mode = asgnMode";
 
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms3), null, false).getResultSets ().next ();
-      _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.8 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
       connection.dropTemporaryTable (modesTbl);
       connection.dropTemporaryTable (ctwTbl);
       _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestModes", starttime, testee, true, null, null, null, clientname, null);
@@ -5781,7 +5762,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           + "from ${modesTbl}, ${ctwTbl} where mode = asgnMode";
       Map<String, String> unquotedParms4 = unquotedParms3;
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), null, false).getResultSets ().next ();
-      _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.9 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
       connection.dropTemporaryTable (modesTbl);
       connection.dropTemporaryTable (ctwTbl);
       _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestModes", starttime, testee, true, null, null, null, clientname, null);
@@ -5789,7 +5769,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       return result;
 
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.10 _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // else there is no specific mode assignment to the testee: return all
     // active windows all modes
     final String SQL_QUERY5 = "select windowID, windowMax, startDate, endDate, mode, modeMax, testkey from ${ctwTbl}";
@@ -5800,7 +5779,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     connection.dropTemporaryTable (modesTbl);
     connection.dropTemporaryTable (ctwTbl);
     _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestModes", starttime, testee, true, null, null, null, clientname, null);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1.11 Total _GetTesteeTestModes_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     return result;
   }
 
@@ -5842,7 +5820,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms.put ("tblName", tbl.getTableName ());
 
     final String query = fixDataBaseNames (SQL_QUERY);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
     return tbl;
   }
 
@@ -5852,12 +5830,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public SingleDataResultSet _GetTesteeTestWindows_SP (SQLConnection connection, String clientname, String testID, Long testee, Integer sessionType,
       String windowList, String formList) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date starttime = _dateUtil.getDateWRetStatus (connection);
 
     SingleDataResultSet result = null;
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 1 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- for guest testees there is no registration data to be found
     if (testee < 0) {
       final String SQL_QUERY1 = "select windowID, windowMax, startDate, endDate, cast(null AS CHAR) as formkey, mode, modeMax, testkey from ${ctwTblName}";
@@ -5867,7 +5843,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (ctwTbl);
       return result;
     }
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 2 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     Boolean requireWindow = null;
     String windowField = null, tideId = null;
     final String SQL_QUERY2 = " select RTSWindowField as windowField,  requireRTSWindow as requireWindow,  TIDE_ID  as tideID "
@@ -5881,7 +5856,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       windowField = record.<String> get ("windowField");
       requireWindow = record.<Boolean> get ("requireWindow");
     }
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 3 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     Boolean isFormTest = false;
     final String SQL_QUERY3 = "select  testID from ${ConfigDB}.client_testformproperties where clientname = ${clientname} and testID = ${testID} limit 1";
     SqlParametersMaps parms3 = parms2;
@@ -5900,10 +5874,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       requireWindow = true;
     else if (windowField == null) // -- sanity check
       requireWindow = false;
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 4 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     DataBaseTable windowsTbl = getDataBaseTable ("gttwWindows").addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("form", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
     connection.createTemporaryTable (windowsTbl);
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 5 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- independent window selection is used in several different places for
     // form and adaptive tests. Set it up here
     if (DbComparator.isEqual (requireWindow, true)) {
@@ -5913,7 +5885,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, windowField, windowListRef);
         windowList = windowListRef.get ();
       }
-      _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 6 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
       // TODO Elena: I added windowList and tideId checks
       if (windowList != null && tideId != null) {
 
@@ -5945,11 +5916,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           }
         }, windowsTbl, false); // temp table already created
       }
-      _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 7 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     }
 
     DataBaseTable tbl = GetTestFormWindows_FN (connection, clientname, testID, sessionType);
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 8 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     final String SQL_QUERY4 = "select  windowID from ${tblName} limit 1";
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("tblName", tbl.getTableName ());
@@ -5972,7 +5941,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       return result;
     }
     connection.dropTemporaryTable (tbl);
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 9 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- NOT A FIXED FORM TEST. Determine if the WINDOW has been assigned to
     // the student
     // -- test windows are recorded by TIDE_ID (in lieu of testID), which is not
@@ -5997,7 +5965,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestWindows", starttime, null, true, null, null, null, clientname, null);
       return result;
     }
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 10 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- not a fixed form test and no special window conditions specific to the
     // testee. Return all windows currently active on this test
     final String SQL_QUERY6 = "select distinct windowID, windowMax , startDate, endDate, cast(null AS CHAR) as formkey, mode, modeMax, testkey from ${ctwTbl}";
@@ -6005,11 +5972,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms6.put ("ctwTbl", ctwTbl.getTableName ());
 
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY6, unquotedParms6), null, false).getResultSets ().next ();
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 11 Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     connection.dropTemporaryTable (windowsTbl);
     connection.dropTemporaryTable (ctwTbl);
     _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestWindows", starttime, null, true, null, null, null, clientname, null);
-    _logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     return result;
   }
 
@@ -6020,7 +5985,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   // Original port
   public void _IsOpportunityBlocked_SP (SQLConnection connection, String clientname, Long testee, String testID, Integer maxopps, _Ref<String> reasonBlockedRef, Integer sessionType)
       throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     // -- This proc is concerned entirely with the current point in time and not
     // with absolutes
     // -- so it applies to both new and existing test opportunities.
@@ -6038,7 +6002,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       subject = record.<String> get ("subject");
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.1 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     final String SQL_QUERY2 = "select  clientname from _externs where clientname = ${clientname} and environment = 'SIMULATION' limit 1";
     SqlParametersMaps parameters2 = (new SqlParametersMaps ()).put ("clientname", clientname);
 
@@ -6051,9 +6014,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     else
       subject = ";;";
     _Ref<String> testeeSubjectsRef = new _Ref<String> ();
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.2 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, "BLOCKEDSUBJECT", testeeSubjectsRef);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.3 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     String testeeSubjects = testeeSubjectsRef.get ();
     if (testeeSubjects != null && testeeSubjects.length () > 0) {
 
@@ -6065,7 +6026,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         return;
       }
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.4 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- Check for number of tests administered in the current test window.
     // -- There is a maximum number of opportunities for the test over all
     // windows, but also a maximum available to a student in each window
@@ -6075,7 +6035,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         addColumn ("modeopps", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("startDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("endDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).
         addColumn ("formkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("modetestkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
         addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("modemax", SQL_TYPE_To_JAVA_TYPE.INT);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.5 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // Check for number of tests administered in the current test window.
     // There is a maximum number of opportunities for the test over all windows,
     // but also a maximum available to a student in each window
@@ -6083,7 +6042,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // WinID, winmax, startDate, endDate, mode, modemax, modeTestKey to table
     // windowID, windowMax, startDate, endDate, mode, modeMax, testkey fromset
     final SingleDataResultSet testModesResult = _GetTesteeTestModes_SP (connection, clientname, testID, testee, sessionType);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.6 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     if (testModesResult.getCount () == 0) {
       reasonBlockedRef.set ("NA");
       return;
@@ -6105,9 +6063,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       record.addColumnValue ("formkey", null);
     }
     connection.createTemporaryTable (modesTbl);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.7 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
-    int insertedCnt = insertBatch (connection, modesTbl.generateInsertStatement (), testModesResult, null);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.8 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
+    insertBatch (connection, modesTbl.generateInsertStatement (), testModesResult, null);
     final String clientnameFinal = clientname;
     final String testIDFinal = testID;
     final Long testeeFinal = testee;
@@ -6122,7 +6078,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (modesTbl);
       return;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.9 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     final String SQL_QUERY4 = "select  testID from ${ConfigDB}.client_testprerequisite where clientname = ${clientname} and TestID = ${testID} and isActive = 1 "
         + " and not exists (select * from testopportunity where clientname = ${clientname} and _efk_Testee = ${testee} and _efk_TestID = prereqTestID "
         + "  and dateCompleted is not null and dateDeleted is null)  limit 1";
@@ -6132,7 +6087,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._FormatMessage_SP (connection, clientname, "ENU", "_CanOpenTestOpportunity", "Missing prerequisite", reasonBlockedRef);
       return;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.10 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     DataBaseTable windowsTbl = getDataBaseTable ("iobWindows").addColumn ("winsession", SQL_TYPE_To_JAVA_TYPE.INT).
         addColumn ("modesessn", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).
         addColumn ("numopps", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("winmax", SQL_TYPE_To_JAVA_TYPE.INT).
@@ -6140,7 +6094,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         addColumn ("startDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("endDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).
         addColumn ("formkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("testkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
         addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("modemax", SQL_TYPE_To_JAVA_TYPE.INT);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.11 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
     {
       @Override
@@ -6171,16 +6124,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         return result;
       }
     }, windowsTbl, true);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.12 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     final String SQL_QUERY5 = "delete from ${windowsTblName} where not exists (select * from ${modesTblName} where WinID = WID and modeTestKey = testkey)";
     Map<String, String> unquoted5 = new HashMap<> ();
     unquoted5.put ("windowsTblName", windowsTbl.getTableName ());
     unquoted5.put ("modesTblName", modesTbl.getTableName ());
 
-    int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquoted5), null, false).getUpdateCount ();
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.13 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquoted5), null, false).getUpdateCount ();
     connection.dropTemporaryTable (modesTbl);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.14 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     final String SQL_QUERY6 = "select  WID from ${windowsTblName} where WID is not null limit 1";
     Map<String, String> unquoted6 = new HashMap<> ();
     unquoted6.put ("windowsTblName", windowsTbl.getTableName ());
@@ -6190,16 +6140,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (connection, "_IsOpportunityBlocked", starttime, testee, true, null, null, null, clientname, null);
       return;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.15 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.16 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     final String SQL_QUERY7 = "update ${windowsTblName} W, ${ctwTblName} C set W.winSession = C.WindowSession , W.modeSessn = C.modeSession ";
     Map<String, String> unquoted7 = new HashMap<> ();
     unquoted7.put ("windowsTblName", windowsTbl.getTableName ());
     unquoted7.put ("ctwTblName", ctwTbl.getTableName ());
 
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquoted7), null, false).getUpdateCount ();
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.17 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquoted7), null, false).getUpdateCount ();
     String statusCodes = _commonDll.GetStatusCodes_FN (connection, "opportunity", "closed");
     final String SQL_QUERY8 = " update ${windowsTblName} set winopps =  (select count(*) from testopportunity O, session S "
         + " where O.clientname = ${clientname} and _efk_Testee = ${testee} and _efk_TestID = ${testID}  and O._fk_Session  = S._Key and (winSession = -1 or S.SessionType = winSession) "
@@ -6208,8 +6155,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquoted8.put ("windowsTblName", windowsTbl.getTableName ());
     SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("testID", testID).put ("statusCodes", statusCodes);
 
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquoted8), parms8, false).getUpdateCount ();
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.18 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquoted8), parms8, false).getUpdateCount ();
     // -- NOTE: Mode is directly correlated with the testkey (as opposed to
     // testID, which is in a one-to-many correspondence with testKEY)
     final String SQL_QUERY9 = "update ${windowsTblName} set modeopps =  (select count(*) from testopportunity O, session S "
@@ -6218,8 +6164,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquoted9 = unquoted8;
     SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("statusCodes", statusCodes);
 
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.19 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
     final String SQL_QUERY10 = "select  winopps from ${windowsTblName} where winopps < winmax and modeopps < modeMax  limit 1";
     Map<String, String> unquoted10 = unquoted8;
 
@@ -6230,14 +6175,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
       return;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.20 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     // -- check for all opportunities used for the logical test (testID as
     // opposed to testkey)
     final String SQL_QUERY11 = "update ${windowsTblName} set numopps = (select count(*) from testopportunity "
         + " where clientname = ${clientname} and _efk_Testee = ${testee} and _efk_TestID = ${testID} and dateDeleted is null and status in (${statusCodes}))";
     Map<String, String> unquoted11 = unquoted8;
     SqlParametersMaps parms11 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("testID", testID).put ("statusCodes", statusCodes);
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
 
     final String SQL_QUERY12 = "select  numopps from ${windowsTblName} where numopps < ${maxopps} limit 1";
     Map<String, String> unquoted12 = unquoted8;
@@ -6248,11 +6192,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (connection, "_IsOpportunityBlocked", starttime, testee, true, null, null, null, clientname, null);
       return;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.21 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     connection.dropTemporaryTable (windowsTbl);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.22 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
     _commonDll._LogDBLatency_SP (connection, "_IsOpportunityBlocked", starttime, testee, true, null, null, null, clientname, null);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3.23 _IsOpportunityBlocked_SP Execution Time : "+((System.currentTimeMillis ()-startTime)) + " miliseconds >>>> " + Thread.currentThread ().getId ());
 
   }
 
@@ -6327,8 +6268,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final SingleDataResultSet testModesResult = _GetTesteeTestModes_SP (connection, clientname, testID, testee, sessionType);
     end = new Date ();
     diff = end.getTime () - start.getTime ();
-    System.out.println (String.format ("_GetTesteeTestModes_SP latency: %d millisec; records in set: %d",
-        (long) diff, testModesResult.getCount ()));
     if (testModesResult.getCount () == 0) {
       reasonBlockedRef.set ("NA");
       return;
@@ -6358,11 +6297,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       record.addColumnValue ("formkey", null);
     }
     connection.createTemporaryTable (modesTbl);
-    int insertedCnt = insertBatch (connection, modesTbl.generateInsertStatement (), testModesResult, null);
+    insertBatch (connection, modesTbl.generateInsertStatement (), testModesResult, null);
     end = new Date ();
     diff = end.getTime () - start.getTime ();
-    System.out.println (String.format ("batch insert _GetTesteeTestModes_SP result into  modes temp tbl latency: %d millisec; records inserted: %d",
-        (long) diff, insertedCnt));
 
     final String clientnameFinal = clientname;
     final String testIDFinal = testID;
@@ -6393,8 +6330,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SingleDataResultSet result = _GetTesteeTestWindows_SP (connection, clientnameFinal, testIDFinal, testeeFinal, sessionTypeFinal);
     end = new Date ();
     diff = end.getTime () - start.getTime ();
-    System.out.println (String.format ("_GetTesteeTestWindows_SP latency: %d millisec; records in set: %d",
-        (long) diff, result.getCount ()));
 
     start = new Date ();
     DataBaseTable windowsTbl = getDataBaseTable ("iobWindows").addColumn ("winsession", SQL_TYPE_To_JAVA_TYPE.INT).
@@ -6428,18 +6363,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       record.addColumnValue ("modeopps", 0);
       record.addColumnValue ("winopps", 0);
     }
-    insertedCnt = insertBatch (connection, windowsTbl.generateInsertStatement (), result, null);
+    insertBatch (connection, windowsTbl.generateInsertStatement (), result, null);
     end = new Date ();
     diff = end.getTime () - start.getTime ();
-    System.out.println (String.format ("batch insert _GetTesteeTestWindows_SP result into windows temp tbl latency: %d millisec; records inserted: %d",
-        (long) diff, insertedCnt));
 
     start = new Date ();
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
     end = new Date ();
     diff = end.getTime () - start.getTime ();
-    System.out.println (String.format ("GetCurrentTestWindows_SP latency: %d millisec; returns tmp tbl",
-        (long) diff));
 
     start = new Date ();
     final String SQL_QUERY5 = "delete from ${windowsTblName} where not exists (select * from ${modesTblName} where WinID = WID and modeTestKey = testkey)";
@@ -6447,7 +6378,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquoted5.put ("windowsTblName", windowsTbl.getTableName ());
     unquoted5.put ("modesTblName", modesTbl.getTableName ());
 
-    int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquoted5), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquoted5), null, false).getUpdateCount ();
 
     connection.dropTemporaryTable (modesTbl);
 
@@ -6465,7 +6396,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquoted7.put ("windowsTblName", windowsTbl.getTableName ());
     unquoted7.put ("ctwTblName", ctwTbl.getTableName ());
 
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquoted7), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquoted7), null, false).getUpdateCount ();
 
     String statusCodes = _commonDll.GetStatusCodes_FN (connection, "opportunity", "closed");
     final String SQL_QUERY8 = " update ${windowsTblName} set winopps =  (select count(*) from testopportunity O, session S "
@@ -6475,7 +6406,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquoted8.put ("windowsTblName", windowsTbl.getTableName ());
     SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("testID", testID).put ("statusCodes", statusCodes);
 
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquoted8), parms8, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquoted8), parms8, false).getUpdateCount ();
 
     // -- NOTE: Mode is directly correlated with the testkey (as opposed to
     // testID, which is in a one-to-many correspondence with testKEY)
@@ -6485,7 +6416,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquoted9 = unquoted8;
     SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("statusCodes", statusCodes);
 
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
 
     final String SQL_QUERY10 = "select  winopps from ${windowsTblName} where winopps < winmax and modeopps < modeMax  limit 1";
     Map<String, String> unquoted10 = unquoted8;
@@ -6502,7 +6433,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " where clientname = ${clientname} and _efk_Testee = ${testee} and _efk_TestID = ${testID} and dateDeleted is null and status in (${statusCodes}))";
     Map<String, String> unquoted11 = unquoted8;
     SqlParametersMaps parms11 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("testID", testID).put ("statusCodes", statusCodes);
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
 
     final String SQL_QUERY12 = "select  numopps from ${windowsTblName} where numopps < ${maxopps} limit 1";
     Map<String, String> unquoted12 = unquoted8;
@@ -6515,20 +6446,16 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     connection.dropTemporaryTable (windowsTbl);
     end = new Date ();
     diff = end.getTime () - start.getTime ();
-    System.out.println (String.format ("rest of functionality dealing with 3 tmp tbls latency: %d millisec; ",
-        (long) diff));
   }
 
   public void _CanOpenTestOpportunity_SP (SQLConnection connection, String clientname, Long testee, String testkey, UUID sessionId,
       Integer maxOpportunities, _Ref<Boolean> newRef, _Ref<Integer> numberRef, _Ref<String> reasonRef) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date today = _dateUtil.getDateWRetStatus (connection);
     newRef.set (false);
     numberRef.set (0);
     reasonRef.set (null);
 
     String environment = _commonDll.getExternsColumnByClientName (connection, clientname, "environment");
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.1 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     Integer sessionType = null;
     final String SQL_QUERY1 = "select sessionType from session where _Key = ${sessionID}";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionID", sessionId);
@@ -6538,7 +6465,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       sessionType = record.<Integer> get ("sessionType");
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.2 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     String testId = null; // -- testkeys are unique
     final String SQL_QUERY2 = "select  TestID from ${ItemBankDB}.tblsetofadminsubjects where _Key = ${testkey}";
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("testkey", testkey);
@@ -6549,7 +6475,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     // -- If simulation environment uses 'real' students then we want the test
     // to proceed anyway
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.3 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     if (DbComparator.notEqual (environment, "SIMULATION") && DbComparator.greaterThan (testee, 0)) {
       // -- only check eligibility on real students
       _IsOpportunityBlocked_SP (connection, clientname, testee, testId, maxOpportunities, reasonRef, sessionType);
@@ -6561,7 +6486,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         numberRef.set (0);
       return;
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.4 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     Integer delayDays = null;
     final String SQL_QUERY6 = "select OppDelay  from timelimits where _efk_TestID = ${testID} and clientname = ${clientname}";
     SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testid", testId);
@@ -6582,9 +6506,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // -- first try to open an existing opportunity of the main test
     // -- _CanOpenExistingOpportunity must use the test key, not testID, because
     // this will be resuming an actual physical test, not a logical one
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.5 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     _CanOpenExistingOpportunity_SP (connection, clientname, testee, testId, sessionId, maxOpportunities, numberRef, reasonRef);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.6 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     if (DbComparator.greaterThan (numberRef.get (), 0) || reasonRef.get () != null) {
       return;
     }
@@ -6594,12 +6516,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // -- Important note: This function takes into account that an expired
     // opportunity may have to be closed first
     _CanOpenNewOpportunity_SP (connection, clientname, testee, testId, maxOpportunities, delayDays, numberRef, reasonRef, sessionId);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5.7 _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     if (DbComparator.greaterThan (numberRef.get (), 0)) {
       newRef.set (true);
     }
     _commonDll._LogDBLatency_SP (connection, "_CanOpenTestOpportunity", today, testee, true, null, null, null, clientname, null);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP Total _CanOpenTestOpportunity_SP Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
   }
 
   public SingleDataResultSet _InitOpportunityAccommodations_SP (SQLConnection connection, UUID oppkey, String accoms) throws ReturnStatusException {
@@ -6640,7 +6560,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         Map<String, String> unquotedParms2 = new HashMap<> ();
         unquotedParms2.put ("tblName", tbl.getTableName ());
         final String query2 = fixDataBaseNames (SQL_QUERY2);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (query2, unquotedParms2), parms2, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (query2, unquotedParms2), parms2, false).getUpdateCount ();
         connection.commit ();
     } catch (ReturnStatusException re) {
       try {
@@ -6685,7 +6605,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
           final String SQL_QUERY3 = "update testopportunity_readonly set AccommodationString = ${accomsStr} where _fk_TestOpportunity = ${oppkey}";
           SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("accomsStr", accomodationsString).put ("oppkey", oppkey);
-          int updatedCnt = executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
+          executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
 
           _commonDll._LogDBLatency_SP (connection, "_InitOpportunityAccommodations", starttime, testee, true, null, oppkey, null, clientname, null);
           return null;
@@ -6804,7 +6724,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " DateStarted = case when ${slotcount} = 0 then null else DateStarted end  where _Key = ${testoppkey}";
     SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("browserID", browserId).put ("today", today).put ("slotcount", slotcount).
         put ("isabnormal", isAbnormal).put ("testoppkey", testoppkeyRef.get ()).put ("newstatus", newstatusRef.get ());
-    int updatedCnt = executeStatement (connection, SQL_QUERY5, parms5, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY5, parms5, false).getUpdateCount ();
 
     // -- there should be accommodations already, but database distress errors
     // have been known to fail here
@@ -6848,13 +6768,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parmts7 = (new SqlParametersMaps ()).put ("testoppkey", testoppkeyRef.get ());
     Map<String, String> unquotedParms7 = new HashMap<> ();
     unquotedParms7.put ("ctaTblName", ctaTbl.getTableName ());
-    updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquotedParms7), parmts7, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquotedParms7), parmts7, false).getUpdateCount ();
     connection.dropTemporaryTable (ctaTbl);
 
     final String SQL_QUERY8 = "update testeeaccommodations set IsApproved = 0 "
         + " where _fk_TestOpportunity = ${testoppkey} and valueCount > 1 and isSelectable = 1 and allowChange = 1";
     SqlParametersMaps parms8 = parmts7;
-    updatedCnt = executeStatement (connection, SQL_QUERY8, parms8, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY8, parms8, false).getUpdateCount ();
 
     // -- record the audit trail
     String localost = _commonDll.getLocalhostName ();
@@ -6864,7 +6784,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " values (${testoppkey}, ${sessionID}, ${localhost}, ${browserID}, ${newstatus}, ${isabnormal}, now(3), ${dbname})";
     SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("testoppkey", testoppkeyRef.get ()).put ("sessionId", sessionId).put ("localhost", localost).
         put ("browserID", browserId).put ("newstatus", newstatusRef.get ()).put ("isabnormal", isAbnormal).put ("dbname", sessionDB);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY9), parms9, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY9), parms9, false).getUpdateCount ();
 
     _commonDll._LogDBLatency_SP (connection, "_OpenExistingOpportunity", starttime, testee, true, null, testoppkeyRef.get ());
   }
@@ -7053,7 +6973,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         put ("testeeID", testeeID).put ("testeeName", testeeName).put ("browserKey", browserKey).put ("today", today).put ("newID", newIdRef.get ()).
         put ("windowID", windowId).put ("mode", mode).put ("segmented", segmentedRef.get ()).put ("algorithm", algorithmRef.get ()).
         put ("testKey", testkey).put ("environment", environment).put ("sessionKey", sessionKey);
-    int insertedCnt = executeStatement (connection, SQL_QUERY5, parms5, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY5, parms5, false).getUpdateCount ();
 
     String context = "INITIAL";
     _commonDll._SetTesteeAttributes_SP (connection, clientname, testoppkeyRef.get (), testee, context);
@@ -7076,7 +6996,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
       final String SQL_QUERY7 = "update testopportunity set status = ${status} where _key = ${testoppkey}";
       SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("testoppkey", testoppkeyRef.get ()).put ("status", status);
-      int updatedCnt = executeStatement (connection, SQL_QUERY7, parms7, false).getUpdateCount ();
+      executeStatement (connection, SQL_QUERY7, parms7, false).getUpdateCount ();
  
       
     } catch (SQLException se) {
@@ -7098,7 +7018,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       String localhost = _commonDll.getLocalhostName ();
       SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("testoppkey", testoppkeyRef.get ()).put ("status", status).put ("sessionKey", sessionKey).
           put ("hostname", localhost).put ("browserKey", browserKey).put ("dbname", sessionDB);
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY8), parms8, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY8), parms8, false).getUpdateCount ();
     }
 
     _commonDll._LogDBLatency_SP (connection, "_OpenNewOpportunity", starttime, testee, true, null, testoppkeyRef.get (), null, clientname, null);
@@ -7176,7 +7096,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   public SingleDataResultSet T_OpenTestOpportunity_SP (SQLConnection connection, Long testee, String testkey, UUID sessionKey, UUID browserKey,
       String guestAccommodations) throws ReturnStatusException {
     
-    _logger.info ("<<<<Start :: "+getTime ()+" T_OpenTestOpportunity_SP "+Thread.currentThread ().getId ());
     Date starttime = _dateUtil.getDateWRetStatus (connection);
 
     String clientname = null;
@@ -7213,7 +7132,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, "--ENTITYNAME--", testeeNameRef);
       testeeName = testeeNameRef.get ();
     }
-    _logger.info ("<<<< "+getTime ()+" T_OpenTestOpportunity_SP 1 "+Thread.currentThread ().getId ());
     Integer maxOpportunities = null;
     final String SQL_QUERY3 = "select maxOpportunities from ${ConfigDB}.client_testproperties where clientname = ${clientname} and testID = ${testID}";
     SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testid", testId);
@@ -7248,7 +7166,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (connection, "T_OpenTestOpportunity", starttime, testee, true, null, null);
       return rs;
     }
-    _logger.info ("<<<<:: "+getTime ()+" T_OpenTestOpportunity_SP 2 "+Thread.currentThread ().getId ());
     Long proctor = null;
     String newstatus = null;
     UUID testoppKey = null;
@@ -7304,7 +7221,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           if (guestAccommodations != null && guestAccommodations.length () == 0)
             guestAccommodations = null;
         }
-        _logger.info ("<<<< :: "+getTime ()+" T_OpenTestOpportunity_SP 3"+Thread.currentThread ().getId ());
         _Ref<String> newstatusRef = new _Ref<> ();
         _Ref<UUID> testoppKeyRef = new _Ref<> ();
         _OpenExistingOpportunity_SP (connection, clientname, testee, testkey, oppnum, sessionKey, browserKey,
@@ -7319,7 +7235,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           // -- automatically approve proctorless session (for practice test)
           final String SQL_QUERY5 = "update testopportunity set status = 'approved' where _Key = ${testoppkey}";
           SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("testoppKey", testoppKey);
-          int updatedCnt = executeStatement (connection, SQL_QUERY5, parms5, false).getUpdateCount ();
+          executeStatement (connection, SQL_QUERY5, parms5, false).getUpdateCount ();
         }
       }
     } catch (ReturnStatusException re) {
@@ -7355,13 +7271,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String SQL_QUERY8 = "update testopportunity set SessID = ${sessID}, Proctorname = ${proctorname}, Language = ${lang}, _fk_session = ${sessionKey} where _Key = ${testoppkey}";
     SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("testoppKey", testoppKey).put ("sessID", sessId).put ("proctorName", proctorName).
         put ("lang", lang).put ("sessionkey", sessionKey);
-    int updatedCnt = executeStatement (connection, SQL_QUERY8, parms8, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY8, parms8, false).getUpdateCount ();
 
     _commonDll._LogDBLatency_SP (connection, "T_OpenTestOpportunity", starttime, testee, true, null, testoppKey);
     // select @oppnum as opportunity, @newstatus as [status], null as reason,
     // @testoppkey as oppkey;
     SingleDataResultSet rs = _commonDll.ReturnStatusReason (newstatus, null, null, testoppKey, oppnum);
-    _logger.info ("<<<<End :: "+getTime ()+" T_OpenTestOpportunity_SP "+Thread.currentThread ().getId ());
     return rs;
   }
 
@@ -7374,8 +7289,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    */
 
   public SingleDataResultSet T_TesteeAttributeMetadata_SP (SQLConnection connection, String clientName) throws ReturnStatusException {
-    // _logger.info
-    // ("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Inside T_TesteeAttributeMetadata_SP Method of MySQL Version class >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     final String SQL_QUERY = "select TDS_ID, Label, SortOrder, RTSName, Type, atLogin, isLatencySite from ${ConfigDB}.client_testeeattribute where clientname = ${clientName}";
     String finalQuery = fixDataBaseNames (SQL_QUERY);
     SqlParametersMaps parameters = new SqlParametersMaps ().put ("clientName", clientName);
@@ -7466,7 +7379,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("now", now).put ("enddate", enddate).put ("sesstart", sesstart).
         put ("browserkey", browserKey).put ("sessionkey", sessionKey);
 
-    int updatedCnt = executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
 
     if (_commonDll.AuditSessions_FN (connection, clientname) == 1) {
       // String sessionDB = getAppSettings ().get ("TDSSessionDBName");
@@ -7476,7 +7389,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       String localhostname = _commonDll.getLocalhostName ();
       SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("sessionkey", sessionKey).put ("now", now).put ("hostname", localhostname).
           put ("browserkey", browserKey).put ("dbname", sessionDB);
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false).getUpdateCount ();
     }
 
     if (suppressReport == false)
@@ -7530,7 +7443,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms = new HashMap<> ();
     unquotedParms.put ("tblName", tbl.getTableName ());
     final String query = fixDataBaseNames (SQL_QUERY);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
     return tbl;
   }
 
@@ -7553,7 +7466,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms1.put ("testsTblName", testsTbl.getTableName ());
     unquotedParms1.put ("activeTestsTbl", activeTestsTbl.getTableName ());
 
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms1), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms1), null, false).getUpdateCount ();
     connection.dropTemporaryTable (activeTestsTbl);
 
     String status = null;
@@ -7599,7 +7512,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             + " where not exists (select * from session where clientname = ${clientname} and sessionid = ${sessionID})";
         SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("sessionKey", sessionKeyRef.get ()).put ("sessionId", sessionIdRef.get ()).
             put ("clientname", clientname).put ("environ", environ).put ("localhost", _commonDll.getLocalhostName ());
-        insertedCnt = executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
+        executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
 
         applock = -1;
         connection.commit ();
@@ -7640,7 +7553,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms4 = new HashMap<> ();
     unquotedParms4.put ("testsTblName", testsTbl.getTableName ());
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("sessionKey", sessionKeyRef.get ());
-    insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), parms4, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), parms4, false).getUpdateCount ();
     connection.dropTemporaryTable (testsTbl);
 
     P_OpenSession_SP (connection, sessionKeyRef.get (), 12, true, null);
@@ -7767,7 +7680,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
         final String SQL_QUERY2 = "insert into _maxtestopps (numopps,  _time, clientname) values (${numopps},  ${now}, ${clientname})";
         SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("numopps", numOpps).put ("now", starttime).put ("clientname", clientname);
-        int insertedCnt = executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
+        executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
       }
     } catch (ReturnStatusException re) {
       // TODO: find out:externalId is not set up at this point!
@@ -7794,7 +7707,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms3 = new HashMap<> ();
     unquotedParms3.put ("valsTblName", valsTbl.getTableName ());
     final String query3 = fixDataBaseNames (SQL_QUERY3);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
     // END: Retrieve a list of fields that this client expects at login
 
     // START: Update list of fields with the values supplied from the login form
@@ -7803,7 +7716,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       final String SQL_QUERY4 = "update ${valsTblName} set inval = ${theRight} where _key = ${theLeft}";
       Map<String, String> unquotedParms4 = unquotedParms3;
       SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("theRight", pair.getValue ()).put ("theLeft", pair.getKey ());
-      int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), parms4, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), parms4, false).getUpdateCount ();
     }
     // END: Update list of fields with the values supplied from the login form
     // (form values were passed into fn as argument)
@@ -7860,7 +7773,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
       final String SQL_QUERY6 = "insert into _anonymoustestee (dateCreated, clientname) values (${now}, ${clientname})";
       SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("now", starttime).put ("clientname", clientname);
-      insertedCnt = executeStatement (connection, SQL_QUERY6, parms6, false).getUpdateCount ();
+      executeStatement (connection, SQL_QUERY6, parms6, false).getUpdateCount ();
 
       // to get auto_increment _key column, we use
       // SELECT LAST_INSERT_ID() 
@@ -7876,15 +7789,15 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       final String SQL_QUERY8 = "update ${valsTblName} set outval = ${outValue} where _Key = 'ID'";
       SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("outValue", outValue);
       Map<String, String> unquotedParms8 = unquotedParms3;
-      int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquotedParms8), parms8, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquotedParms8), parms8, false).getUpdateCount ();
 
       final String SQL_QUERY9 = "update  ${valsTblName} set outval = 'GUEST' where _Key in ('Lastname', 'Firstname')";
       Map<String, String> unquotedParms9 = unquotedParms3;
-      updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquotedParms9), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquotedParms9), null, false).getUpdateCount ();
 
       final String SQL_QUERY10 = "update  ${valsTblName} set outval = concat('GUEST', _Key) where atttype = 'relationship'";
       Map<String, String> unquotedParms10 = unquotedParms3;
-      updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY10, unquotedParms10), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY10, unquotedParms10), null, false).getUpdateCount ();
 
       // select 'success' as status, @gkey as entityKey, null as accommodations;
       List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
@@ -7937,7 +7850,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // returned. Now check required attributes
     final String SQL_QUERY12 = "update ${valsTblName} set outval = inval where _Key = 'ID'";
     Map<String, String> unquotedParms12 = unquotedParms3;
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY12, unquotedParms12), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY12, unquotedParms12), null, false).getUpdateCount ();
 
     final String SQL_QUERY13 = "select  action from ${valsTblName} where outval is null and action = 'REQUIRE' limit 1";
 
@@ -8141,7 +8054,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms1 = new HashMap<String, String> ();
       unquotedParms1.put ("itemsTableName", itemsTable.getTableName ());
       unquotedParms1.put ("temporaryTableName", buildTable.getTableName ());
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms1), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms1), null, false).getUpdateCount ();
       // System.err.println (insertedCnt); // for testing
       connection.dropTemporaryTable (buildTable);
     }
@@ -8240,7 +8153,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms3 = new HashMap<String, String> ();
     unquotedParms3.put ("insertsTableName", insertsTable.getTableName ());
     unquotedParms3.put ("TestItemgroupDataTableName", TestItemgroupDataTable.getTableName ());
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms3), null, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms3), null, false).getUpdateCount ();
     // System.err.println (insertedCnt); // for testing
 
     if (itemKeys != null) {
@@ -8248,7 +8161,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms4 = new HashMap<String, String> ();
       unquotedParms4.put ("insertsTableName", insertsTable.getTableName ());
       unquotedParms4.put ("itemsTableName", itemsTable.getTableName ());
-      int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms4), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms4), null, false).getUpdateCount ();
       // System.err.println (deletedCnt); // for testing
     }
     final String SQL_QUERY6 = "select  bankitemkey from ${insertsTableName} where formPosition is null limit 1";
@@ -8280,7 +8193,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       }
       final String SQL_UPDATE1 = "update ${insertsTableName} set relativePosition = formPosition - ${formStart};";
       SqlParametersMaps parms6 = new SqlParametersMaps ().put ("formStart", formStart);
-      int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms2), parms6, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms2), parms6, false).getUpdateCount ();
       // System.err.println (updatedCnt); // for testing
     }
     final String SQL_QUERY9 = "select relativePosition from ${insertsTableName} group by relativePosition having count(*) > 1";
@@ -8307,7 +8220,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       }
       final String SQL_UPDATE2 = "update ${insertsTableName} set position = ${lastpos} + 1 where relativePosition = ${minpos};";
       SqlParametersMaps parms7 = new SqlParametersMaps ().put ("lastpos", lastpos).put ("minpos", minpos);
-      int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms7, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms7, false).getUpdateCount ();
       // System.err.println (updatedCnt); // for testing
 
       lastpos += 1;
@@ -8343,7 +8256,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       final String SQL_INSERT3 = "insert into testeeresponse (_fk_TestOpportunity, Position) select ${oppkey}, R.position from ${insertsTableName} R " +
           " where not exists (select * from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = R.position);";
       SqlParametersMaps parms9 = parms1;
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms2), parms9, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms2), parms9, false).getUpdateCount ();
 
       // TODO Elena check this query!
       final String SQL_UPDATE3 = "Update testeeresponse T, ${insertsTableName} R  set T.isRequired = R.IsRequired, T._efk_ITSItem = R._efk_ITSItem, T._efk_ITSBank = R.bankkey, "
@@ -8364,9 +8277,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       parms10.put ("segment", segment);
       parms10.put ("segmentID", segmentId);
       parms10.put ("groupB", groupB);
-      int updateCnt = 0;
       // TODO Elena Testing only till we fix mysql update
-      // updateCnt = executeStatement (connection, fixDataBaseNames
+      // executeStatement (connection, fixDataBaseNames
       // (SQL_UPDATE3, unquotedParms2), parms10, false).getUpdateCount ();
 
       // check for successful insertion of ALL and ONLY the items in the group
@@ -8403,12 +8315,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             "and segment = ${segment} and groupID = ${groupID};";
         SqlParametersMaps parms12 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("groupID", groupId).put ("now", starttime).put ("minFTpos", minFTpos)
             .put ("segment", segment);
-        updateCnt = executeStatement (connection, SQL_UPDATE4, parms12, false).getUpdateCount ();
+        executeStatement (connection, SQL_UPDATE4, parms12, false).getUpdateCount ();
       }
       if (_AA_IsSegmentSatisfied_FN (connection, oppKey, segment) == true) {
         final String SQL_UPDATE5 = "update testopportunitysegment set IsSatisfied = 1 where _fk_TestOpportunity = ${oppkey} and segmentPosition = ${segment};";
         SqlParametersMaps parms13 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("segment", segment);
-        updateCnt = executeStatement (connection, SQL_UPDATE5, parms13, false).getUpdateCount ();
+        executeStatement (connection, SQL_UPDATE5, parms13, false).getUpdateCount ();
       }
       connection.commit ();
       connection.setAutoCommit (preexistingAutoCommitMode);
@@ -8434,7 +8346,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       }
       final String SQL_UPDATE6 = "update testopportunity set inSegment = ${segment}, numitems = ${itemcnt} where _Key = ${oppkey};";
       SqlParametersMaps parms15 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("segment", segment).put ("itemcnt", itemcnt);
-      int updateCnt = executeStatement (connection, SQL_UPDATE6, parms15, false).getUpdateCount ();
+      executeStatement (connection, SQL_UPDATE6, parms15, false).getUpdateCount ();
       // System.err.println (updateCnt); // for testing
 
     } catch (ReturnStatusException re) {
@@ -8505,7 +8417,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
  public MultiDataResultSet T_InsertItems_SP (SQLConnection connection, UUID oppKey, UUID sessionKey, UUID browserId, Integer segment, String segmentId, Integer page, String groupId,
      String itemKeys, Character delimiter, Integer groupItemsRequired, Float groupB, Integer debug, Boolean noinsert) throws ReturnStatusException {
    
-   long startTime = System.currentTimeMillis ();
    List<SingleDataResultSet> resultsSets = new ArrayList<SingleDataResultSet> ();
    Date starttime = _dateUtil.getDateWRetStatus (connection);
    String localhostname = _commonDll.getLocalhostName ();
@@ -8513,7 +8424,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    Long testee = null;
 
    _ValidateTesteeAccessProc_SP (connection, oppKey, sessionKey, browserId, false, error);
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP _ValidateTesteeAccessProc_SP 1 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    if (error.get () != null) {
      resultsSets.add (_commonDll._ReturnError_SP (connection, null, "T_InsertItems", error.get (), null, oppKey, "_ValidateTesteeAccesss", "denied"));
      return (new MultiDataResultSet (resultsSets));
@@ -8545,11 +8455,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      Map<String, String> unquotedParms1 = new HashMap<String, String> ();
      unquotedParms1.put ("itemsTableName", itemsTable.getTableName ());
      unquotedParms1.put ("temporaryTableName", buildTable.getTableName ());
-     int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms1), null, false).getUpdateCount ();
+     executeStatement (connection, fixDataBaseNames (SQL_INSERT1, unquotedParms1), null, false).getUpdateCount ();
      // System.err.println (insertedCnt); // for testing
      connection.dropTemporaryTable (buildTable);
    }
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 2 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    final String SQL_QUERY1 = "select clientname, _efk_AdminSUbject as testkey, Restart as opprestart, status, environment, _efk_Testee as testee  from testopportunity where _key = ${oppkey};";
    SqlParametersMaps parms1 = new SqlParametersMaps ().put ("oppkey", oppKey);
    SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
@@ -8590,10 +8499,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      resultsSets.add (_commonDll._ReturnError_SP (connection, clientname, "T_InsertItems", "Unknown test segment", null, oppKey, null));
      return (new MultiDataResultSet (resultsSets));
    }
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 3 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    _Ref<String> msgRef = new _Ref<> ();
    _ValidateItemInsert_SP (connection, oppKey, page, segment, segmentId, groupId, msgRef);
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 4 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    if (msgRef.get () != null) {
      _commonDll._LogDBError_SP (connection, "T_InsertItems", msgRef.get (), null, null, null, oppKey, clientname, sessionKey);
      resultsSets.add (_commonDll._ReturnError_SP (connection, clientname, "T_InsertItems", "Database record insertion failed for new test items: ", msgRef.get (), oppKey, null));
@@ -8636,7 +8543,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      lastPosition = record.<Integer> get ("lastPosition");
    }
    
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 5 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    // Get item data from the itembank, filtering by the items that were chosen
    // by the selection algorithm (some may have been excluded)
    DataBaseTable insertsTable = getDataBaseTable ("inserts").addColumn ("bankitemkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("relativePosition", SQL_TYPE_To_JAVA_TYPE.INT)
@@ -8645,7 +8551,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
        .addColumn ("Scorepoint", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("contentLevel", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("Format", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50)
        .addColumn ("IsFieldTest", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("IsRequired", SQL_TYPE_To_JAVA_TYPE.BIT);
    connection.createTemporaryTable (insertsTable);
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 6 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    // DataBaseTable TestItemgroupDataTable = ITEMBANK_TestItemGroupData_FN
    // (connection, testkey, groupId, language, formKey);
    // final String SQL_INSERT2 =
@@ -8678,14 +8583,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    SqlParametersMaps params = (new SqlParametersMaps ()).put ("formkey", formKey).put ("testkey", testkey).put ("groupid", groupId).put ("language", language).put ("segmentKey", segmentKey);
    String query = fixDataBaseNames (SQL_INSERT2); // to substitute
                                                   // ${ItemBankDB}
-   int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms3), params, false).getUpdateCount ();
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 7 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
+   executeStatement (connection, fixDataBaseNames (query, unquotedParms3), params, false).getUpdateCount ();
    if (itemKeys != null) {
      final String SQL_DELETE1 = "delete from  ${insertsTableName} where bankitemkey not in (select itemkey from ${itemsTableName});";
      Map<String, String> unquotedParms4 = new HashMap<String, String> ();
      unquotedParms4.put ("insertsTableName", insertsTable.getTableName ());
      unquotedParms4.put ("itemsTableName", itemsTable.getTableName ());
-     int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms4), null, false).getUpdateCount ();
+     executeStatement (connection, fixDataBaseNames (SQL_DELETE1, unquotedParms4), null, false).getUpdateCount ();
      // System.err.println (deletedCnt); // for testing
    }
    final String SQL_QUERY6 = "select  bankitemkey from ${insertsTableName} where formPosition is null limit 1";
@@ -8717,7 +8621,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      }
      final String SQL_UPDATE1 = "update ${insertsTableName} set relativePosition = formPosition - ${formStart};";
      SqlParametersMaps parms6 = new SqlParametersMaps ().put ("formStart", formStart);
-     int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms3), parms6, false).getUpdateCount ();
+     executeStatement (connection, fixDataBaseNames (SQL_UPDATE1, unquotedParms3), parms6, false).getUpdateCount ();
      // System.err.println (updatedCnt); // for testing
    }
    final String SQL_QUERY9 = "select relativePosition from ${insertsTableName} group by relativePosition having count(*) > 1";
@@ -8744,7 +8648,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      }
      final String SQL_UPDATE2 = "update ${insertsTableName} set position = ${lastpos} + 1 where relativePosition = ${minpos};";
      SqlParametersMaps parms7 = new SqlParametersMaps ().put ("lastpos", lastpos).put ("minpos", minpos);
-     int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms3), parms7, false).getUpdateCount ();
+     executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms3), parms7, false).getUpdateCount ();
      // System.err.println (updatedCnt); // for testing
 
      lastpos += 1;
@@ -8771,7 +8675,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    if (noinsert == true) {
      return (new MultiDataResultSet (resultsSets));
    }
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 8 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    String errmsg = null;
    Integer itemcnt = null;
    try {
@@ -8781,8 +8684,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      final String SQL_INSERT3 = "insert into testeeresponse (_fk_TestOpportunity, Position) select ${oppkey}, R.position from ${insertsTableName} R " +
          " where not exists (select * from testeeresponse where _fk_TestOpportunity = ${oppkey} and position = R.position);";
      SqlParametersMaps parms9 = parms1;
-     insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms3), parms9, false).getUpdateCount ();
-     _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 9 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
+     executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms3), parms9, false).getUpdateCount ();
      // TODO Elena: this is temporary solution while Sai further researches
      // mysql capabilities around this and
      // see if it is even possible to this and the next statement as 1
@@ -8790,7 +8692,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      final String SQL_EXISTS1 = "select page from testeeresponse T,  ${insertsTableName} R where T._fk_TestOpportunity = ${oppkey} and "
          + " (T.page = ${page} or (T._efk_ITSBank = R.bankkey and T._efk_ITSItem = R._efk_ITSItem))";
      SqlParametersMaps prm = (new SqlParametersMaps ()).put ("oppkey", oppKey).put ("page", page);
-     int updateCnt = 0;
      if (exists (executeStatement (connection, fixDataBaseNames (SQL_EXISTS1, unquotedParms3), prm, false)) == false) {
        final String SQL_UPDATE3 = "Update testeeresponse T, ${insertsTableName} R  set T.isRequired = R.IsRequired, T._efk_ITSItem = R._efk_ITSItem, T._efk_ITSBank = R.bankkey, "
            + " T.response = null, T.OpportunityRestart = ${opprestart}, T.Page = ${page}, T.Answer = R.Answer, T.ScorePoint = R.ScorePoint, T.DateGenerated = ${today},"
@@ -8812,10 +8713,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
        parms10.put ("segmentID", segmentId);
        parms10.put ("groupB", groupB);
 
-       updateCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms3), parms10, false).getUpdateCount ();
-       _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 10 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
+       executeStatement (connection, fixDataBaseNames (SQL_UPDATE3, unquotedParms3), parms10, false).getUpdateCount ();
      }
-     _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 11 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
      // check for successful insertion of ALL and ONLY the items in the group
      // given here
      final String SQL_QUERY16 = "select count(*) as itemcnt from testeeresponse where _fk_TestOpportunity = ${oppkey} and GroupID = ${groupID} and DateGenerated = ${today};";
@@ -8846,12 +8745,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
            "and segment = ${segment} and groupID = ${groupID};";
        SqlParametersMaps parms12 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("groupID", groupId).put ("now", starttime).put ("minFTpos", minFTpos)
            .put ("segment", segment);
-       updateCnt = executeStatement (connection, SQL_UPDATE4, parms12, false).getUpdateCount ();
+       executeStatement (connection, SQL_UPDATE4, parms12, false).getUpdateCount ();
      }
      if (_AA_IsSegmentSatisfied_FN (connection, oppKey, segment) == true) {
        final String SQL_UPDATE5 = "update testopportunitysegment set IsSatisfied = 1 where _fk_TestOpportunity = ${oppkey} and segmentPosition = ${segment};";
        SqlParametersMaps parms13 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("segment", segment);
-       updateCnt = executeStatement (connection, SQL_UPDATE5, parms13, false).getUpdateCount ();
+       executeStatement (connection, SQL_UPDATE5, parms13, false).getUpdateCount ();
      }
      connection.commit ();
      connection.setAutoCommit (preexistingAutoCommitMode);
@@ -8866,7 +8765,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      resultsSets.add (_commonDll._ReturnError_SP (connection, clientname, "T_InsertItems", "Database record insertion failed for new test items", null, oppKey, null));
      return (new MultiDataResultSet (resultsSets));
    }
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP 12 Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    try {
      final String SQL_QUERY19 = "select count(*) as itemcnt from testeeresponse where _fk_TestOpportunity = ${oppkey} and dateGenerated is not null;";
      SqlParametersMaps parms14 = parms1;
@@ -8877,7 +8775,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
      }
      final String SQL_UPDATE6 = "update testopportunity set inSegment = ${segment}, numitems = ${itemcnt} where _Key = ${oppkey};";
      SqlParametersMaps parms15 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("segment", segment).put ("itemcnt", itemcnt);
-     int updateCnt = executeStatement (connection, SQL_UPDATE6, parms15, false).getUpdateCount ();
+     executeStatement (connection, SQL_UPDATE6, parms15, false).getUpdateCount ();
      // System.err.println (updateCnt); // for testing
 
    } catch (ReturnStatusException re) {
@@ -8911,7 +8809,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    connection.dropTemporaryTable (insertsTable);
    connection.dropTemporaryTable (itemsTable);
    _commonDll._LogDBLatency_SP (connection, "T_InsertItems", starttime, null, true, page, oppKey, sessionKey, clientname, null);
-   _logger.info (new StringBuilder ("<<<<<<<<< Response update T_InsertItems_SP Total Execution Time : ").append ((System.currentTimeMillis ()-startTime)).append ( " ms. ThreadId: ").append(Thread.currentThread ().getId ()).toString ());
    return (new MultiDataResultSet (resultsSets));
  }
 
@@ -9076,7 +8973,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquoted3.put ("items", itemsTbl.getTableName ());
 
     final String query3 = fixDataBaseNames (SQL_QUERY3);
-    insertedCnt = executeStatement (connection, fixDataBaseNames (query3, unquoted3), parms3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query3, unquoted3), parms3, false).getUpdateCount ();
 
     String itemKey = null, s = null;
     final String SQL_QUERY4 = "select  _efk_Item as itemKey from ${itemsTblName} limit 1";
@@ -9173,7 +9070,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           scoreratio = (float) score / scorepoints;
 
         SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("itemkey", itemKey).put ("scoreratio", scoreratio);
-        int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
 
         Integer dif = null;
         SqlParametersMaps parms10 = (new SqlParametersMaps ()).put ("itemkey", itemKey).put ("score", score);
@@ -9184,7 +9081,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           dif = (tmp == null ? null : tmp.intValue ());
         }
         SqlParametersMaps parms11 = (new SqlParametersMaps ()).put ("itemkey", itemKey).put ("dif", dif);
-        updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
 
         while (true) {
           String dimname = null;
@@ -9199,7 +9096,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           dimscore = record.<Integer> get ("dimscore");
 
           SqlParametersMaps parms13 = (new SqlParametersMaps ()).put ("itemkey", itemKey).put ("dimname", dimname);
-          updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY13, unquoted13), parms13, false).getUpdateCount ();
+          executeStatement (connection, fixDataBaseNames (SQL_QUERY13, unquoted13), parms13, false).getUpdateCount ();
 
           String ds = null;
           // SqlParametersMaps parms14 = (new SqlParametersMaps ()).put
@@ -9235,7 +9132,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       final String SQL_QUERY15 = "delete from ${itemsTblName} where _efk_ITem = ${itemkey}";
       Map<String, String> unquoted15 = unquoted2;
       SqlParametersMaps parms15 = (new SqlParametersMaps ()).put ("itemkey", itemKey);
-      int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY15, unquoted15), parms15, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY15, unquoted15), parms15, false).getUpdateCount ();
 
       if (s == null)
         continue;
@@ -9338,7 +9235,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       final String SQL_QUERY5 = "delete from ${tblName} where pos = ${p}";
       Map<String, String> unquotedParms5 = unquotedParms2;
       SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("p", p);
-      int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquotedParms5), parms5, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquotedParms5), parms5, false).getUpdateCount ();
 
       p = selectMinP (connection, tbl);
 
@@ -9511,7 +9408,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String SQL_QUERY1 = " update testopportunity set scoringDate = ${now}, scoreMark = ${mark} "
         + " where _key = ${oppkey} and (scoringDate is null or scoringDate < ${adjustedNow})";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("now", now).put ("mark", mark).put ("oppkey", oppkey).put ("adjustedNow", adjustedNow);
-    int updatedCnt = executeStatement (connection, SQL_QUERY1, parms1, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY1, parms1, false).getUpdateCount ();
 
     Date scoreDate = null, dateCompleted = null;
     final String SQL_QUERY2 = "select scoringDate as scoreDate, dateCompleted from testopportunity where _Key = ${oppkey} and scoreMark = ${mark}";
@@ -9534,7 +9431,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " values (${oppkey}, 'Get Score String', ${itemstring}, now(3), ${localhost}, ${dbname})";
     SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("itemstring", itemstring).put ("oppkey", oppkey).
         put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false).getUpdateCount ();
 
     String status = (reason == null ? "Official score" : "Unofficial score");
     List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
@@ -9585,7 +9482,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String SQL_QUERY1 = " update testopportunity set scoringDate = ${now}, scoreMark = ${mark} "
         + " where _key = ${oppkey} and (scoringDate is null or scoringDate < ${adjustedNow})";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("now", now).put ("mark", mark).put ("oppkey", oppkey).put ("adjustedNow", adjustedNow);
-    int updatedCnt = executeStatement (connection, SQL_QUERY1, parms1, false).getUpdateCount ();
+    executeStatement (connection, SQL_QUERY1, parms1, false).getUpdateCount ();
 
     Date scoreDate = null, dateCompleted = null;
     final String SQL_QUERY2 = "select scoringDate as scoreDate, dateCompleted from testopportunity where _Key = ${oppkey} and scoreMark = ${mark}";
@@ -9629,7 +9526,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         + " values (${oppkey}, 'Get Score String', ${itemstring}, now(3), ${localhost}, ${dbname})";
     SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("itemstring", itemstring).put ("oppkey", oppkey).
         put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false).getUpdateCount ();
 
     String status = (reason == null ? "Official score" : "Unofficial score");
     List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
@@ -10246,7 +10143,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @throws ReturnStatusException
    */
   public SingleDataResultSet T_GetEligibleTests_SP (SQLConnection connection, Long testee, UUID sessionKey, String grade) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date starttime = _dateUtil.getDateWRetStatus (connection);
 
     Integer sessionType = null;
@@ -10260,8 +10156,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       sessionType = record.<Integer> get ("sessionType");
       clientname = record.<String> get ("clientname");
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 1 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
-    _logger.info ("testee::: "+testee +" && sessionKey ::"+sessionKey + "  && grade :: "+grade);
     DataBaseTable eligibleTbl = getDataBaseTable ("eligible").addColumn ("testKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
         addColumn ("testId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 350).addColumn ("maxOpps", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
 
@@ -10287,7 +10181,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         return resultSet;
       }
     }, eligibleTbl, true);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 2 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     // -- maxopps is for the logical test (TestID) as opposed to the physical
     // (or mode) test (testkey)
     // -- hence, all testkeys of the same testID will have the same value for
@@ -10330,10 +10223,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     _Ref<Boolean> newoppRef = new _Ref<> ();
     _Ref<Integer> oppnumRef = new _Ref<> ();
     _Ref<String> reasonRef = new _Ref<> ();
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     while (true) {
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY2, unquotedParms2), null, false).getResultSets ().next ();
-      _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.1 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
       if (result.getCount () == 0)
         break;
 
@@ -10344,19 +10235,16 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       maxopps = record.<Integer> get ("maxopps");
 
       SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("testkey", testkey);
-      int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY_DELETE3, unquotedParms3), parms3, false).getUpdateCount ();
-      _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.2 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY_DELETE3, unquotedParms3), parms3, false).getUpdateCount ();
       SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey).put ("testname", testname);
       if (DbComparator.isEqual (sessionType, 0) && sessionKey != null &&
           exists (executeStatement (connection, SQL_QUERY4, parms4, false)) == false) {
 
         SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("testname", testname).put ("notAvail", notAvailRef.get ()).
             put ("mode", mode).put ("maxopps", maxopps).put ("clientname", clientname);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (query5, unquotedParms5), parms5, false).getUpdateCount ();
-        _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.3 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
+        executeStatement (connection, fixDataBaseNames (query5, unquotedParms5), parms5, false).getUpdateCount ();
       } else {
         _CanOpenTestOpportunity_SP (connection, clientname, testee, testkey, sessionKey, maxopps, newoppRef, oppnumRef, reasonRef);
-        _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.4 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
         String status = null;
         if (DbComparator.isEqual (oppnumRef.get (), 0))
           status = "denied";
@@ -10369,8 +10257,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
         SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("testname", testname).put ("oppnum", oppnumRef.get ()).
             put ("mode", mode).put ("maxopps", maxopps).put ("status", status).put ("reason", reasonRef.get ()).put ("clientname", clientname);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (query6, unquotedParms6), parms6, false).getUpdateCount ();
-        _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.5 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
+        executeStatement (connection, fixDataBaseNames (query6, unquotedParms6), parms6, false).getUpdateCount ();
         SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("testname", testname).put ("clientname", clientname);
 
         // -- Some tests have other tests as prerequisites for which the student
@@ -10397,12 +10284,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testname", testname);
 
           final String query8 = fixDataBaseNames (SQL_QUERY_INSERT8);
-          insertedCnt = executeStatement (connection, fixDataBaseNames (query8, unquotedParms8), parms8, false).getUpdateCount ();
-          _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 3.6 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
+          executeStatement (connection, fixDataBaseNames (query8, unquotedParms8), parms8, false).getUpdateCount ();
         }
       }
     }
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 4 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     // -- prerequisite tests need to be forced into the session's tests, so just
     // ensure they are all there
 
@@ -10415,13 +10300,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms9.put ("resultTblName", resultTbl.getTableName ());
       SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey);
 
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY_INSERT9, unquotedParms9), parms9, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY_INSERT9, unquotedParms9), parms9, false).getUpdateCount ();
 
       final String SQL_QUERY_DELETE10 = "delete from ${resultTblName} where status = 'NA'";
       Map<String, String> unquotedParms10 = new HashMap<> ();
       unquotedParms10.put ("resultTblName", resultTbl.getTableName ());
 
-      int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_QUERY_DELETE10, unquotedParms10), null, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_QUERY_DELETE10, unquotedParms10), null, false).getUpdateCount ();
 
     }
     final String SQL_QUERY11 = "select * from ${resultTblName} order by sortOrder";
@@ -10432,9 +10317,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     connection.dropTemporaryTable (eligibleTbl);
     connection.dropTemporaryTable (resultTbl);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP 5 Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     _commonDll._LogDBLatency_SP (connection, "T_GetEligibleTests", starttime, testee, true, null, null, null, clientname, null);
-    _logger.info ("<<<<<<<<< T_GetEligibleTests_SP Total Execution Time : "+((System.currentTimeMillis ()-startTime)/1000) + " seconds >>>> " + Thread.currentThread ().getId ());
     return result;
   }
 
@@ -10451,9 +10334,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // long st = System.currentTimeMillis();
     _commonDll.SetOpportunityStatus_SP (connection, oppkey, "scored", true);
     // long diff = System.currentTimeMillis() - st;
-    // System.out.println (String.format
-    // ("SetOpportunityStatus latency: %d millisec, status %s", diff,
-    // "scored"));
     return _commonDll.ReturnStatusReason ("success", null);
 
   }
@@ -10497,7 +10377,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms2 = unquotedParms1;
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("scoremark", scoremark).put ("now", now).put ("before", before);
 
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
 
     // -- now return the ones that we succeeded in marking. Their new
     // scoringDate should make them immune to other callers
@@ -10567,7 +10447,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms2 = unquotedParms1;
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("scoremark", scoremark).put ("now", now).put ("before", before);
 
-    int updatedCnt = executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_UPDATE2, unquotedParms2), parms2, false).getUpdateCount ();
 
     // -- now return the ones that we succeeded in marking. Their new
     // scoringDate should make them immune to other callers
@@ -10808,11 +10688,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     String finalQuery = fixDataBaseNames (SQL_INSERT);
     SqlParametersMaps parms1 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("seg", seg).put ("sessionKey", sessionKey).
         put ("browserKey", browserKey).put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", sessionDB);
-    int insertedCnt = executeStatement (connection, finalQuery, parms1, false).getUpdateCount ();
+    executeStatement (connection, finalQuery, parms1, false).getUpdateCount ();
 
     final String SQL_UPDATE = "update testopportunitysegment set dateExited = ${now} where _fk_TestOpportunity = ${oppkey} and segmentPosition = ${segment};";
     SqlParametersMaps parms2 = new SqlParametersMaps ().put ("oppkey", oppKey).put ("now", now).put ("segment", segment);
-    int updateCnt = executeStatement (connection, SQL_UPDATE, parms2, false).getUpdateCount ();
+    executeStatement (connection, SQL_UPDATE, parms2, false).getUpdateCount ();
 
     List<CaseInsensitiveMap<Object>> resultlist = new ArrayList<CaseInsensitiveMap<Object>> ();
     CaseInsensitiveMap<Object> rcrd = new CaseInsensitiveMap<Object> ();
@@ -10975,7 +10855,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         Map<String, String> unquotedParms3 = new HashMap<> ();
         unquotedParms3.put ("scoresTblName", scoresTbl.getTableName ());
 
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms3), parms3, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (SQL_INSERT3, unquotedParms3), parms3, false).getUpdateCount ();
       }
 
       final String SQL_QUERY4 = "select  _fk_TestOpportunity from testopportunityscores where _fk_TestOpportunity = ${testoppkey} limit 1";
@@ -10991,12 +10871,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
               + "  from testopportunityscores where _fk_TestOpportunity = ${testoppkey}";
           SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("testoppkey", testoppkey).put ("dbname", sessionDB);
 
-          int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT5), parms5, false).getUpdateCount ();
+          executeStatement (connection, fixDataBaseNames (SQL_INSERT5), parms5, false).getUpdateCount ();
         }
         final String SQL_DELETE6 = "delete from testopportunityscores  where _fk_TestOpportunity = ${testoppkey}";
         SqlParametersMaps parms6 = parms1;
 
-        int deletedCnt = executeStatement (connection, SQL_DELETE6, parms6, false).getUpdateCount ();
+        executeStatement (connection, SQL_DELETE6, parms6, false).getUpdateCount ();
       }
 
       final String SQL_UPDATE7 = "update ${scoresTblName} S, ${ConfigDB}.client_testscorefeatures F set S.ability = F.UseForAbility "
@@ -11006,7 +10886,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("test", test);
 
       final String query7 = fixDataBaseNames (SQL_UPDATE7);
-      int updatedCnt = executeStatement (connection, fixDataBaseNames (query7, unquotedParms7), parms7, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query7, unquotedParms7), parms7, false).getUpdateCount ();
 
       final String SQL_INSERT8 = "insert into testopportunityscores "
           + "(_fk_TestOpportunity, subject, UseforAbility, MeasureOf, MeasureLabel, value, standardError, _date, hostname) "
@@ -11014,7 +10894,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms8 = unquotedParms7;
       SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("testoppkey", testoppkey).put ("subject", subject).put ("localhost", _commonDll.getLocalhostName ());
 
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT8, unquotedParms8), parms8, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT8, unquotedParms8), parms8, false).getUpdateCount ();
       connection.dropTemporaryTable (scoresTbl);
 
     } catch (ReturnStatusException re) {
@@ -11093,7 +10973,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       result1.addColumn ("ability", SQL_TYPE_To_JAVA_TYPE.BIGINT);
       result1.addRecords (resultList);
 
-      int insertedCnt = insertBatch (connection, scoresTbl.generateInsertStatement (), result1, null);
+      insertBatch (connection, scoresTbl.generateInsertStatement (), result1, null);
 
       final String SQL_QUERY4 = "select  _fk_TestOpportunity from testopportunityscores where _fk_TestOpportunity = ${testoppkey} limit 1";
       SqlParametersMaps parms4 = parms1;
@@ -11108,12 +10988,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
               + "  from testopportunityscores where _fk_TestOpportunity = ${testoppkey}";
           SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("testoppkey", testoppkey).put ("dbname", sessionDB);
 
-          insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT5), parms5, false).getUpdateCount ();
+          executeStatement (connection, fixDataBaseNames (SQL_INSERT5), parms5, false).getUpdateCount ();
         }
         final String SQL_DELETE6 = "delete from testopportunityscores  where _fk_TestOpportunity = ${testoppkey}";
         SqlParametersMaps parms6 = parms1;
 
-        int deletedCnt = executeStatement (connection, SQL_DELETE6, parms6, false).getUpdateCount ();
+        executeStatement (connection, SQL_DELETE6, parms6, false).getUpdateCount ();
       }
 
       final String SQL_UPDATE7 = "update ${scoresTblName} S, ${ConfigDB}.client_testscorefeatures F set S.ability = F.UseForAbility "
@@ -11123,7 +11003,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("test", test);
 
       final String query7 = fixDataBaseNames (SQL_UPDATE7);
-      int updatedCnt = executeStatement (connection, fixDataBaseNames (query7, unquotedParms7), parms7, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (query7, unquotedParms7), parms7, false).getUpdateCount ();
 
       final String SQL_INSERT8 = "insert into testopportunityscores "
           + "(_fk_TestOpportunity, subject, UseforAbility, MeasureOf, MeasureLabel, value, standardError, _date, hostname) "
@@ -11131,7 +11011,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Map<String, String> unquotedParms8 = unquotedParms7;
       SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("testoppkey", testoppkey).put ("subject", subject).put ("localhost", _commonDll.getLocalhostName ());
 
-      insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT8, unquotedParms8), parms8, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (SQL_INSERT8, unquotedParms8), parms8, false).getUpdateCount ();
       connection.dropTemporaryTable (scoresTbl);
 
     } catch (ReturnStatusException re) {
@@ -11218,7 +11098,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms.put ("tblName", tbl.getTableName ());
 
     final String query = fixDataBaseNames (SQL_INSERT);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
     return tbl;
   }
 
@@ -11301,7 +11181,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("tblName", tests.getTableName ());
     unquotedParms.put ("currenttests", currenttestsTable.getTableName ());
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT, unquotedParms), parms, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (SQL_INSERT, unquotedParms), parms, false).getUpdateCount ();
 
     if (testee < 0) {
       final String SQL_QUERY1 = "select distinct testkey, testid, maxopps, mode, grade from ${tablename} ";
@@ -11384,7 +11264,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms = (new SqlParametersMaps ()).put ("clientname", clientname).put ("sessionType", sessiontype).put ("today", starttime);
 
     final String query = fixDataBaseNames (SQL_INSERT);
-    int insertedCnt = executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
+    executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
 
     if (testee < 0) {
       final String SQL_QUERY1 = "select distinct testkey, testid, maxopps, mode, grade from ${tablename} ";
@@ -11988,7 +11868,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
         String value = (valueRef.get () == null ?  UNKNOWN_ATTRIBUTE_VALUE : valueRef.get ());
         SqlParametersMaps parms = (new SqlParametersMaps ()).put ("value", value).put ("field", field);
-        int updatedCnt = executeStatement (connection, fixDataBaseNames (queryUpdate, unquotedParms), parms, false).getUpdateCount ();
+        executeStatement (connection, fixDataBaseNames (queryUpdate, unquotedParms), parms, false).getUpdateCount ();
       }
     }
   }
@@ -12041,7 +11921,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   
           SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("errorMessage", errorMessage).
               put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ());
-          int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd2), parms2, false).getUpdateCount ();
+          executeStatement (connection, fixDataBaseNames (cmd2), parms2, false).getUpdateCount ();
         }
       } else {
         err = String.format ("%s, success %s, %s", err, success, errorMessage);
@@ -12069,8 +11949,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     
     if (DbComparator.isEqual (status, "expired")) {
       final String cmd2 = "update testopportunity set dateExpiredReported=now(3) where _key=${oppkey}";
-      SqlParametersMaps parms2 = parms1;
-      int updatedCnt = executeStatement (connection, cmd2, parms1, false).getUpdateCount ();
+      executeStatement (connection, cmd2, parms1, false).getUpdateCount ();
      
       final String cmd3 = "insert into ${ArchiveDB}.opportunityaudit "
           + "(_fk_TestOpportunity, _fk_Session, AccessType, hostname, _fk_Browser, dateaccessed, dbname) "
@@ -12078,7 +11957,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           + " from testopportunity where _Key = ${oppkey}";
       SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
           put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ());
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd3), parms3, false).getUpdateCount ();
+      executeStatement (connection, fixDataBaseNames (cmd3), parms3, false).getUpdateCount ();
       return;
     }
     
@@ -12089,7 +11968,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
           + " from testopportunity where _Key = ${oppkey}";
       SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
           put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ());
-      int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd4), parms4, false).getUpdateCount (); 
+      executeStatement (connection, fixDataBaseNames (cmd4), parms4, false).getUpdateCount (); 
       return;
     }
     
@@ -12109,31 +11988,4 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return str.replace ('/', java.io.File.separatorChar).replace ('\\', java.io.File.separatorChar);
   }
 
-  public static void main (String[] args) {
-    // DateConverter dateConverter = new DateConverter();
-    // dateConverter.setPatterns(new String[] {
-    // "",
-    // });
-
-    String a = null;
-    String[] rows = new String[0];
-    if (rows.length == 0) 
-      a =  ("''");
-    
-    String myDate = "2014-04-14 08:55:30.531000";
-    String[] tokens = myDate.split ("\\.");
-    if (tokens.length == 2 && tokens[1].length () > 3) {
-      myDate = String.format ("%s.%s", tokens[0], tokens[1].substring (0, 3));
-    }
-    Date dt = null;
-    try {
-      dt = DateUtils.parseDate (myDate, new String[] { "yyyy-MM-dd HH:mm:ss.SSS",
-          "yyyy-MM-dd HH:mm:ss" }
-          );
-      System.out.println (dt);
-    } catch (Exception e) {
-      System.out.println (e.getMessage ());
-    }
-    System.out.println ("done");
-  }
 }

@@ -9,11 +9,12 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_client varchar(100)
   , v_testid varchar(150)) RETURNS bit(1)
+sql security invoker
 begin
 
 	declare v_score bit;
 
-    if (exists (select * from tdscore_dev_configs2012_sandbox.client_testscorefeatures 
+    if (exists (select * from configs.client_testscorefeatures 
 				where clientname = v_client and testid = v_testid 
 					and (reporttostudent = 1 or reporttoproctor = 1 or reporttoparticipation = 1 or useforability = 1))) then
        set v_score = 1;
@@ -23,6 +24,6 @@ begin
     
 	return v_score;
 
-end$$
+end $$
 
 DELIMITER ;

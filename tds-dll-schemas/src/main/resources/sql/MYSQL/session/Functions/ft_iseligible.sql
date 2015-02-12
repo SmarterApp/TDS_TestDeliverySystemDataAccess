@@ -13,8 +13,10 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 	v_oppkey varbinary(16)
   , v_testkey varchar(200)
   , v_parentkey varchar(250)
-  , v_language varchar(20))
+  , v_language varchar(20)
+)
 returns int
+sql security invoker
 begin
 	
 	declare v_ftlength, v_langitemcount, v_ftitems int;	
@@ -32,7 +34,7 @@ begin
 	from externs where clientname = v_clientname;
 
     select count(*) into v_ftitems -- ftminitems
-    from itembank_tblitemprops p, itembank_tblsetofadminitems i
+    from itembank.tblitemprops p, itembank.tblsetofadminitems i
     where p._fk_adminsubject = v_testkey and p.propname = 'language' and p.propvalue = v_language
         and i._fk_adminsubject = v_testkey and i.isfieldtest = 1 and p._fk_item = i._fk_item
         and i.isactive = 1 and p.isactive = 1;
@@ -40,7 +42,7 @@ begin
     if (v_ftitems = 0) then return 0; end if;
 
     select testid, ftminitems into v_testid, v_ftlength
-    from itembank_tblsetofadminsubjects s
+    from itembank.tblsetofadminsubjects s
     where s._key = v_testkey;
     
 	-- if no field test items available
@@ -56,7 +58,7 @@ begin
 
     if (v_parentkey <> v_testkey) then
         select testid into v_parentid 
-		from itembank_tblsetofadminsubjects where _key = v_parentkey;
+		from itembank.tblsetofadminsubjects where _key = v_parentkey;
     else 
 		set v_parentid = v_testid;
 	end if;
@@ -78,6 +80,6 @@ begin
     return v_testokay;
 
 
-end$$
+end $$
 
 DELIMITER ;

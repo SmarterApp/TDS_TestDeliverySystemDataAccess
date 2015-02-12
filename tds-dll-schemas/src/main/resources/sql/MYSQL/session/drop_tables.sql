@@ -158,3 +158,5 @@ drop table if exists  `tblclsclientsessionstatus`;
 
 drop table if exists  `tbluser`  ;
 
+drop table if exists  `sim_sessiontestpackage`  ;
+

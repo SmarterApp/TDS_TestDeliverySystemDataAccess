@@ -12,6 +12,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 	v_clientname varchar(100)
 )
 returns bit
+sql security invoker
 begin
 
 	declare v_allow bit;

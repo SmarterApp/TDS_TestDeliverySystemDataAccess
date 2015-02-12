@@ -11,6 +11,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_clientname varchar(100))
 returns int
+sql security invoker
 begin
 
 	declare v_brokerid varbinary(16);
@@ -37,6 +38,6 @@ begin
 
     return 1;
 
-end$$
+end $$
 
 DELIMITER ;

@@ -8,9 +8,6 @@
  ******************************************************************************/
 package tds.dll.mysql;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -107,7 +104,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   // Optimization attempt
   public MultiDataResultSet IB_GetTestAccommodations_SP (SQLConnection connection, String testKey) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date today = _dateUtil.getDateWRetStatus (connection);
 
     SingleDataResultSet rs1 = null;
@@ -151,7 +147,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       resultsets.add (rs2);
     }
     _LogDBLatency_SP (connection, "IB_GetTestAccommodations", today, 0L, true, null, null);
-    _logger.info ("<<<<<<<<< checkTestApproval IB_GetTestAccommodations_SP Total: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     return new MultiDataResultSet (resultsets);
   }
 
@@ -1711,7 +1706,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   public SingleDataResultSet P_PauseSession_SP (SQLConnection connection, UUID sessionKey, Long proctorKey, UUID browserKey, String reason, Boolean report) throws ReturnStatusException {
     String clientname = null;
-    long startTime = System.currentTimeMillis ();
     Date starttime = _dateUtil.getDateWRetStatus (connection);
 
     final String SQL_QUERY1 = "select clientname from session where _Key = ${sessionKey}";
@@ -1720,7 +1714,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
     if (record != null)
       clientname = record.<String> get ("clientname");
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 1: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     String accessdenied = ValidateProctorSession_FN (connection, proctorKey, sessionKey, browserKey);
     if (accessdenied != null) {
 
@@ -1729,11 +1722,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
       return _ReturnError_SP (connection, clientname, "P_PauseSession", accessdenied, null, null, "ValidateProctorSession", "failed");
     }
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 2: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     Integer audit = AuditSessions_FN (connection, clientname);
     String localhostName = getLocalhostName ();
     Date now = _dateUtil.getDateWRetStatus (connection);
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 3: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     final String SQL_QUERY2 = "select  _Key from session where _Key = ${sessionKey} limit 1";
     SqlParametersMaps parms2 = parms1;
     if (exists (executeStatement (connection, SQL_QUERY2, parms2, false)) == false) {
@@ -1741,11 +1732,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       _RecordSystemError_SP (connection, "P_PauseSession", msg);
       return _ReturnError_SP (connection, clientname, "P_PauseSession", "Session does not exist");
     }
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 4: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     final String SQL_UPDATE3 = "Update session set status = 'closed', datechanged = ${now}, dateend=${now} where _Key = ${sessionKey}";
     SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("now", now).put ("sessionKey", sessionKey);
     int updateCnt = executeStatement (connection, SQL_UPDATE3, parms3, false).getUpdateCount ();
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 5: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     if (DbComparator.notEqual (audit, 0)) {
 
       String sessionDB = getTdsSettings ().getTDSSessionDBName ();
@@ -1758,7 +1747,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
       executeStatement (connection, fixDataBaseNames (SQL_INSERT4), parms4, false);
     }
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 6: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     final String statusStr = GetStatusCodes_FN (connection, "Opportunity", "inuse");
     if (AuditOpportunities_FN (connection, clientname) != 0) {
 
@@ -1776,7 +1764,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
           put ("host", localhostName).put ("dbname", sessionDB);
       int insertCnt5 = executeStatement (connection, fixDataBaseNames (query5, unquotedparms), parms5, false).getUpdateCount ();
     }
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 7: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     final String SQL_QUERY7 = "select _key from testopportunity where _fk_Session = ${sessionKey} and status in (${statusStr})";
 
     Map<String, String> unquotedparms = new HashMap<String, String> ();
@@ -1784,7 +1771,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey);
 
     SingleDataResultSet result7 = executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquotedparms), parms7, false).getResultSets ().next ();
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 8: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     Iterator<DbResultRecord> records = result7.getRecords ();
     while (records.hasNext ()) {
       record = records.next ();
@@ -1799,7 +1785,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       // ("SetOPportunityStatus latency: %d millisec, status: %s", diff,
       // "paused"));
     }
-    _logger.info ("<<<<<<<<< P_PauseSession_SP Execution Time 9: "+((System.currentTimeMillis ()-startTime)) + " ms. ThreadId: " +Thread.currentThread ().getId ());
     if (DbComparator.isEqual (report, true))
       result = ReturnStatusReason ("closed", null);
     else

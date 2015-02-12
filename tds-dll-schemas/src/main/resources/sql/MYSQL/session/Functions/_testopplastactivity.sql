@@ -11,6 +11,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_oppkey varbinary(16))
 returns datetime(3)
+sql security invoker
 begin
 
 	declare v_fromtime datetime(3);	
@@ -24,7 +25,7 @@ begin
     insert into tblfromtimes (lasttime)
     select datepaused from testopportunity where _key = v_oppkey;
 
---	set transaction isolation level read uncommitted;
+	set transaction isolation level read uncommitted;
 
 	insert into tblfromtimes (lasttime)
 	select  max(datesubmitted) 

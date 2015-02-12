@@ -226,4 +226,9 @@ public interface ISimDLL
   public void SIM_DeleteAllItemSelectionParameterDefaultRecords (SQLConnection connection) throws ReturnStatusException;
 
   public void SIM_AddItemSelectionParameterDefaultRecord (SQLConnection connection, String algorithmType, String entityType, String name, String value, String label) throws ReturnStatusException;
+  
+  public MultiDataResultSet SIM_GetSessionForPublish (SQLConnection connection, UUID sessionKey) throws ReturnStatusException;
+  
+  public SingleDataResultSet SIM_GetSessionTestPackage (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException;
+
 }

@@ -96,6 +96,18 @@ create table `tblitemselectionparm`  (
  	constraint `pk_tblitemselectionparm` primary key clustered(`_key`) 
 ) default charset = UTF8;
 
+create table `tbltestpackage` (
+	`_key`             varbinary(16) not null,
+	`testpackage`      longtext,
+	constraint `pk_tbltestpackage` primary key clustered(`_key`)
+) default charset = UTF8;
+
+create table `tbladminsubjecttestpackage` (
+	`_fk_adminsubject` varchar(250) not null,
+	`_fk_testpackage`  varbinary(16) not null,
+	constraint `pk_tbladminsubjecttestpackage` primary key clustered(`_fk_adminsubject`)
+) default charset = UTF8;
+
 /*
 create table `loader_accommodations`  ( 
 	`type`            	varchar(255) not null,

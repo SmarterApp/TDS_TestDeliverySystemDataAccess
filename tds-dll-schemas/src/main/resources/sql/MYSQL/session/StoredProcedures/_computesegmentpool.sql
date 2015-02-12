@@ -17,17 +17,19 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , out v_poolcount int
   , out v_poolstring text
   , v_debug bit
-  , v_sessionkey varbinary(16))
+  , v_sessionkey varbinary(16)
+)
+sql security invoker
 begin  
 
     declare v_shortfall int;       -- sum of items on strands that the pool falls below the min
     declare v_strandcnt, v_newlen int;
 
-	drop temporary table if exists tblpool;
-	drop temporary table if exists tblblueprint;
+	drop temporary table if exists tmp_tblpool;
+	drop temporary table if exists tmp_tblblueprint;
 
-    create temporary table tblpool(itemkey varchar(50) primary key not null, isft bit, isactive bit, strand varchar(200));
-    create temporary table tblblueprint(strand varchar(200), minitems int, maxitems int, poolcnt int);
+    create temporary table tmp_tblpool(itemkey varchar(50) primary key not null, isft bit, isactive bit, strand varchar(200));
+    create temporary table tmp_tblblueprint(strand varchar(200), minitems int, maxitems int, poolcnt int);
 
 	-- initilize input variables when no values are passed
 	if v_debug is null then set v_debug = 0; end if;
@@ -41,38 +43,38 @@ begin
 		  
 	call _buildtable(v_poolstring, ',');
 
-    insert into tblpool (itemkey)
+    insert into tmp_tblpool (itemkey)
     select record 
 	from tblout_buildtable;
 	/* # */
 
 	if (v_sessionkey is null) then
 	begin
-        update tblpool p, itembank_tblsetofadminitems i
+        update tmp_tblpool p, itembank.tblsetofadminitems i
 		set isft = i.isfieldtest
 		  , isactive = i.isactive
 		  , strand = i.strandname
 		where i._fk_adminsubject = v_segmentkey and i._fk_item = p.itemkey;
 
-        insert into tblblueprint (strand, minitems, maxitems, poolcnt)
-        select _fk_strand, minitems, maxitems, (select count(*) from tblpool where strand = _fk_strand and isft = 0 and isactive = 1 )
-        from itembank_tbladminstrand
+        insert into tmp_tblblueprint (strand, minitems, maxitems, poolcnt)
+        select _fk_strand, minitems, maxitems, (select count(*) from tmp_tblpool where strand = _fk_strand and isft = 0 and isactive = 1 )
+        from itembank.tbladminstrand
         where _fk_adminsubject = v_segmentkey and adaptivecut is not null;
 
         select minitems into v_testlen 
-		from itembank_tblsetofadminsubjects 
+		from itembank.tblsetofadminsubjects 
 		where _key = v_segmentkey;
     end;
     else 
 	begin
-        update tblpool, sim_segmentitem i  
+        update tmp_tblpool, sim_segmentitem i  
 		set isft = i.isfieldtest
 		  , isactive = i.isactive
 		  , strand = i.strand
         where _fk_session = v_sessionkey and _efk_segment = v_segmentkey and _efk_item = itemkey;
 
-        insert into tblblueprint (strand, minitems, maxitems, poolcnt)
-        select contentlevel, minitems, maxitems, (select count(*) from tblpool where strand = contentlevel and isft = 0 and isactive = 1  )
+        insert into tmp_tblblueprint (strand, minitems, maxitems, poolcnt)
+        select contentlevel, minitems, maxitems, (select count(*) from tmp_tblpool where strand = contentlevel and isft = 0 and isactive = 1  )
         from sim_segmentcontentlevel
         where _fk_session = v_sessionkey and _efk_segment = v_segmentkey and adaptivecut is not null;
 
@@ -83,23 +85,27 @@ begin
 	end if;
 
     select sum(minitems - poolcnt) into v_shortfall
-    from tblblueprint 
+    from tmp_tblblueprint 
 	where poolcnt < minitems;
 
     if (v_shortfall is null) then set v_shortfall = 0; end if;
 
-    set v_strandcnt = (select sum(poolcnt) from tblblueprint);
+    set v_strandcnt = (select sum(poolcnt) from tmp_tblblueprint);
     set v_newlen = (case when v_testlen - v_shortfall < v_strandcnt then v_testlen - v_shortfall else v_strandcnt end);
     set v_poolcount = v_strandcnt;
     set v_testlen = v_newlen;
 
     if (v_debug = 1) then
         select v_testlen as testlen, v_shortfall as shortfall, v_strandcnt as strandcnt, v_newlen as newlen, v_poolstring as poolstring;
-        select * from tblblueprint;
-        select * from tblpool;
+        select * from tmp_tblblueprint;
+        select * from tmp_tblpool;
     end if;
 
-end$$
+	-- clean-up
+	drop temporary table tmp_tblpool;
+	drop temporary table tmp_tblblueprint;
+
+end $$
 
 DELIMITER ;
 

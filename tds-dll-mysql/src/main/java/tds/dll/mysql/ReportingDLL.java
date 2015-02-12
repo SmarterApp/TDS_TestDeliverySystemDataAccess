@@ -596,7 +596,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " ${ftcount} as \"@ftCount\", "
           + " abnormalStarts as \"@abnormalStarts\", "
           + " gracePeriodRestarts as \"@gracePeriodRestarts\", "
-          + " ProctorID as \"@taId\", "
+          + " U.email as \"@taId\", "
           + " S.ProctorName as \"@taName\", "
           + " sessionID as \"@sessionId\", "
           + " windowID as \"@windowId\", "
@@ -605,8 +605,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " '' as \"@qaLevel\", "											// TODO Hardcoded value SB-999
           + " '' as \"@assessmentParticipantSessionPlatformUserAgent\", "	// TODO Hardcoded value
           + " ${effectiveDate} as \"@effectiveDate\" "
-          + " from testopportunity O, session S where O._Key = ${oppkey}"
-          + " and O._fk_Session = S._Key";
+          + " from testopportunity O, session S, tbluser U where O._Key = ${oppkey}"
+          + " and O._fk_Session = S._Key and  S.proctorid = U.userid";
 
       parameters.put ("itemcount", itemcount).put ("ftcount", ftcount).put("reportingID", newReportingIdRef.get())
           .put ("winopp", winopp).put ("dbName", dbName).put("effectiveDate", effectiveDate);
@@ -1010,16 +1010,55 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		  String scoreDimensionValue,
 		  String maxScoreValue)
   {
+		// TODO: AK --- When we (Shiva!) score it we need to put in DB xml like this
+		/*
+		<ScoreInfo confLevel="1.0" scoreDimension="overall" maxScore="30" scorePoint="6" scoreStatus="Scored">
+			<ScoreRationale>
+				<StackTrace><![CDATA[]]></StackTrace>
+				<Message><![CDATA[]]></Message>
+			</ScoreRationale>
+			<SubScoreList>
+				<ScoreInfo confLevel="1.0" scoreDimension="STATEMENT OF PURPOSE/FOCUS &amp; ORGANIZATION" maxScore="10" scorePoint="2" scoreStatus="Scored">
+					<SubScoreList/>
+				</ScoreInfo>
+				<ScoreInfo confLevel="1.0" scoreDimension="EVIDENCE/ELABORATION" maxScore="10" scorePoint="2" scoreStatus="Scored">
+					<SubScoreList/>
+				</ScoreInfo>
+				<ScoreInfo confLevel="1.0" scoreDimension="EDITING/CONVENTIONS" maxScore="10" scorePoint="2" scoreStatus="Scored">
+					<SubScoreList/>
+				</ScoreInfo>
+			</SubScoreList>
+		</ScoreInfo>
+		 */
+		// and then put this xml in xml report (without changes!
+		// Problem in <StackTrace><![CDATA[]]></StackTrace> node ?1
+
 	StringBuilder strBuilder = new StringBuilder();
 
 	String confLevelValue = "";
 	
 	strBuilder.append("<").append(SCOREINFO_NODE_NAME);
+	if(scorePointValue != null && !scorePointValue.isEmpty())
+	{
 		strBuilder.append(SPACE).append("scorePoint = \"").append(scorePointValue).append("\" ");
+	}
+	if(maxScoreValue != null && !maxScoreValue.isEmpty())
+	{
 		strBuilder.append(SPACE).append("maxScore = \"").append(maxScoreValue).append("\" ");
-		strBuilder.append(SPACE).append("scoreDimension = \"").append(scoreDimensionValue).append("\" ");
+	}
+	{
+		// TODO
+		strBuilder.append(SPACE).append("scoreDimension = \"").append("overall").append("\" ");
+		// strBuilder.append(SPACE).append("scoreDimension = \"").append(scoreDimensionValue).append("\" ");
+	}
+	if(scoreStatusValue != null && !scoreStatusValue.isEmpty())
+	{
 		strBuilder.append(SPACE).append("scoreStatus = \"").append(scoreStatusValue).append("\" ");
+	}
+	if(confLevelValue != null && !confLevelValue.isEmpty())
+	{
 		strBuilder.append(SPACE).append("confLevel = \"").append(confLevelValue).append("\" ");	
+	}
 	strBuilder.append(">").append(ls);
 	
     	strBuilder.append(SPACE).append("<").append(SCORERATIONALE_NODE_NAME).append(">").append(ls);
@@ -2285,8 +2324,8 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
 		    		) 
 		    {
 		    	resValue = (!(resValue == null || resValue.isEmpty()) 
-		    			|| resValue.equalsIgnoreCase("true")
-		    			|| resValue.equalsIgnoreCase("1"))? "1": "0";
+		    			&& ( resValue.equalsIgnoreCase("true")
+		    				|| resValue.equalsIgnoreCase("1")))? "1": "0";
 		    }
 		    // type = 'UFloatAllowNegativeOne'
 		    else if (attrName.equalsIgnoreCase("scorePoint")

@@ -12,6 +12,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 	v_oppkey varbinary(16)
   , v_segment int)
 returns bit
+sql security invoker
 begin
 
 	declare v_opcnt, v_ftcnt int;
@@ -44,6 +45,6 @@ begin
 
     return 0;
 
-end$$
+end $$
 
 DELIMITER ;

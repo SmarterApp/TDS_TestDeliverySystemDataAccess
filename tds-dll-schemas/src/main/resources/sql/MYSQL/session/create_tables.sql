@@ -609,6 +609,12 @@ create table  `sim_defaultitemselectionparameter`(
 	`label` 	varchar(200) default null
 ) default charset = UTF8;
 
+create table `sim_sessiontestpackage` (
+	`_fk_session`      varbinary(16) not null,
+	`_fk_testpackage`  varbinary(16) not null,
+	constraint `pk_sim_sessiontestpackage` primary key clustered(`_fk_session`, `_fk_testpackage`)
+) default charset = UTF8;
+
 create table `sirve_audit`  ( 
 	`_date`           	datetime(3) not null, -- constraint `df__sirve_aud___date__30a40e89`  default (now()),
 	`_fk_sirvesession`	varbinary(16) not null,

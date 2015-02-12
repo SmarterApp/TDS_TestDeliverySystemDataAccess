@@ -7,8 +7,10 @@ create function `issimulation`(
 VERSION 	DATE 			AUTHOR 			COMMENTS
 001			11/26/2013		Sai V. 			Converted code from SQL Server to MySQL
 */
-	v_oppkey varbinary(16))
+	v_oppkey varbinary(16)
+)
 returns bit
+sql security invoker
 begin
 
 	declare v_sim bit;

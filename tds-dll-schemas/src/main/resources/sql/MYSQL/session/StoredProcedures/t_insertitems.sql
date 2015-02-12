@@ -9,26 +9,25 @@ Description:
 VERSION 	DATE 			AUTHOR 			COMMENTS
 001			1/29/2015		Sai V. 			Converted code from T-SQL to MySQL
 */
-	v_oppkey varbinary(16)
-  ,	v_session varbinary(16)
+	v_oppkey 	varbinary(16)
+  ,	v_session 	varbinary(16)
   , v_browserid varbinary(16)
-  , v_segment int
+  , v_segment 	int
   , v_segmentid varchar(100)
-  , v_page int
-  , v_groupid varchar(50)
-  , v_itemkeys text
+  , v_page 		int
+  , v_groupid 	varchar(50)
+  , v_itemkeys 	text
   , v_delimiter char -- = ','
   , v_groupitemsrequired int -- = -1
-  , v_groupb float -- = null    -- this is needed for simulation reports
-  , v_debug int -- = 0
-  , v_noinsert bit -- = 0
+  , v_groupb 	float -- = null    -- this is needed for simulation reports
+  , v_debug 	int -- = 0
+  , v_noinsert 	bit -- = 0
 )								
 proc: begin
 
-	declare v_starttime 	datetime(3);
  	declare v_hostname 		nchar(50);
 	declare v_error 		varchar(128);
-	declare v_procname		varchar(30);
+	declare v_procname		varchar(30) default 't_insertitems';
 	declare v_testee 		bigint;
 	declare v_today 		datetime(3);
 	declare v_status 		varchar(50);
@@ -42,23 +41,26 @@ proc: begin
     declare v_formkey 		varchar(50);
     declare v_algorithm 	varchar(100);
     declare v_argstring 	varchar(1000);
-	declare v_trace 		varchar(200);
+-- 	declare v_trace 		varchar(200);
 	declare v_errmsg 		varchar(200);
     declare v_lastposition 	int;      -- last position of existing items
 	declare v_relativepositionflag bit default 0;
     declare v_count, v_opprestart, v_lastpos, v_minpos, v_maxpos, v_insertcnt, v_lastsegment, v_lastpage, v_formstart, v_itemcnt, v_minftpos int;
-	
--- 	declare exit handler for sqlexception, sqlwarning
--- 	begin
--- 		rollback;
--- 		set v_errmsg = 'item insertion failed: ';-- , error_message();
--- 		call _logdberror(v_procname, v_errmsg, null, null, null, v_oppkey, v_clientname, v_session);
--- 		call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
--- 	end;
 
+	declare v_starttime datetime(3);
+	
+	declare exit handler for sqlexception -- , sqlwarning
+	begin
+		rollback;
+
+		set v_errmsg = 'exception handler: item insertion failed: ';-- , error_message();
+		call _logdberror(v_procname, v_errmsg, null, null, null, v_oppkey, v_clientname, v_session);
+		call _returnerror(v_clientname, v_procname, 'exception handler: database record insertion failed for new test items', null, v_oppkey, null, null);
+	end;
+
+	set v_today = now(3);
 	set v_starttime = now(3);
 	set v_hostname  = @@hostname;
-	set v_procname  = 't_insertitems';
 
 	-- check if input parameters that MUST contain values are populated, if not set default values here
 	if (v_delimiter is null) then set v_delimiter = ','; end if;
@@ -71,8 +73,6 @@ proc: begin
         call _returnerror(null, v_procname, v_error, null, v_oppkey, '_validatetesteeaccesss', 'denied');
 		leave proc;
 	end if;
-
-	set v_today = now(3);
     
 	drop temporary table if exists tmp_tblitems;
     create temporary table tmp_tblitems(
@@ -101,13 +101,14 @@ proc: begin
     from testopportunity 
 	where _key = v_oppkey;
 
-    if (v_environment <> 'production') then
-        set v_trace = concat('tracing ', v_groupid, ':', v_itemkeys);
-    end if;
+--     if (v_environment <> 'production') then
+--         set v_trace = concat('tracing ', v_groupid, ':', v_itemkeys);
+--     end if;
 
 	if (v_status not in ('started')) then
 	begin
 		-- select 'denied' as [status], 'your test opportunity has been interrupted. please check with your test administrator to resume your test.' as reason, 't_insertitems_2009' as [context], null as [argstring], null as [delimiter];
+		if v_debug = 1 then select 1; end if;
         call _returnerror(v_clientname, v_procname,'your test opportunity has been interrupted. please check with your test administrator to resume your test.',null, v_oppkey, 't_insertitems_2009', 'denied');
 		leave proc;
 	end;
@@ -122,7 +123,8 @@ proc: begin
 	begin
         set v_argstring = ltrim(cast(v_segment as char(10)));
         set v_msg = concat('unknown test segment ', v_argstring);
-
+		
+		if v_debug = 1 then select 2; end if;
         call _logdberror(v_procname, v_msg, null, null, null, v_oppkey, v_clientname, v_session);
         call _returnerror(v_clientname, v_procname, 'unknown test segment', null, v_oppkey, null, null);
         leave proc;
@@ -133,6 +135,7 @@ proc: begin
 
     if (v_msg is not null) then 
 	begin
+		if v_debug = 1 then select 3; end if;
         call _logdberror(v_procname, v_msg, null, null, null, v_oppkey, v_clientname, v_session);
         call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
         leave proc;
@@ -150,6 +153,10 @@ proc: begin
     from testeeresponse 
 	where _fk_testopportunity = v_oppkey and position = v_lastposition;
 
+	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 1');
+	set v_starttime = now(3);
+
 	-- get item data from the itembank, filtering by the items that were chosen by the selection algorithm (some may have been excluded)
 	drop temporary table if exists tmp_tblinserts;
     create temporary table tmp_tblinserts(
@@ -166,7 +173,7 @@ proc: begin
 	  , `format` varchar(50)
 	  , isfieldtest bit
 	  , isrequired bit
-	) ;
+	) engine = memory;
 
 	insert into tmp_tblinserts(bankitemkey, relativeposition, bankkey, _efk_itsitem, b, scorepoint, `format`, isfieldtest, isrequired, contentlevel, formposition, answer) 
     select a._fk_item 		as bankitemkey
@@ -196,7 +203,8 @@ proc: begin
     if (v_algorithm = 'fixedform' and exists (select * from tmp_tblinserts where formposition is null)) then
 	begin
         set v_msg = concat('item(s) not on form: ', v_groupid, '; items: ', v_itemkeys);
-        
+
+		if v_debug = 1 then select 4; end if;        
 		call _logdberror(v_procname, v_msg, null, null, null, v_oppkey, v_clientname, v_session);
 		call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
         leave proc;
@@ -205,8 +213,9 @@ proc: begin
 
     if (not exists (select * from tmp_tblinserts)) then 
 	begin
-        set v_msg = concat('item group does not exist: ', v_groupid, '; items: ', v_itemkeys);
+        set v_msg = concat('item group does not exist: ', coalesce(v_groupid, ''), '; items: ', coalesce(v_itemkeys, ''));
 
+		if v_debug = 1 then select 5; end if;
 		call _logdberror(v_procname, v_msg, null, null, null, v_oppkey, v_clientname, v_session);
 		call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
         leave proc;
@@ -233,7 +242,8 @@ proc: begin
     if (exists (select * from tmp_tblinserts group by relativeposition having count(*) > 1) or v_relativepositionflag = 1) then
 	begin
         set v_msg = concat('ambiguous item positions in item group ', v_groupid);
-
+	
+		if v_debug = 1 then select 6; end if;	
 		call _logdberror(v_procname, v_msg, null, null, null, v_oppkey, v_clientname, v_session);
 		call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
         leave proc;
@@ -268,6 +278,7 @@ proc: begin
 	begin
         set v_msg = concat('attempt to duplicate existing item: ', v_itemkeys);
 
+		if v_debug = 1 then select 7; end if;
 		call _logdberror(v_procname, v_msg, null, null, null, v_oppkey, v_clientname, v_session);
 		call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
         leave proc;
@@ -275,6 +286,10 @@ proc: begin
 	end if;
 
     if (v_noinsert = 1) then leave proc; end if;
+
+	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 2: before transaction');
+	set v_starttime = now(3);
 
 	start transaction;
 
@@ -285,7 +300,7 @@ proc: begin
 		where not exists (select * from testeeresponse where _fk_testopportunity = v_oppkey and position = r.position);
     
 		-- make sure the page has not been used, and that the items have not already been administered
-		if ( not exists (select * from testeeresponse t, tmp_tblinserts r 
+		if (not exists (select * from testeeresponse t, tmp_tblinserts r 
 						  where t._fk_testopportunity = v_oppkey and (t.`page` = v_page or (t._efk_itsbank = r.bankkey and t._efk_itsitem = r._efk_itsitem)))) 
 		then
 			update testeeresponse t, tmp_tblinserts r 
@@ -312,11 +327,9 @@ proc: begin
 			where -- first, hit the primary key
 				_fk_testopportunity = v_oppkey and t.position = r.position 
 				-- next guard against errors
-				and t._efk_itsitem is null -- make sure this position has not been filled
-			;
+				and t._efk_itsitem is null; -- make sure this position has not been filled
 		end if;
 	   
-
 		-- check for successful insertion of all and only the items in the group given here
 		set v_itemcnt = (select count(*) from testeeresponse
 						  where _fk_testopportunity = v_oppkey and groupid = v_groupid and dategenerated = v_today);
@@ -326,6 +339,7 @@ proc: begin
 			rollback;
 			set v_errmsg = concat('item insertion failed for group ', v_groupid);
 
+		if v_debug = 1 then select 8; end if;
 			call _logdberror(v_procname, v_errmsg, null, null, null, v_oppkey, v_clientname, v_session);
 			call _returnerror(v_clientname, v_procname, 'database record insertion failed for new test items', null, v_oppkey, null, null);
 			leave proc;
@@ -352,6 +366,9 @@ proc: begin
 
 	commit;
 
+	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 3: after transaction commit');
+
     set v_itemcnt = (select count(*)
 					   from testeeresponse where _fk_testopportunity = v_oppkey and dategenerated is not null);
 
@@ -370,8 +387,11 @@ proc: begin
 		 , `format`
     from tmp_tblinserts
     order by position;
+
+	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+		 values (TIMESTAMPDIFF(microsecond, v_today, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'final log');
 	
-    call _logdblatency(v_procname, v_starttime); -- , null, 1, v_n = v_page, v_testoppkey = v_oppkey, v_sessionkey = v_session, v_clientname = v_clientname;
+--     call _logdblatency(v_procname, v_today, null, 1, v_page, v_oppkey, v_session, v_clientname, null);
 
 	-- clean-up
 	drop temporary table tmp_tblitems;

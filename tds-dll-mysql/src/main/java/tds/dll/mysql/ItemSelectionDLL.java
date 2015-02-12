@@ -2307,8 +2307,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ " and P2.Propname = C2.propname and P2.Propvalue = C2.Propvalue and P2.isActive = 1 "
 				+ " )"
 				// -- there should be the same number of records per item as
-				// there are
-				// item_in constraints, check in the 'having' clause
+				// there are item_in constraints, check in the 'having' clause
 				+ " group by I._fk_ITem "
 				+ " having count(*) = "
 				+ " (select count(*) from ${ConfigDB}.client_test_itemconstraint C1  "
@@ -2561,7 +2560,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 					+ " from ${ItemBankDB}.tblitemselectionparm p"
 					+ " inner join ${ItemBankDB}.performancelevels pl"
 					+ " on pl._fk_content = p._fk_AdminSubject"
-					+ " and cast(pl.PLevel as varchar(5)) = p.value"
+					+ " and cast(pl.PLevel as char(5)) = p.value"
 					+ " where p._fk_AdminSubject = ${segmentKey} "
 					+ " and p.name = ${proficientPLevel}";
 			parameters.put("proficientTheta", proficientTheta).put("proficientPLevel", proficientPLevel);
@@ -2738,7 +2737,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 					+ " from sim_itemselectionparameter p"
 					+ " inner join ${ItemBankDB}.performancelevels pl"
 					+ " on pl._fk_content = p._fk_AdminSubject"
-					+ " and cast(pl.PLevel as varchar(5)) = p.value"
+					+ " and cast(pl.PLevel as char(5)) = p.value"
 					+ " where p._fk_Session = ${sessionKey} and p._fk_AdminSubject = ${segmentKey} " //where p.[_fk_Session] = @sessionKey AND p._fk_AdminSubject = @segmentKey
 					+ " and p.name = ${proficientPLevel}";
 			parameters.put("proficientTheta", proficientTheta).put("proficientPLevel", proficientPLevel);

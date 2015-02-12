@@ -2040,7 +2040,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     insertedCnt = executeStatement (connection, fixDataBaseNames (finalQuery, unquotedParms2), parms9, false).getUpdateCount ();
 
     connection.dropTemporaryTable (msgKeysTable);
-    _logger.info ("<<<<<<<< TDS_GetMessages_SP Old Total Execution time : " + (System.currentTimeMillis () - startTime) + " ms, Thread: " + Thread.currentThread ().getId ());
     return msgsTable;
   }
 
@@ -2129,7 +2128,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
         _logger.error (String.format ("Problem removing rec from __appmessagecontexts: %s", re1.getMessage ()), re1);
       }
     }
-    _logger.info ("<<<<<<<< populateAllMessages Total Execution time : " + (System.currentTimeMillis () - startTime) + " ms, Thread: " + Thread.currentThread ().getId ());    
   }
 
   /*
@@ -2335,7 +2333,6 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
     if (result.getCount () > 0) {
       DbResultRecord rec = result.getRecords ().next ();
       Long key = rec.<Long> get ("msgkey");
-      _logger.info ("<<<<<<<< TDS_GetMessages_SP Total Optimized Execution time : " + (System.currentTimeMillis () - startTime) + " ms, Thread: " + Thread.currentThread ().getId ());
       _commonDll._LogDBLatency_SP (connection, "AppMessagesByContext", starttime, key, true, null, null, null, client, null);
 
       return result;

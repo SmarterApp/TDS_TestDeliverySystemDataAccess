@@ -56,6 +56,8 @@ drop table if exists `affinitygroupitem`;
 drop table if exists `affinitygroup`;
 drop table if exists `aa_itemcl`;
 drop table if exists `tblitemgroup`;
+drop table if exists `tbltestpackage`;
+drop table if exists `tbladminsubjecttestpackage`;
 
 
 drop table if exists `loader_segmentpoolgroupitem`;

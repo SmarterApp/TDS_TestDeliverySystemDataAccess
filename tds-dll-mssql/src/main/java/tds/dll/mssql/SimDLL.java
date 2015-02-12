@@ -784,4 +784,17 @@ public class SimDLL extends AbstractDLL implements ISimDLL {
     // TODO Auto-generated method stub
 
   }
+
+  @Override
+  public MultiDataResultSet SIM_GetSessionForPublish (SQLConnection connection, UUID sessionKey) throws ReturnStatusException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public SingleDataResultSet SIM_GetSessionTestPackage (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
 }

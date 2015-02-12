@@ -9,6 +9,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_oppkey varbinary(16))
 returns varchar(20)
+sql security invoker
 begin
 
 	declare v_lang varchar(20);

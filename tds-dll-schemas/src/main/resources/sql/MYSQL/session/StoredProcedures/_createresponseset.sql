@@ -9,7 +9,9 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_testoppkey varbinary(16)
   , v_maxitems int
-  , v_reset int)
+  , v_reset int -- = 0
+)
+sql security invoker
 proc: begin
 
 	declare v_numitems int;
