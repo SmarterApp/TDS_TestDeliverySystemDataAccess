@@ -51,9 +51,9 @@ begin
 	if (v_sessionkey is null) then
 	begin
         update tmp_tblpool p, itembank.tblsetofadminitems i
-		set isft = i.isfieldtest
-		  , isactive = i.isactive
-		  , strand = i.strandname
+		set p.isft = i.isfieldtest
+		  , p.isactive = i.isactive
+		  , p.strand = i.strandname
 		where i._fk_adminsubject = v_segmentkey and i._fk_item = p.itemkey;
 
         insert into tmp_tblblueprint (strand, minitems, maxitems, poolcnt)
@@ -67,10 +67,10 @@ begin
     end;
     else 
 	begin
-        update tmp_tblpool, sim_segmentitem i  
-		set isft = i.isfieldtest
-		  , isactive = i.isactive
-		  , strand = i.strand
+        update tmp_tblpool p, sim_segmentitem i  
+		set p.isft = i.isfieldtest
+		  , p.isactive = i.isactive
+		  , p.strand = i.strand
         where _fk_session = v_sessionkey and _efk_segment = v_segmentkey and _efk_item = itemkey;
 
         insert into tmp_tblblueprint (strand, minitems, maxitems, poolcnt)

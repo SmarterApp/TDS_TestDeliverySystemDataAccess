@@ -47,15 +47,15 @@ begin
 
     insert into tblpool (itemkey)
     select distinct i._fk_item 
-    from itembank_tblsetofadminitems i, tdsconfigs_client_test_itemconstraint c1, 
-        testeeaccommodations a1, itembank_tblitemprops p1
+    from itembank.tblsetofadminitems i, configs.client_test_itemconstraint c1, 
+        testeeaccommodations a1, itembank.tblitemprops p1
     where i._fk_adminsubject = v_segmentkey 
         and c1.clientname = v_clientname and c1.testid = v_testid and c1.item_in = 1
         and a1._fk_testopportunity = v_oppkey and a1.acctype = c1.tooltype and a1.acccode = c1.toolvalue
         and p1._fk_adminsubject = v_segmentkey and p1._fk_item  = i._fk_item and p1.propname = c1.propname and p1.propvalue = c1.propvalue and p1.isactive = 1
 		and not exists    -- exclude any item possessing an 'item_out' constraint
 				  ( select * 
-					from tdsconfigs_client_test_itemconstraint c2, testeeaccommodations a2, itembank_tblitemprops p2
+					from configs.client_test_itemconstraint c2, testeeaccommodations a2, itembank.tblitemprops p2
 					where a2._fk_testopportunity = v_oppkey 
 						and c2.clientname = v_clientname and c2.testid = v_testid and c2.item_in = 0
 						and a2.acctype = c2.tooltype and a2.acccode = c2.toolvalue
@@ -64,7 +64,7 @@ begin
 	 -- there should be the same number of records per item as there are item_in constraints, check in the 'having' clause
      group by i._fk_item
      having count(*) = (select count(*) 
-						from tdsconfigs_client_test_itemconstraint c1, testeeaccommodations a1
+						from configs.client_test_itemconstraint c1, testeeaccommodations a1
 						where c1.clientname = v_clientname and c1.testid = v_testid and c1.item_in = 1
 							and a1._fk_testopportunity = v_oppkey and a1.acctype = c1.tooltype and a1.acccode = c1.toolvalue
 					);

@@ -12,6 +12,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 	v_testkey varchar(200)
   , v_itemkey varchar(20)
 ) returns varchar(1000)
+sql security invoker
 begin
 
     declare v_result varchar(1000);

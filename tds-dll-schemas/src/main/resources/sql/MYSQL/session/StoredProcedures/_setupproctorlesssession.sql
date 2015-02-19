@@ -20,11 +20,12 @@ proc: begin
 	declare v_enddate datetime(3);
 	declare v_applock int;
     declare v_resourcename varchar(200);
+	declare v_consume int;
 
-	declare exit handler for sqlexception -- , sqlwarning
+	declare exit handler for sqlexception
 	begin
 		rollback;
-		call _recordsystemerror ('_setupproctorlesssession', 'exception handler: attempt to set up proctorless failed', null, null, null, null, null, null, null, null, null);
+		call _recordsystemerror ('_setupproctorlesssession', 'mysql exit handler: attempt to set up proctorless failed', null, null, null, null, null, null, null, null, null);
 	end;
 
 	-- only allow when anonymous testee login permitted
@@ -43,9 +44,7 @@ proc: begin
 	) engine = memory;
 
     insert into tmp_tbltests (testkey, testid) 
--- 	select distinct testkey, testid 
---     from getactivetests(v_clientname, 0) 
--- 	where isselectable = 1;
+	-- from getactivetests(v_clientname, 0) 
     select distinct m.testkey, p.testid
     from configs.client_testwindow w, configs.client_testmode m, configs.client_testproperties p
         , _externs e , itembank.tblsetofadminsubjects bank    -- make sure the itembank we are pointing to coincides with tdsconfigs' data
@@ -87,7 +86,7 @@ proc: begin
 			insert into `session` (_key, _fk_browser, sessionid, `name`, clientname, environment, datecreated, serveraddress) 
 				 values (v_sessionkey, v_sessionkey, v_sessionid, 'tds session', v_clientname, v_environ, now(3), @@hostname);
 			
-			select release_lock(v_resourcename);
+			set v_consume = (select release_lock(v_resourcename));
 		commit;        
 	end;
 	end if;

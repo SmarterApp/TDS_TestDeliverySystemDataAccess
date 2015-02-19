@@ -9,7 +9,7 @@ DESCRIPTION:
 VERSION 	DATE 			AUTHOR 			COMMENTS
 001			02/10/2015		Sai V. 			code migration
 */
-	clientname varchar(100)
+	v_clientname varchar(100)
 )
 returns bit
 sql security invoker

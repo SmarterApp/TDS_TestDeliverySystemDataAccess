@@ -64,7 +64,7 @@ begin
 	end if;
    
     select 1 into v_parentokay
-	from tdsconfigs_client_testproperties
+	from configs.client_testproperties
     where clientname = v_clientname and testid = v_parentid
 		and (ftstartdate is null or ftstartdate <= v_today) and (ftenddate is null or ftenddate > v_today);
 
@@ -73,7 +73,7 @@ begin
     
 	-- else, parent dates okay and is a test segment, so check the segment too
     select 1 into v_testokay 
-	from tdsconfigs_client_segmentproperties
+	from configs.client_segmentproperties
     where clientname = v_clientname and segmentid = v_testid
 		and (ftstartdate is null or ftstartdate <= v_today) and (ftenddate is null or ftenddate > v_today);
 

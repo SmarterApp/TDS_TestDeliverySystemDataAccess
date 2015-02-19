@@ -21,6 +21,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_subject varchar(50)
 )
 returns varchar(64)
+sql security invoker
 begin
 
     declare v_altmsg varchar(64);

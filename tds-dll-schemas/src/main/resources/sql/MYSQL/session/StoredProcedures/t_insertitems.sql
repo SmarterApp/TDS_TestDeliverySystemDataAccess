@@ -49,13 +49,13 @@ proc: begin
 
 	declare v_starttime datetime(3);
 	
-	declare exit handler for sqlexception -- , sqlwarning
+	declare exit handler for sqlexception
 	begin
 		rollback;
 
-		set v_errmsg = 'exception handler: item insertion failed: ';-- , error_message();
+		set v_errmsg = 'mysql exit handler: item insertion failed:';
 		call _logdberror(v_procname, v_errmsg, null, null, null, v_oppkey, v_clientname, v_session);
-		call _returnerror(v_clientname, v_procname, 'exception handler: database record insertion failed for new test items', null, v_oppkey, null, null);
+		call _returnerror(v_clientname, v_procname, 'mysql exit handler: database record insertion failed for new test items', null, v_oppkey, null, null);
 	end;
 
 	set v_today = now(3);

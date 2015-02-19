@@ -34,8 +34,8 @@ proc: begin
     set v_starttime = now(3);
     set v_isformtest = 0;
 
-	drop temporary table if exists tmp_tblwindows;
-    create temporary table tmp_tblwindows(wid varchar(100), form varchar(50))engine = memory;
+	drop temporary table if exists tmp_tblformwindows;
+    create temporary table tmp_tblformwindows(wid varchar(100), form varchar(50))engine = memory;
 
 	drop temporary table if exists tmp_tblforms;
     create temporary table tmp_tblforms(_key varchar(50))engine = memory;
@@ -97,7 +97,7 @@ proc: begin
     if (v_requirewindow = 1) then 
 	begin                
         if (v_windowlist is null) then
-            call _getrtsattribute(v_clientname, v_testee, v_windowfield, v_windowlist /*output*/);
+            call _getrtsattribute(v_clientname, v_testee, v_windowfield, v_windowlist /*output*/, 'student', 0);
 		end if;
 
 		/* Call _buildtable stored procedure 
@@ -107,7 +107,7 @@ proc: begin
 			  
 		call _buildtable(v_windowlist, ';');
 
-		insert into tmp_tblwindows (wid)
+		insert into tmp_tblformwindows (wid)
 		select substring_index(record, ':', -1) 
 		from tblout_buildtable
 		where record like concat(v_tideid, ':%');
@@ -156,12 +156,12 @@ proc: begin
     if (v_requirewindow = 1) then
 	begin                
         if (v_windowlist is null) then
-            call _getrtsattribute(v_clientname, v_testee, v_windowfield, v_windowlist /*output*/);
+            call _getrtsattribute(v_clientname, v_testee, v_windowfield, v_windowlist /*output*/, 'student', 0);
 		end if;
 
 		insert into tblout_gettesteetestwindows
         select distinct windowid, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
-        from tmp_tblwindows, tmp_tblgetcurrenttestwindows
+        from tmp_tblformwindows, tmp_tblgetcurrenttestwindows
         where wid = windowid;
 		
 		if (v_debug = 1) then 
@@ -179,6 +179,11 @@ proc: begin
     select distinct windowid, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
     from tmp_tblgetcurrenttestwindows;
     
+	-- clean-up
+	drop temporary table tmp_tblformwindows;
+	drop temporary table tmp_tblforms;
+	drop temporary table tmp_tblgetcurrenttestwindows;
+
     call _logdblatency('_gettesteetestwindows', v_starttime, null, null, null, null, null, v_clientname, null);
 
 end $$

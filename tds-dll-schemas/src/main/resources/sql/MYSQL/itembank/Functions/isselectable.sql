@@ -11,6 +11,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_testkey varchar(250)
 ) returns bit
+sql security invoker
 begin
 
 	declare v_result bit;

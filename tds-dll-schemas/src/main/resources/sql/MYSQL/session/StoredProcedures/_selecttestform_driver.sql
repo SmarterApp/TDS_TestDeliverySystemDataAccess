@@ -37,6 +37,7 @@ proc: begin
 
 	-- form predetermination is set at the parent test level, not the segment level. so use the parent test id to find out
     set v_fromrts = 0;
+
     select (cast(requirertsform as unsigned) + cast(requirertsformwindow as unsigned)), requirertsformifexists
 	into v_fromrts, v_ifrts
     from configs.client_testmode 
@@ -46,22 +47,26 @@ proc: begin
 	set v_formid = null;
     set v_formlength = null;
 
-	if v_debug = 1 then
+	if (v_debug = 1) then
         select v_parenttest parent, v_fromrts fromrts, v_ifrts ifrts;
+		select hex(v_oppkey), v_testkey, v_language, v_sessiontype, v_formlist, v_formcohort;
 	end if;
     
     if (v_formcohort is null and (v_fromrts > 0 or v_formlist <> null or v_ifrts = 1)) then 
 		-- use formlist for debugging or for overriding the distribution algorithm 
-        if v_debug = 1 then select 'predetermined'; end if;
+        if (v_debug = 1) then select 'predetermined'; end if;
         call _selecttestform_predetermined(v_oppkey, v_testkey, v_language, v_formkey /*output*/, v_formid /*output*/, v_formlength /*output*/, v_sessiontype, v_formlist, 0);
+		if (v_debug = 1) then select '_selecttestform_predetermined', v_formkey, v_formid, v_formlength; end if;
     else 
         if (v_debug = 1)  then select 'algorithmic'; end if;
         call _selecttestform_eqdist(v_oppkey, v_testkey, v_language, v_formkey /*output*/, v_formid /*output*/, v_formlength /*output*/, v_formcohort, 0);
+		if (v_debug = 1) then select '_selecttestform_eqdist', v_formkey, v_formid, v_formlength; end if;
 	end if;
 
     if (v_ifrts = 1 and v_formkey is null) then
 		if (v_debug = 1) then select 'algorithmic'; end if;
 		call _selecttestform_eqdist(v_oppkey, v_testkey, v_language, v_formkey /*output*/, v_formid /*output*/, v_formlength /*output*/, v_formcohort, 0);
+		if (v_debug = 1) then select '_selecttestform_eqdist', v_formkey, v_formid, v_formlength; end if;
 	end if;
 
     if (v_formkey is null or v_formid is null or v_formlength is null) then

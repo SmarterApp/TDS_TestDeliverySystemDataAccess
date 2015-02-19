@@ -76,7 +76,7 @@ proc: begin
     else
         select t.message, messageid
 		into v_msg, v_msgid
-        from tdsconfigs_tds_coremessageobject o, tdsconfigs_client_messagetranslation t
+        from configs.tds_coremessageobject o, configs.client_messagetranslation t
         where t._key = v_msgkey and o._key = t._fk_coremessageobject;
 	end if;
 
@@ -96,7 +96,7 @@ proc: begin
 
 	-- clean-up
 	drop temporary table tmp_tblargs;
-	drop temporary table tblout_buildtable;
+	drop temporary table if exists tblout_buildtable;
 
 
 end $$

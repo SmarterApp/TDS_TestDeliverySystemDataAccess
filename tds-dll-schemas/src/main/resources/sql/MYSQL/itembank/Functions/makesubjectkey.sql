@@ -13,6 +13,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_subjectname varchar(100)
   , v_grade 	  varchar(100)
 ) returns varchar(200)
+sql security invoker
 begin
 
 	declare v_key varchar(200);

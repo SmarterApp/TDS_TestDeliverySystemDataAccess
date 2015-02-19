@@ -14,6 +14,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 	v_testkey varchar(250)
   , v_itemkey varchar(50)
 ) returns text
+sql security invoker
 begin
 
 	-- make a string from the set of content level ids for quick retrieval by adaptive algorithm (this will be stored with the item, see load_adminitems)

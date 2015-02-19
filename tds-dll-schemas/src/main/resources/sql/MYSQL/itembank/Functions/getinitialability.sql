@@ -12,6 +12,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_testkey varchar(250))
 returns float
+sql security invoker
 begin
 
 	declare v_result float;

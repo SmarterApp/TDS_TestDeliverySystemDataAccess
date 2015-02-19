@@ -4,7 +4,7 @@ CREATE TABLE __accommodationcache (
 	clientname   	varchar(100) NOT NULL,
 	_date        	datetime NOT NULL,
 	dategenerated	datetime NULL,
-	CONSTRAINT PK_AccomCache PRIMARY KEY CLUSTERED(_Key)
+	CONSTRAINT pk_accomcache PRIMARY KEY CLUSTERED(_Key)
 ) default charset = UTF8;
 
 CREATE TABLE __cachedaccommodations ( 

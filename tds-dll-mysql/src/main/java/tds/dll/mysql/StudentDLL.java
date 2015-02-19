@@ -9383,7 +9383,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // "@scoreDimension",scorestatus AS "@scoreStatus",
     // Example
     // <ScoreInfo scorePoint="1" scoreDimension="overall" scoreStatus="Scored">
-    String tmp = String.format ("<ScoreInfo scorePoint=\"%d\" scoreDimensions=\"%s\" scoreStatus=\"%s\">",
+    String tmp = String.format ("<ScoreInfo scorePoint=\"%d\" scoreDimensions=\"%s\" scoreStatus=\"%s\"><SubScoreList /></ScoreInfo>",
         score, scoreDimConstant, scoreStatus);
     return tmp;
   }

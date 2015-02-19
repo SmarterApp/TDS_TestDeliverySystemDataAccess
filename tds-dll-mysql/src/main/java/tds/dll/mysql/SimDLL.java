@@ -3099,6 +3099,16 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     SingleDataResultSet rs = executeStatement (connection,  fixDataBaseNames (cmd), parms, false).getResultSets ().next ();
     return rs;    
   }
+  
+  @Override
+  public void SIM_LoaderMain (SQLConnection connection, String xmlTestPackage) throws ReturnStatusException {
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("xmlTestPackage", xmlTestPackage);
+    final String cmd = "call ${ItembankDB}.loader_main(${xmlTestPackage})";
+    executeStatement (connection, fixDataBaseNames(cmd), params, false);
+    
+    // TODO: arp - In addition itembank database needs to be setup to enable testpackage update after simulation session
+  }  
 
   private String getClientnameFromSession (SQLConnection connection, UUID session) throws ReturnStatusException {
     String client = null;

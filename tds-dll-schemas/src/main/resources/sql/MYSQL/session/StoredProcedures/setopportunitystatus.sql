@@ -15,6 +15,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_requestor varchar(100) -- = null
   , v_comment varchar(200) -- = null
 )
+sql security invoker
 proc: begin
 
 	declare v_now datetime(3);
@@ -39,7 +40,7 @@ proc: begin
 		set v_oldstatus = 'undefined'; 
 	end if;
 
-	set v_msg = _canchangeoppstatus (v_oldstatus, v_status);
+	set v_msg = _canchangeoppstatus(v_oldstatus, v_status);
 
 	if (v_msg is not null) then
 	begin   

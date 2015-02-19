@@ -91,6 +91,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
   protected final String SCOREINFO_NODE_NAME 		= "ScoreInfo";
   protected final String SCORERATIONALE_NODE_NAME 	= "ScoreRationale";
   protected final String SCOREINFOMESSAGE_NODE_NAME = "Message";
+  protected final String NOTSCORED_VALUE 			= "NotScored";
+  protected final String SCORED_VALUE 				= "Scored";
   
   protected final String COMMENT_NODE_NAME 			= "Comment";
   protected final String TOOLUSAGE_NODE_NAME 		= "ToolUsage";
@@ -914,7 +916,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           recordToXML (record2, orderedColumns, strBuilder, debug);
         }
         query = "select coalesce(response, '') as response, coalesce(scoreRationale, '') as rationale, datesubmitted as responseDate,  "
-        		+ " I.scorepoints as scorePoint,"
+        		+ " I.scorepoints as maxScore,"
+        		+ " R.score as scorePoint, "
         		+ " R.scoredimensions as scoreDimension, "
         		+ " R.scorestatus as scoreStatus ";
 // TODO: (AK) We need to add the column scoredimensions to table  testeeresponsearchive !!!       
@@ -942,8 +945,10 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           respDate 		= (responseDate != null)?  responseDate.toString(): "";
           respDate		= formatXSDateTime(respDate);
           scoreStatus   = record2.<String> get ("scoreStatus");
-          Integer spoint	= record2.<Integer> get ("scorePoint");
-          scorePoint = spoint.toString();
+          Integer scint	= record2.<Integer> get ("scorePoint");
+          scorePoint 	= scint.toString();
+          scint			= record2.<Integer> get ("maxScore");
+          maxscore 		= scint.toString();
           scoredimension= record2.<String> get ("scoreDimension");
         }
         else
@@ -955,8 +960,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         scoreStatus 	= formatValueToXSD(scoreStatus, "scoreStatus");
         scorePoint 		= formatValueToXSD(scorePoint, "scorePoint");
         scoredimension 	= formatValueToXSD(scoredimension, "scoreDimension");
-        //TODO maxscore????
-        maxscore 	= formatValueToXSD(maxscore, "maxScore");
+        maxscore 		= formatValueToXSD(maxscore, "maxScore");
 
 
         xml = strBuilder.toString ();
@@ -1031,11 +1035,14 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		</ScoreInfo>
 		 */
 		// and then put this xml in xml report (without changes!
-		// Problem in <StackTrace><![CDATA[]]></StackTrace> node ?1
+		// Problem in <StackTrace><![CDATA[]]></StackTrace> node ?!
 
 	StringBuilder strBuilder = new StringBuilder();
-
-	String confLevelValue = "";
+	
+	if(!SCORED_VALUE.equalsIgnoreCase(scoreStatusValue))
+	{
+		scorePointValue = "-1";
+	}
 	
 	strBuilder.append("<").append(SCOREINFO_NODE_NAME);
 	if(scorePointValue != null && !scorePointValue.isEmpty())
@@ -1047,17 +1054,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		strBuilder.append(SPACE).append("maxScore = \"").append(maxScoreValue).append("\" ");
 	}
 	{
-		// TODO
+		// Up level always has scoreDimension = "overall" !
 		strBuilder.append(SPACE).append("scoreDimension = \"").append("overall").append("\" ");
-		// strBuilder.append(SPACE).append("scoreDimension = \"").append(scoreDimensionValue).append("\" ");
 	}
 	if(scoreStatusValue != null && !scoreStatusValue.isEmpty())
 	{
 		strBuilder.append(SPACE).append("scoreStatus = \"").append(scoreStatusValue).append("\" ");
-	}
-	if(confLevelValue != null && !confLevelValue.isEmpty())
-	{
-		strBuilder.append(SPACE).append("confLevel = \"").append(confLevelValue).append("\" ");	
 	}
 	strBuilder.append(">").append(ls);
 	
@@ -1068,8 +1070,10 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         	
     	strBuilder.append(SPACE).append("</").append(SCOREINFOMESSAGE_NODE_NAME).append(">").append(ls);	
     	strBuilder.append(SPACE).append("</").append(SCORERATIONALE_NODE_NAME).append(">").append(ls);
+    	strBuilder.append(SPACE).append("<SubScoreList/>").append(ls);
     
     strBuilder.append("</").append(SCOREINFO_NODE_NAME).append(">").append(ls);
+    
 	  
 	  
 	return  strBuilder.toString(); 

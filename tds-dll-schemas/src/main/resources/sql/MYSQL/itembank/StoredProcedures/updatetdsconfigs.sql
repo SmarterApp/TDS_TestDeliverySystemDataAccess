@@ -453,7 +453,7 @@ begin
       and not exists (select * from configs.client_testtool c 
                     where c.clientname = v_client and c.contexttype = 'TEST' and c.`context` = '*' and c.`type` = t.toolname);
 
-	drop temporary table if exists tmp_lang2;
+	drop temporary table if exists tmp_langs2;
 	create temporary table tmp_langs2 (
 		select * from tmp_langs
 	);

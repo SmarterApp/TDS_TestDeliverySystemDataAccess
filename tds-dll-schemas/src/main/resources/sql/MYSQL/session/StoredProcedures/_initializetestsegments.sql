@@ -52,7 +52,7 @@ proc: begin
 
 	declare exit handler for sqlexception
     begin		
-		set v_msg = 'exit handler: sqlexception';
+		set v_msg = 'mysql exit handler: sqlexception';
 		call _logdberror('_initializetestsegments', v_msg, null, null, null, v_oppkey, v_clientname, null);
 
 		if (v_debug = 1) then 
@@ -60,7 +60,7 @@ proc: begin
 		else 
 			set v_error = 'segment initialization failed';
 		end if;
-	end;	
+	end; 	
 
 	
     if (exists (select * from testopportunitysegment where _fk_testopportunity = v_oppkey and v_debug = 0)) then
@@ -138,7 +138,7 @@ proc: begin
 	end if;
 
 	if (v_debug = 1) then
-        select * from tmp_tblsegments;
+        select 'tmp_tblsegments', s.* from tmp_tblsegments s;
 	end if;
 
     select max(segmentposition), min(segmentposition) 
@@ -170,11 +170,13 @@ proc: begin
         if (v_algorithm = 'fixedform') then
 		begin            
             -- if this test segment is fixed form ...
+			if (v_debug = 1) then select '_selecttestform_driver', v_oppkey, v_testkey, v_language, v_formkeylist, v_formcohort; end if;
             call _selecttestform_driver(v_oppkey, v_testkey, v_language, v_formkey /*output*/, v_formid /*output*/, v_formlength /*output*/, v_formkeylist, v_formcohort, 0);
+			if (v_debug = 1) then select '_selecttestform_driver', v_formkey, v_formid, v_formlength; end if;
 
             if (v_formkey is null) then
                 set v_error = 'unable to complete test form selection';
-                delete from tmp_tblsegments where _fk_testopportunity = v_oppkey;     -- don't leave garbage around if we failed to do everything
+                delete from tmp_tblsegments where _fk_testopportunity = v_oppkey;
                 
 				leave proc;
             end if;
@@ -186,10 +188,15 @@ proc: begin
 									 where _fk_adminsubject = v_testkey and _key = v_formkey);			
 			else 
 			begin
+				if (v_debug = 1) then select '_computesegmentpool', v_oppkey, v_testkey, v_sessionpoolkey; end if;
 				call _computesegmentpool(v_oppkey, v_testkey, v_newlen /*output*/, v_poolcount /*output*/, v_itemstring /*output*/, 0, v_sessionpoolkey);
-									
+				if (v_debug = 1) then select '_computesegmentpool', v_newlen, v_poolcount, v_itemstring; end if;									
+
+
 				if (ft_iseligible(v_oppkey, v_testkey, v_parentkey, v_language) = 1 and v_newlen = v_opitems) then
-					call _ft_selectitemgroups(v_oppkey, v_testkey, v_pos, v_segmentid, v_language, v_ftcnt /*output*/, v_debug, 0);               
+					if (v_debug = 1) then select '_ft_selectitemgroups', v_oppkey, v_testkey, v_pos, v_segmentid, v_language; end if;
+					call _ft_selectitemgroups(v_oppkey, v_testkey, v_pos, v_segmentid, v_language, v_ftcnt /*output*/, v_debug, 0);             
+					if (v_debug = 1) then select '_ft_selectitemgroups', v_ftcnt; end if;  
 				else 
 					set v_ftcnt = 0;
 				end if;

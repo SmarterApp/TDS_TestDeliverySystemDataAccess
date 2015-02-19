@@ -9,6 +9,7 @@ drop function if exists `testbankkey` $$
 create function `testbankkey` ( 
 	v_testkey varchar(250) 
 ) returns bigint
+sql security invoker
 begin
 	
   declare v_bankkey bigint;

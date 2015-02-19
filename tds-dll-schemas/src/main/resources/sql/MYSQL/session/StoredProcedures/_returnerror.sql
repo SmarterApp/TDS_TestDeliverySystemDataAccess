@@ -40,8 +40,9 @@ begin
 			and a._fk_testopportunity = v_oppkey 
 			and a.acctype = 'language';
         
-		-- if (v_testee > 0) then
-        --    call _getrtsattribute v_client, v_testee, 'enrlgrdcode', v_grade output;
+		if (v_testee > 0) then
+			call _getrtsattribute(v_client, v_testee, 'enrlgrdcode', v_grade /*output*/, 'student', 0);
+		end if;
     end;
 	end if;
 

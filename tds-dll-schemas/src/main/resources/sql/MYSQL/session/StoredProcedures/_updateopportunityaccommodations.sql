@@ -30,7 +30,8 @@ proc: begin
 	declare exit handler for sqlexception
 	begin
 		rollback;
-		set v_error = 'exit handler: error setting accommodations';
+		set v_error = 'mysql exit handler: error setting accommodations';
+		call _logdberror('_updateopportunityaccommodations', v_error, null, null, null, v_oppkey, null, null);
 		call _logdblatency('_updateopportunityaccommodations', v_starttime, null, 1, null, v_oppkey, null, null, null);
 	end;
 
@@ -159,7 +160,7 @@ proc: begin
     select acctype, accvalue, acccode, 0 
 	from testeeaccommodations a
     where _fk_testopportunity= v_oppkey
-		and exists (select * from tdsconfigs_client_tooldependencies d
+		and exists (select * from configs.client_tooldependencies d
 					 where d.contexttype = 'test' and d.`context` = v_testid and d.clientname = v_clientname
 					   and a.acctype = d.thentype and a.acccode = d.thenvalue);
 

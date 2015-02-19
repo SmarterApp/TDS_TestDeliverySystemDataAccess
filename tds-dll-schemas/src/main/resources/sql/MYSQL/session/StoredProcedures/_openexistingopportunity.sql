@@ -22,6 +22,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_accommodations text -- = null
   , v_restorerts bit
   , out v_testoppkey varbinary(16)
+  , v_debug bit -- = 0
 )
 sql security invoker 
 proc: begin
@@ -38,7 +39,7 @@ proc: begin
     -- clienttestoppkey will only return non-deleted testopps
     set v_testoppkey = (select _key from testopportunity 
 						 where clientname = v_clientname and _efk_testee = v_testee and _efk_adminsubject = v_testkey and opportunity = v_opportunity and datedeleted is null);
-   	
+
     set v_audit = auditopportunities(v_clientname);
 
 	
@@ -129,8 +130,8 @@ proc: begin
     where _fk_testopportunity = v_testoppkey and valuecount > 1 and isselectable = 1 and allowchange = 1;
 
 	-- record the audit trail
-    insert into archive.opportunityaudit (_fk_testopportunity, dateaccessed, _fk_session, hostname, _fk_browser, accesstype, isabnormal)
-		 values (v_testoppkey, now(3), v_sessionid, @@hostname, v_browserid, v_newstatus, v_isabnormal);
+    insert into archive.opportunityaudit(_fk_testopportunity, dateaccessed, _fk_session, hostname, _fk_browser, accesstype, isabnormal)
+		 values (coalesce(v_testoppkey, ''), now(3), v_sessionid, @@hostname, v_browserid, v_newstatus, v_isabnormal);
 
     call _logdblatency('_openexistingopportunity', v_today, v_testee, null, null, v_testoppkey, null, null, null);
     

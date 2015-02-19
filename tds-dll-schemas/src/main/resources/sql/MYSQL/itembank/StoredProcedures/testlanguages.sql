@@ -26,20 +26,20 @@ proc: begin
     if (v_segmented = 0) then 
 	begin
         if (v_algorithm = 'fixedform') then
-            insert into tblout_testlanguages (`code`, label)
+            insert into `session`.tblout_testlanguages (`code`, label)
             select distinct propvalue, propdescription
             from tblitemprops p, testform f
             where p._fk_adminsubject = v_test and propname = 'language' and f._fk_adminsubject = v_test and f.`language` = p.propvalue
                 and p.isactive = 1;
         else 
-            insert into tblout_testlanguages (`code`, label)
+            insert into `session`.tblout_testlanguages (`code`, label)
             select distinct  propvalue, propdescription
             from  tblitemprops p
             where p._fk_adminsubject = v_test and propname = 'language' and isactive = 1;
         end if;
     end;
     else
-        insert into tblout_testlanguages (`code`, label)
+        insert into `session`.tblout_testlanguages (`code`, label)
         select distinct propvalue, propdescription
         from tblsetofadminitems a, tblitemprops p, tblsetofadminsubjects s
         where s.virtualtest = v_test and a._fk_adminsubject = s._key and a._fk_adminsubject = p._fk_adminsubject 

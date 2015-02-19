@@ -37,7 +37,7 @@ proc: begin
 		end if;
 	end if;
 	
-	drop table if exists tmptbl;
+	drop temporary table if exists tmptbl;
 	create temporary table tmptbl(position int) engine = memory;
 
 	set v_i = 1;
@@ -53,7 +53,8 @@ proc: begin
 	select v_testoppkey, position 
 	from tmptbl;
 
-	drop table tmptbl;
+	-- clean-up
+	drop temporary table tmptbl;
 	
 end$$
 

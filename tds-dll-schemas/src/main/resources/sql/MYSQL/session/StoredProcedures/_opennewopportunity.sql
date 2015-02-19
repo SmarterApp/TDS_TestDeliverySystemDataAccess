@@ -7,7 +7,7 @@ create procedure `_opennewopportunity`(
 Description: open a new test opportunity for testing. main purpose of this function is to apply business rules.
 
 VERSION 	DATE 			AUTHOR 			COMMENTS
-001			02/10/2015		Sai V. 			
+001			02/10/2015		Sai V. 			Code Migration
 */
 	v_clientname varchar(100)
   , v_testee bigint
@@ -24,8 +24,8 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 sql security invoker
 proc: begin
 
+	declare v_today, v_startdatewin datetime(3);
     declare v_subject varchar(100);      -- subject added 7/28/2009 to facilitate blocking of tests by subject
-	declare v_today datetime(3);
     declare v_auditproc bit;
 	declare v_newid bigint;
     declare v_testid varchar(200);
@@ -83,9 +83,11 @@ proc: begin
 	insert into tmp_tblwindows(wid, maxopps, startdate, enddate, formkey, testmode, modemax, testkey)
 	select * from tblout_gettesteetestwindows;
 
+	set v_startdatewin = (select min(startdate) from tmp_tblwindows);
+
     select wid, testmode into v_windowid, v_mode
     from tmp_tblwindows
-    where testkey = v_testkey and startdate = (select min(startdate) from tmp_tblwindows)
+    where testkey = v_testkey and startdate = v_startdatewin
 	limit 1;
 
     if (v_windowid is null) then
@@ -93,7 +95,7 @@ proc: begin
         leave proc;
     end if;
 
-	-- exec _createclientreportingid v_clientname, v_testoppkey, v_newid output;
+	call _createclientreportingid(v_clientname, v_testoppkey, v_newid /*output*/);
 
     if (v_newid is null) then
 		call _logdberror(v_procname, 'unable to create a unique reporting id', v_testee, v_testkey, v_opportunity, null, null, null);
@@ -140,7 +142,7 @@ proc: begin
 			 values (v_testoppkey, now(3), v_sessionkey, v_status, @@hostname, v_browserkey);
 	end if;
 
-    call _logdblatency(v_procname, v_starttime, v_testee, 1, null, v_testoppkey, null, v_clientname, null);
+    call _logdblatency(v_procname, v_today, v_testee, 1, null, v_testoppkey, null, v_clientname, null);
 
 end $$
 

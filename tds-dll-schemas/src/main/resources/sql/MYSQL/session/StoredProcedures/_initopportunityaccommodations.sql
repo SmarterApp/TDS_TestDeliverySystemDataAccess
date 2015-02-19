@@ -25,7 +25,7 @@ proc: begin
 
 	declare exit handler for sqlexception
 	begin		
-		set v_err = 'excpetion handler: no error message logged';
+		set v_err = 'mysql exit handler: sqlexception';
 		call _logdberror('_initopportunityaccommodations', v_err, null, null, null, v_oppkey, null, null);
 	end;
 
@@ -42,7 +42,7 @@ proc: begin
 	  , label	varchar(150)
 	);
 
-	call testlanguages(v_test);
+	call itembank.testlanguages(v_test);
 
 	start transaction;
 		-- first, set default for every type of accommodation 
@@ -58,7 +58,7 @@ proc: begin
 					, tt.testmode as toolmode, `type` as acctype, `value` as accvalue, `code` as acccode, isdefault, allowcombine
 					, isfunctional, allowchange, isselectable, isvisible, studentcontrol
 					, (select count(*) from configs.client_testtool tool 
-						where tool.contexttype = 'test' and tool.`context` = `mode`.testid and tool.clientname = `mode`.clientname and tool.`type` = tt.`type`) as valcount
+						where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
 					, dependsontooltype
 					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
 					where md.testkey = v_test and
@@ -103,7 +103,7 @@ proc: begin
 	begin
         if (v_accoms is null) then
 		begin
-            call _getrtsattribute(v_clientname, v_testee, '--accommodations--', v_accoms /*output*/);
+            call _getrtsattribute(v_clientname, v_testee, '--accommodations--', v_accoms /*output*/, 'student', 0);
             if (v_accoms is null or length(v_accoms) < 1) then
                 update testopportunity_readonly 
 				set accommodationstring = p_formataccommodations (v_oppkey)

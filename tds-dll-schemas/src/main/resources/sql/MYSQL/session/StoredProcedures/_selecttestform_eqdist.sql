@@ -57,14 +57,14 @@ proc: begin
 		 , f.formid
 		 , (select count(*) 
 			  from itembank.testformitem i where i._fk_adminsubject = v_testkey and i._fk_testform = f._key) 
-    from itembank.testform f, tdsconfigs.client_testformproperties p
+    from itembank.testform f, configs.client_testformproperties p
     where f.`language` = v_lang and f._fk_adminsubject = v_testkey and f._key = p._efk_testform and p.clientname = v_clientname
         and (v_formcohort is null or cohort = v_formcohort)
 		and ((p.startdate is null or v_date > p.startdate) and (p.enddate is null or v_date < p.enddate));
     
     set v_formcount = (select count(*) from tmp_tblforms);
 
-    if (v_formcount = 0 and v_debug = 1) then select * from tmp_tblforms; end if;
+    if (v_formcount = 0 and v_debug = 1) then select 'tmp_tblforms', f.* from tmp_tblforms f; end if;
     if (v_formcount = 0) then leave proc; end if;
     if (v_formcount = 1) then
         select _formkey, id, itemcnt

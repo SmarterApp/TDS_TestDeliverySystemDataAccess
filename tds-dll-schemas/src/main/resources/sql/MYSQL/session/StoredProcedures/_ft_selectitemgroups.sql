@@ -55,10 +55,10 @@ proc: begin
 	declare v_intervalindex int; -- this starts at startpos + 1 and is incremented by v_intervalsize * num_items_in_group each time through the loop
     declare v_itemcohort int;
 
-	declare exit handler for sqlexception -- , sqlwarning
+	declare exit handler for sqlexception
 	begin
 		rollback;
-		call _logdberror('_ft_selectitemgroups', 'exception handler: sqlexception', v_testee, v_testkey, null, v_testoppkey, null, null);
+		call _logdberror('_ft_selectitemgroups', 'mysql exit handler: sqlexception', v_testee, v_testkey, null, v_testoppkey, null, null);
 		set v_ftcount = 0;
 	end;
 

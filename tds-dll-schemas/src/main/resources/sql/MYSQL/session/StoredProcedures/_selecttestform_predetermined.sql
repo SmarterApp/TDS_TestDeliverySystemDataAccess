@@ -57,6 +57,8 @@ proc: begin
 
     set v_environment = (select environment from externs where clientname = v_clientname);
 
+	if (v_debug = 1) then select '_gettesteetestforms', v_clientname, v_testid, v_testee, v_sessiontype,  v_formlist; end if;
+
 	/* Call _gettesteetestforms stored procedure 
 	-- To capture and use result set from _gettesteetestforms, a temporary table is created to store the resultset */
 	drop temporary table if exists tblout_gettesteetestforms;
@@ -78,7 +80,7 @@ proc: begin
 	select * from tblout_gettesteetestforms;
 
 
-    if (v_debug = 1) then select * from tmp_tblassigned; end if;
+    if (v_debug = 1) then select 'tmp_tblassigned', a.* from tmp_tblassigned a; end if;
 
 
     update tmp_tblassigned 

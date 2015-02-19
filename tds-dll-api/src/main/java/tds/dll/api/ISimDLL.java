@@ -230,5 +230,6 @@ public interface ISimDLL
   public MultiDataResultSet SIM_GetSessionForPublish (SQLConnection connection, UUID sessionKey) throws ReturnStatusException;
   
   public SingleDataResultSet SIM_GetSessionTestPackage (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException;
-
+  
+  public void SIM_LoaderMain (SQLConnection connection, String xmlTestPackage) throws ReturnStatusException;
 }

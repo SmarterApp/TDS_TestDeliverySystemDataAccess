@@ -42,13 +42,14 @@ begin
 	end;
 	end while;
 
-	insert into resulttable (idx, record) values
-	(v_recordcount, substring(v_modifiedlist from v_searchposition));
-     
+	insert into resulttable (idx, record) 
+		 values (v_recordcount, substring(v_modifiedlist from v_searchposition));
+ 
+	insert into tblout_buildtable
 	select idx, record 
 	from resulttable;
 
-end$$
+end $$
 
 DELIMITER ;
 

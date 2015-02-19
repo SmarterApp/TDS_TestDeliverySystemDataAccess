@@ -10,6 +10,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 001			10/21/2014		Sai V. 			Ported code from SQL Server to MySQL
 */
 )
+sql security invoker
 begin
 
     declare v_client varchar(100);    

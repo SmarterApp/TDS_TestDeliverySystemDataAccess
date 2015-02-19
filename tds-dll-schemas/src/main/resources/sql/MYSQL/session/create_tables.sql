@@ -1,3 +1,12 @@
+create table `r_studentpackagedetails` (
+  `_fk_studentpackagekey` bigint(20) not null,
+  `studentkey` bigint(20) default null,
+  `attrname` varchar(200) not null,
+  `attrdesc` varchar(200) default null,
+  `attrvalue` text not null,
+  KEY `fk_studentpackage` (`_fk_studentpackagekey`)
+) default charset = UTF8;
+
 create table `adminevent`  ( 
 	`_key`       	varbinary(16) not null,
 	`eventtype`  	varchar(25) not null,

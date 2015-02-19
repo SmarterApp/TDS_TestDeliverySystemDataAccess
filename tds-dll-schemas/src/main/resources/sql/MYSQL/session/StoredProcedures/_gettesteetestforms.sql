@@ -96,6 +96,7 @@ proc: begin
 
 
     if (v_testee < 0) then  -- if 'guest' testees are allowed into the system, then they qualify for all forms by default since there is no rts data for them
+		insert into tblout_gettesteetestforms
         select windowid, windowmax, startdate, enddate, formkey, `mode`, modemax, testkey
         from tmp_tblgettestformwindows;
         
@@ -119,7 +120,7 @@ proc: begin
         end if;
     end;
     elseif (v_tideid is not null and v_formfield is not null) then   -- this is live production condition
- -       call _getrtsattribute(v_clientname, v_testee, v_formfield, v_formlist /*output*/, null, null);
+		call _getrtsattribute(v_clientname, v_testee, v_formfield, v_formlist /*output*/, 'student', 0);
 	end if;
 
     if (v_debug = 1) then 

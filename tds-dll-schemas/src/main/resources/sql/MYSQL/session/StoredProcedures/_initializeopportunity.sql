@@ -9,7 +9,7 @@ Description: all code for initializing a new test opportunity is here, including
 			-- this procedure assumes the testee has been cleared to start a test.
 
 VERSION 	DATE 			AUTHOR 			COMMENTS
-001			02/06/2015		Sai V. 			Converted code from SQL Server to MySQL
+001			02/06/2015		Sai V. 			Code Migration
 */
 	v_oppkey varbinary(16)
   , out v_testlength int
@@ -28,7 +28,7 @@ proc: begin
     set v_reason = null;
 	set v_procname = '_initializeopportunity';
 
-    call _initializetestsegments(v_oppkey, v_reason /*output*/, v_formkeylist);
+    call _initializetestsegments(v_oppkey, v_reason /*output*/, v_formkeylist, 0);
 
     if (v_reason is not null) then
         call _logdberror(v_procname, v_reason, null, null, null, v_oppkey, null, null);

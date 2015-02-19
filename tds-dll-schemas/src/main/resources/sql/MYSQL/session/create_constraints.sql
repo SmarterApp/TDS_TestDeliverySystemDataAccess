@@ -1,3 +1,10 @@
+alter table `r_studentpackagedetails`
+	add constraint `fk_studentpackage` 
+	foreign key(`_fk_studentpackagekey`) 
+	references `r_studentpackage` (`_key`) 
+	on delete cascade 
+	on update no action ;
+
 alter table `admineventitems`
 	add constraint `fk_admineventitems`
 	foreign key(`_fk_adminevent`)

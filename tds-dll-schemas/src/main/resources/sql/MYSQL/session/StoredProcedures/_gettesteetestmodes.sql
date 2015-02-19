@@ -87,7 +87,7 @@ proc: begin
 		end if;
     end;
     elseif ((v_requiremodewindow = 1 or v_requiremode = 1) and v_modefield is not null) then   -- this is live production condition
-        call _getrtsattribute(v_clientname, v_testee, v_modefield, v_modelist /*output*/);
+        call _getrtsattribute(v_clientname, v_testee, v_modefield, v_modelist /*output*/, 'student', 0);
 	end if;
 
 	-- note: we cannot rely on all ';'-delimited values in the test modes field to be window-discriminated. only those for this test

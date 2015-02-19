@@ -1175,7 +1175,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           attributes.put ("DemographicRaceTwoOrMoreRaces", student.getDemographicRaceTwoOrMoreRaces ());
           attributes.put ("IDEAIndicator", student.getIDEAIndicator ());
           attributes.put ("LEPStatus", student.getLEPStatus ());
-          attributes.put ("Section504Status", student.getSection504Status ());
+          attributes.put ("Section504Status", student.getSection504Status ());// TODO: UNKNOWN/CANNOT PROVIDE
 
           attributes.put ("EconomicDisadvantageStatus", student.getEconomicDisadvantageStatus ());
           // SB-512

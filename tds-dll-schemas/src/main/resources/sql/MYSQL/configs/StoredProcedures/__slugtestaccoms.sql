@@ -9,7 +9,9 @@ Description: a background process that precomputes accommodations for all tests 
 VERSION 	DATE 			AUTHOR 			COMMENTS
 001			10/21/2014		Sai V. 			Ported code from SQL Server to MySQL
 */
-	v_contextkey bigint)
+	v_contextkey bigint
+)
+sql security invoker
 proc: begin
 
     declare v_client varchar(100);

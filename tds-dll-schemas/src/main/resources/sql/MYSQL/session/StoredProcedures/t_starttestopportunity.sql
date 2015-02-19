@@ -15,6 +15,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_sessionkey varbinarY(16) -- = null
   , v_browserid varbinary(16) -- = null
   , v_formkeylist text -- = null
+  , v_debug bit -- = 0
 )
 sql security invoker
 proc: begin
@@ -34,7 +35,6 @@ proc: begin
     declare v_sessiontype int;
 	declare v_error varchar(200);
     declare v_reason text;
-	declare v_starttime datetime(3);
     declare v_testkey varchar(250);
     declare v_testid varchar(200);
     declare v_clientname varchar(100);
@@ -47,11 +47,8 @@ proc: begin
 	--  we have to take the most recent of last item generated, last item responded, and datechanged to determine if 
 	--  testee has met the delay rule that permits picking up without a penalty
 	set v_now = now(3);
-	set v_starttime = v_now;
 	set v_procname = 't_starttestopportunity';
         
-	-- testlength is now considered to be fluid from one day to the next due to possible
-	-- fragility of field test item activation
 	select `status`, datestarted, datechanged, `restart`, graceperiodrestarts, maxitems, _efk_adminsubject, clientname, _efk_testid 
 	into v_status, v_datestarted, v_datechanged, v_rcnt, v_gprestarts, v_testlength, v_testkey, v_clientname, v_testid
 	from testopportunity
@@ -68,6 +65,7 @@ proc: begin
         call _validatetesteeaccessproc(v_oppkey, v_sessionkey, v_browserid, 1, v_error /*output*/);
         if (v_error is not null) then
 		begin
+			if (v_debug = 1) then select 'condition 1. exit'; end if;
 			-- select 'denied' as [status], v_error as reason, '_validatetesteeaccess' as [context], null as [argstring], null as [delimiter];
             call _returnerror(v_clientname, v_procname, v_error, null, v_oppkey, '_validatetesteeaccess', 'denied');
             leave proc;
@@ -87,6 +85,7 @@ proc: begin
 	where _efk_testid = v_testid and clientname = v_clientname;
 
 	if (v_delay is null) then 
+		if (v_debug = 1) then select 'condition 2'; end if;
 		select opprestart, interfacetimeout, requestinterfacetimeout 
 		into v_delay, v_interfacetimeout, v_requestinterfacetimeout
 		from timelimits  
@@ -96,7 +95,7 @@ proc: begin
 	if (v_delay is null) then set v_delay = 1; end if;
 
 	if (v_status not in ('approved')) then	-- this cannot be checked by _validatetesteeaccess
-		-- select 'denied' as [status], 'test start/restart not approved by test administrator' as reason, 't_starttestopportunity' as [context], null as [argstring], null as [delimiter];
+		if (v_debug = 1) then select 'condition 3.exit'; end if;
 		call _returnerror(v_clientname, v_procname, 'test start/restart not approved by test administrator', null, v_oppkey, 't_starttestopportunity', 'denied');
 		leave proc;
 	end if;
@@ -106,28 +105,31 @@ proc: begin
 	if (v_datestarted is null) then 
 	begin
 		-- 1/31/2009: _initializeopportunity now handles all data initialization including item, field test, and opportunity-level
+		if (v_debug = 1) then select '_initializeopportunity', hex(v_oppkey), v_formkeylist; end if;
 		call _initializeopportunity(v_oppkey, v_testlength /*output*/,  v_reason /*output*/, v_formkeylist);
+		if (v_debug = 1) then select '_initializeopportunity', v_testlength,  v_reason; end if;
 
         if (v_reason is not null) then
+			if (v_debug = 1) then select 'condition 4.exit'; end if;
             call _logdberror(v_procname, v_reason, null, null, null, v_oppkey, v_clientname, null);
 			call _returnerror(v_clientname, v_procname, v_reason, null, v_oppkey, 't_starttestopportunity', 'failed');
             leave proc;
         end if;
 
-        insert into opportunityaudit (_fk_testopportunity, _fk_session, hostname, accesstype, _fk_browser)
-			 values (v_oppkey, v_sessionkey, host_name(), 'started', v_browserid);
+        insert into archive.opportunityaudit(_fk_testopportunity, dateaccessed, _fk_session, hostname, accesstype, _fk_browser)
+			 values (v_oppkey, v_now, v_sessionkey, @@hostname, 'started', v_browserid);
 
 		select 'started' as `status`
-			 , 0 as restart
+			 , bigtoint(0) as restart
 			 , v_testlength as testlength
              , cast(null as char) as reason
 			 , v_interfacetimeout as interfacetimeout
 			 , v_delay as opprestart
              , v_ability as initialability
 			 , v_excludeitemtypes as excludeitemtypes
-             , 120 as contentloadtimeout
+             , bigtoint(120) as contentloadtimeout
 			 , v_requestinterfacetimeout as requestinterfacetimeout
-             , 1 as startposition
+             , bigtoint(1) as startposition
 			 , prefetch
 			 , validatecompleteness
 			 , scorebytds(v_clientname, v_testid) as scorebytds
@@ -135,7 +137,7 @@ proc: begin
         from configs.client_testproperties 
 		where clientname = v_clientname and testid = v_testid;
         
-        call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, v_clientname, null);
+        call _logdblatency(v_procname, v_now, null, null, null, v_oppkey, null, v_clientname, null);
 
 		leave proc;
 	end;
@@ -162,7 +164,7 @@ proc: begin
 	where _key = v_oppkey;
 	
     insert into archive.opportunityaudit(_fk_testopportunity, dateaccessed, _fk_session, hostname, accesstype, _fk_browser)
-		 values (v_oppkey, now(3), v_sessionkey, @@hostname, concat('restart ', cast(v_rcnt + 1 as char(10))), v_browserid);
+		 values (v_oppkey, v_now, v_sessionkey, @@hostname, concat('restart ', cast(v_rcnt + 1 as char(10))), v_browserid);
 
     -- 2/2012: exempt data-entry session from pause-time rule
     if (v_sessiontype = 1) then
@@ -192,7 +194,7 @@ proc: begin
 		 , v_delay as opprestart
 		 , v_ability as initialability
 		 , v_excludeitemtypes as excludeitemtypes
-		 , 120 as contentloadtimeout
+		 , bigtoint(120) as contentloadtimeout
 		 , v_requestinterfacetimeout as requestinterfacetimeout
 		 , prefetch
 		 , validatecompleteness
@@ -202,7 +204,7 @@ proc: begin
     from configs.client_testproperties 
 	where clientname = v_clientname and testid = v_testid;
             
-    call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, v_clientname, null);
+    call _logdblatency(v_procname, v_now, null, null, null, v_oppkey, null, v_clientname, null);
 
 end $$
 

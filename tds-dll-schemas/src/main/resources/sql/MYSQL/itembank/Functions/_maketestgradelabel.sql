@@ -11,6 +11,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_testkey varchar(200)
 ) returns varchar(100)
+sql security invoker
 begin
 
     declare v_result 		varchar(100);

@@ -11,8 +11,9 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 */
 	v_clientname varchar(100)
   , v_testkey varchar(250)
-  , v_itemkey varchar(50))
-returns varchar(150)
+  , v_itemkey varchar(50)
+) returns varchar(150)
+sql security invoker
 begin
 
 	-- declare the return variable here

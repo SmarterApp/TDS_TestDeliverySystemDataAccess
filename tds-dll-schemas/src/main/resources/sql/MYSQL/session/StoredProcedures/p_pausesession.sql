@@ -35,7 +35,7 @@ proc: begin
 
     if (v_accessdenied is not null) then 
 	begin        
-        call _logdberror(v_procname, v_accessdenied, v_proctorkey, null, null, v_sessionkey, v_clientname, null);
+        call _logdberror(v_procname, v_accessdenied, v_proctorkey, null, null, null, v_clientname, v_sessionkey);
 		call _logdblatency (v_procname, v_today, null, null, null, null, v_sessionkey, v_clientname, null);
         call _returnerror(v_clientname, v_procname, v_accessdenied, null, null, 'validateproctorsession', null);
         leave proc;
@@ -70,7 +70,7 @@ proc: begin
 
 	-- account for any dangling test opportunities
 	if (auditopportunities(v_clientname) <> 0) then
-		insert into opportunityaudit (_fk_testopportunity, dateaccessed, accesstype, _fk_session, hostname, _fk_browser)
+		insert into archive.opportunityaudit (_fk_testopportunity, dateaccessed, accesstype, _fk_session, hostname, _fk_browser)
 		select _key, v_now, 'paused by session', v_sessionkey, v_host, _fk_browser
 		from testopportunity 
 		where _fk_session = v_sessionkey	

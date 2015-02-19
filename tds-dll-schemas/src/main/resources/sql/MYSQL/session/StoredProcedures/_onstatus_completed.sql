@@ -7,10 +7,11 @@ create procedure `_onstatus_completed`(
 Description: perform whatever actions are required when a test opportunity status changes to 'completed'
 
 VERSION 	DATE 			AUTHOR 			COMMENTS
-001			01/10/2014		Sai V. 			Converted code from SQL Server to MySQL
+001			01/10/2014		Sai V. 			Code Migration
 */
 	v_oppkey varbinary(16)
 )
+sql security invoker
 proc: begin
 
 	declare v_starttime datetime(3);
@@ -30,39 +31,43 @@ proc: begin
 	where _key = v_oppkey;
 	
     update testopportunity 
-	set itemgroupstring = makeitemgroupstring(v_oppkey) where _key = v_oppkey;
+	set itemgroupstring = makeitemgroupstring(v_oppkey) 
+	where _key = v_oppkey;
 
 	-- restore segment permeabilities, even though the test is over (in case it reopens?)
     update testopportunitysegment 
 	set ispermeable = -1
     where _fk_testopportunity = v_oppkey;
 
-    exec _settesteeattributes v_clientname, v_oppkey, v_testee, 'final';
-    exec _recordbpsatisfaction v_oppkey;
+    call _settesteeattributes(v_clientname, v_oppkey, v_testee, 'final');
+    call _recordbpsatisfaction(v_oppkey);
 
-    if (dbo.isxmlon(v_oppkey) = 1 and dbo.canscoreopportunity(v_oppkey) = 'complete: do not score')
-        exec submitqareport v_oppkey, 'submitted', v_v_procid;
+    if (isxmlon(v_oppkey) = 1 and canscoreopportunity(v_oppkey) = 'complete: do not score') then
+        call submitqareport(v_oppkey, 'submitted', '_onstatus_completed');
+	end if;
 
--- note: _efk_adminsubject is the primary key for table ft_fieldtest, hence the direct comparison between (ft_itemgroup.)_fk_fieldtest and _efk_adminsubject from testopportunity
-    if (exists (select * from ft_opportunityitem where _fk_testopportunity = v_oppkey)) begin   
-        declare v_groups table (gid varchar(50), bid varchar(20), seg int, pos int);
-        insert into v_groups (gid, bid, seg, pos)
+    if (exists (select * from ft_opportunityitem where _fk_testopportunity = v_oppkey)) then  
+	begin
+        drop temporary table if exists tmp_tblgroups;
+		create temporary table tmp_tblgroups(gid varchar(50), bid varchar(20), seg int, pos int);
+
+        insert into tmp_tblgroups (gid, bid, seg, pos)
         select r.groupid, i.blockid, r.segment, min(r.position)
         from testeeresponse r, ft_opportunityitem i
         where r._fk_testopportunity = v_oppkey and i._fk_testopportunity = v_oppkey 
             and r.segment = i.segment and r.groupid = i.groupid and r.isfieldtest = 1
         group by r.segment, r.groupid, i.blockid;
 
--- set the true position each item group was administered in
-        update ft_opportunityitem set positionadministered = pos, dateadministered=getdate()
-        from v_groups 
-        where _fk_testopportunity = v_oppkey and segment = seg and groupid = gid;
+		-- set the true position each item group was administered in
+        update ft_opportunityitem, tmp_tblgroups
+		set positionadministered = pos
+		  , dateadministered = now(3)
+        where _fk_testopportunity = v_oppkey 
+			and segment = seg and groupid = gid;
+	end;
+    end if;
 
-        
-
-    end
-
-    exec _logdblatency v_v_procid, v_starttime, v_testee, 1, v_testoppkey = v_oppkey;
+    call _logdblatency('_onstatus_completed', v_starttime, v_testee, 1, v_oppkey, null, null, null);
 
 end $$
 
