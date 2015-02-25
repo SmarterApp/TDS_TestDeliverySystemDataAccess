@@ -14,8 +14,14 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 sql security invoker
 proc: begin
 
-    if (isxmlon(v_oppkey) = 1) then
-        call submitqareport(v_oppkey, 'submitted', '_onstatus_scored');
+	declare v_testee bigint;
+
+	set v_testee = (select _efk_testee from testopportunity where _key = v_oppkey);
+
+	if (v_testee > 0) then 
+		if (isxmlon(v_oppkey) = 1) then
+			call submitqareport(v_oppkey, 'submitted', '_onstatus_scored');
+		end if;
 	end if;
 
 end $$

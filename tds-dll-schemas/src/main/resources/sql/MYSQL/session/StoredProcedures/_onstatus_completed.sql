@@ -42,8 +42,10 @@ proc: begin
     call _settesteeattributes(v_clientname, v_oppkey, v_testee, 'final');
     call _recordbpsatisfaction(v_oppkey);
 
-    if (isxmlon(v_oppkey) = 1 and canscoreopportunity(v_oppkey) = 'complete: do not score') then
-        call submitqareport(v_oppkey, 'submitted', '_onstatus_completed');
+	if (v_testee > 0) then 
+		if (isxmlon(v_oppkey) = 1 and canscoreopportunity(v_oppkey) = 'complete: do not score') then
+			call submitqareport(v_oppkey, 'submitted', '_onstatus_completed');
+		end if;
 	end if;
 
     if (exists (select * from ft_opportunityitem where _fk_testopportunity = v_oppkey)) then  

@@ -146,7 +146,26 @@ proc: begin
 
 
     if (v_gettestformwindows_cnt > 0) then
-        call _gettesteetestforms(v_clientname, v_testid, v_testee, v_sessiontype, v_formlist, 0);
+		/* Call _gettesteetestforms stored procedure 
+		-- To capture and use result set from _gettesteetestforms, a temporary table is created to store the resultset */
+		drop temporary table if exists tblout_gettesteetestforms;
+		create temporary table tblout_gettesteetestforms(
+			window 		varchar(100)
+		  , windowmax 	int
+		  , startdate 	datetime(3)
+		  , enddate 	datetime(3)
+		  , frmkey 		varchar(50)
+		  , `mode` 		varchar(50)
+		  , modemax 	int
+		  , testkey 	varchar(250)
+		);
+		
+		call _gettesteetestforms(v_clientname, v_testid, v_testee, v_sessiontype, v_formlist, 0);
+		/* # */
+		insert into tblout_gettesteetestwindows
+		select distinct window, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
+		from tblout_gettesteetestforms;
+
         call _logdblatency('_gettesteetestwindows', v_starttime, null, null, null, null, null, v_clientname, null);
         leave proc;
     end if;

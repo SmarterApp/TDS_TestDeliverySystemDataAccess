@@ -892,4 +892,12 @@ public SingleDataResultSet R_GetDistrictSchools_SP (SQLConnection connection, St
     // TODO Auto-generated method stub
     return null;
   }
+
+//Implementation not required  
+  @Override
+  public void _InsertStudentPackageDetails (SQLConnection connection, Long key, String clientName, String xmlPackage) throws ReturnStatusException {
+    
+  }
+  
+  
 }

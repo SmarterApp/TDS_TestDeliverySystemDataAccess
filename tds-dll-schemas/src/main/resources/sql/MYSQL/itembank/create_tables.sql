@@ -105,7 +105,8 @@ create table `tbltestpackage` (
 create table `tbladminsubjecttestpackage` (
 	`_fk_adminsubject` varchar(250) not null,
 	`_fk_testpackage`  varbinary(16) not null,
-	constraint `pk_tbladminsubjecttestpackage` primary key clustered(`_fk_adminsubject`)
+	`dateloaded`	   datetime(3) not null,
+	constraint `pk_tbladminsubjecttestpackage` primary key clustered(`_fk_testpackage`, `_fk_adminsubject`)
 ) default charset = UTF8;
 
 /*

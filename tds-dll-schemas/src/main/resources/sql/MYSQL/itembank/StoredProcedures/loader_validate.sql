@@ -220,7 +220,7 @@ begin
 	   and bp1.elementtype = 'contentlevel' 
 	   and bp2.bpelementid is null;
 
-
+/*
 
 select * 
 from tblsetofadminsubjects
@@ -324,7 +324,7 @@ select * from a
 	 where packagekey = v_testpackagekey
 	   and season is null;	
 
-
+*/
 
 	-- check if season is one of the following, if not error. fall, winter, spring
 

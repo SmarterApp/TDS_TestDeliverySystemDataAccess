@@ -23,8 +23,8 @@ proc: begin
 	declare v_modefield varchar(50);
 	declare v_requiremode, v_requiremodewindow bit;
 
-	drop temporary table if exists tmp_tblmodes;
-    create temporary table tmp_tblmodes(
+	drop temporary table if exists tmp_tbltestmodes;
+    create temporary table tmp_tbltestmodes(
 		rtsval varchar(200)
 	  , wid varchar(100)
 	  , asgnmode varchar(50)
@@ -109,13 +109,13 @@ proc: begin
 
 		-- each component is of the form <tideid>:<mode> or <tideid>&<windowid>:<mode>
 		-- first, split the string for the tide_id (which is required)
-        insert into tmp_tblmodes (rtsval, asgnmode)
+        insert into tmp_tbltestmodes (rtsval, asgnmode)
         select substring_index(record, ':', 1), substring_index(record, ':', -1)
         from tmp_tblrtsvals 
 		where record like concat(v_tideid, ':%') or record like concat(v_tideid, '&%:%');
 
 		-- now, parse the windowid out, if applicable
-        update tmp_tblmodes 
+        update tmp_tbltestmodes 
 		set wid = substring_index(rtsval, '&', -1) 
 		where locate('&', rtsval) > 0;
     end;
@@ -125,7 +125,7 @@ proc: begin
 	begin
 		insert into tblout_gettesteetestmodes
         select distinct windowid, windowmax, startdate, enddate,  mode, modemax, testkey
-        from tmp_tblmodes, tmp_tblgetcurrenttestwindows
+        from tmp_tbltestmodes, tmp_tblgetcurrenttestwindows
         where wid = windowid and `mode` = asgnmode;
 
 		if (v_debug = 1) then 
@@ -140,7 +140,7 @@ proc: begin
 		-- window is not assigned, just the mode, so just join the modes
 		insert into tblout_gettesteetestmodes
         select distinct windowid, windowmax, startdate, enddate,  `mode`, modemax, testkey
-        from tmp_tblmodes, tmp_tblgetcurrenttestwindows
+        from tmp_tbltestmodes, tmp_tblgetcurrenttestwindows
         where `mode` = asgnmode;
 
 		if (v_debug = 1) then 

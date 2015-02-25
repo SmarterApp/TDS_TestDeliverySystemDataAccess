@@ -275,4 +275,6 @@ public interface IRtsDLL
    */
   public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientname, long testee);
   
+  public void _InsertStudentPackageDetails(SQLConnection connection,Long key, String clientName, String xmlPackage) throws ReturnStatusException;
+  
 }

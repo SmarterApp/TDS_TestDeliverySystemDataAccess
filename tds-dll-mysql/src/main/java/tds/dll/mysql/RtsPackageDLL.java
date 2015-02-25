@@ -98,6 +98,13 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   
   @Value ("${ClientName}")
   private String              _clientName;
+  
+  private String rtsAttributes = "DOB~BirthDtTxt;Ethnicity~--ETHNICITY--;FirstName~LglFNm;Gender~Gndr;Grade~EnrlGrdCd;ID~ExternalID;"
+      + "LastName~LglLNm;LEP~LEPfg;Name~--ENTITYNAME--;Accommodations~--ACCOMMODATIONS--;TestMode~tds-testmode;TestForm~tds-testform;"
+      + "TestWindow~tds-testwindow";
+  
+  private String testeeRelAtrributes = "ENRDIST-STUDENT;ENRLINST-STUDENT;STATE-STUDENT";
+  
 
   @PostConstruct
   private void init () {
@@ -170,6 +177,68 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     return false;
   }
 
+  public void _InsertStudentPackageDetails(SQLConnection connection,Long key, String clientName, String xmlPackage) throws ReturnStatusException {
+    Map<String,Object> resultMap = getPackageDetailsByKeyAndClientName (connection, EntityType.STUDENT, key, clientName);
+    
+    byte[] pkg = null;
+    Long _fk_studentpackagekey = null;
+    Long studentkey = null;
+    if (resultMap!=null) {
+      _fk_studentpackagekey = Long.valueOf (resultMap.get("_key").toString ());
+      studentkey = Long.valueOf (resultMap.get("studentkey").toString ());
+      pkg = (byte[])resultMap.get  ("package");
+    }
+    if (pkg != null) {
+      IRtsPackageReader packageReader = new StudentPackageReader ();
+      try {
+        if (packageReader.read (pkg)) {
+          String[] rtsAttributesArr = rtsAttributes.split (";");
+          String attrVal = null;
+          String attrName = null;
+          String attrDesc = null;
+          String[] attrNameArr = null;
+          for(String rtsAttribute:rtsAttributesArr) {
+            attrNameArr = rtsAttribute.split ("~");
+            attrName = attrNameArr[1];
+            attrDesc = attrNameArr[0];
+            attrVal = packageReader.getFieldValue (attrName);
+            if (attrVal != null) {
+              T_InsertStudentPackageDetails (connection, _fk_studentpackagekey, studentkey, attrName, attrDesc, attrVal);
+            }
+          }
+          
+//          List<String> testeeRelSet =  Arrays.asList (testeeRelAtrributes.split (";"));
+          SingleDataResultSet result = getTesteeRelationships_SP (connection, pkg);
+          Iterator<DbResultRecord> records = result.getRecords ();
+          while (records.hasNext ()) {
+            DbResultRecord record = records.next ();
+            attrName = record.<String>get ("attKey");
+//            if(testeeRelSet.contains (attrName)) {
+              attrVal =  record.<String>get ("attval");
+              T_InsertStudentPackageDetails (connection, _fk_studentpackagekey, studentkey, attrName, null, attrVal);
+//            }
+          }
+        }
+      } catch (RtsPackageReaderException e) {
+        _logger.error (e.getMessage (), e);
+      }
+    }
+    
+  }
+  
+  
+  private void T_InsertStudentPackageDetails(SQLConnection connection,long _fk_studentpackagekey,long studentkey, 
+      String attrname, String attrdesc, String attrvalue) throws ReturnStatusException {
+    final String query = "INSERT INTO r_studentpackagedetails (_fk_studentpackagekey, studentkey, attrname, attrdesc, attrvalue) "
+        + "VALUES ( ${_fk_studentpackagekey},  ${studentkey},  ${attrname},  ${attrdesc},  ${attrvalue})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("_fk_studentpackagekey", _fk_studentpackagekey);
+    params.put ("studentkey", studentkey);
+    params.put ("attrname", attrname);
+    params.put ("attrdesc", attrdesc);
+    params.put ("attrvalue", attrvalue);
+    executeStatement (connection, query, params, false).getUpdateCount ();
+  }
   /*
    * (non-Javadoc)
    * 
@@ -307,6 +376,65 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
       singleDataResultSet.addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("TDS_ID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
       singleDataResultSet.addColumn ("attval", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+
+      singleDataResultSet.addRecords (resultList);
+    }
+    return singleDataResultSet;
+  }
+  
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * tds.dll.api.IRtsDLL#_GetTesteeRelationships_SP(AIR.Common.DB.SQLConnection,
+   * java.lang.String, java.lang.Long)
+   */
+  private SingleDataResultSet getTesteeRelationships_SP (SQLConnection connection, byte[]  packageObject) throws ReturnStatusException {
+    IRtsPackageReader packageReader = null;
+    SingleDataResultSet singleDataResultSet = null;
+    if (packageObject != null) {
+      List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
+      packageReader = new StudentPackageReader ();
+      try {
+        if (packageReader.read (packageObject)) {
+          RtsRecord rtsRecord = packageReader.getRtsRecord ("ENRDIST-STUDENT");
+          if (rtsRecord != null) {
+              CaseInsensitiveMap<Object> result =  new CaseInsensitiveMap<Object> ();
+              result.put ("relationType", "District");
+              result.put ("attval",  rtsRecord.get ("entityId") + ":"+rtsRecord.get ("entityName"));
+              result.put ("attKey", "ENRDIST-STUDENT");
+              resultList.add (result);
+          }
+          rtsRecord = packageReader.getRtsRecord ("ENRLINST-STUDENT");
+          if (rtsRecord != null) {
+              CaseInsensitiveMap<Object> result =   new CaseInsensitiveMap<Object> ();
+              result.put ("relationType", "School");
+              result.put ("attval", rtsRecord.get ("entityId") + ":"+rtsRecord.get ("entityName"));
+              result.put ("attKey", "ENRLINST-STUDENT");
+              resultList.add (result);
+            }
+          rtsRecord = packageReader.getRtsRecord ("STATE-STUDENT");
+          if (rtsRecord != null) {
+            CaseInsensitiveMap<Object> result =   new CaseInsensitiveMap<Object> ();
+            result.put ("relationType", "State");
+            result.put ("attval", rtsRecord.get ("entityId") + ":"+rtsRecord.get ("entityName"));
+            result.put ("attKey", "STATE-STUDENT");
+            resultList.add (result);  
+          }
+        }
+      } catch (RtsPackageReaderException e) {
+        _logger.error (e.getMessage (), e);
+      }
+      packageReader = null;
+
+      singleDataResultSet = new SingleDataResultSet ();
+
+      singleDataResultSet.addColumn ("relationType", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+      singleDataResultSet.addColumn ("entityKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+      singleDataResultSet.addColumn ("TDS_ID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+      singleDataResultSet.addColumn ("attval", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+      singleDataResultSet.addColumn ("attKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
 
       singleDataResultSet.addRecords (resultList);
     }
@@ -1576,7 +1704,43 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     }
     return null;
   }
-
+  
+  
+  /**
+   *  Gets package for particular Entity by entity's key and ClientName.
+   *  
+   * @param connection
+   * @param entityType
+   * @param key
+   * @param clientName
+   * @return
+   * @throws ReturnStatusException
+   */
+  private Map<String,Object> getPackageDetailsByKeyAndClientName (SQLConnection connection, EntityType entityType, Long key, String clientName) throws ReturnStatusException {
+    final String SQL_SELECT = "select * from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ? and ClientName = ? and IsCurrent = 1 limit 1";
+    Map<String,Object>  resultMap= null;
+    try (PreparedStatement preparedStatement = connection.prepareStatement (SQL_SELECT)) {
+      preparedStatement.setLong (1, key);
+      preparedStatement.setString (2, clientName);
+      boolean rtn = preparedStatement.execute ();
+      if (rtn) {
+        ColumnResultSet crs = ColumnResultSet.getColumnResultSet (preparedStatement.getResultSet ());
+          if (crs!=null && crs.next () == true) {
+            resultMap = new HashMap<String,Object> ();
+            resultMap.put ("_key",crs.getObject("_key"));
+            resultMap.put ("studentkey",crs.getObject("studentkey"));
+            resultMap.put ("package",crs.getObject("package"));
+            return resultMap;
+          }
+      }
+    } catch (SQLException exp) {
+      _logger.error (exp.getMessage (), exp);
+    }
+    
+    return resultMap;
+  }
+  
+  
   /**
    * Gets student package given a StudentKey and ClientName.
    * 

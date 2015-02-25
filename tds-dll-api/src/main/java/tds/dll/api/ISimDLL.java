@@ -231,5 +231,5 @@ public interface ISimDLL
   
   public SingleDataResultSet SIM_GetSessionTestPackage (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException;
   
-  public void SIM_LoaderMain (SQLConnection connection, String xmlTestPackage) throws ReturnStatusException;
+  public void SIM_LoaderMain (SQLConnection connection, String testKey, String xmlTestPackage) throws ReturnStatusException;
 }

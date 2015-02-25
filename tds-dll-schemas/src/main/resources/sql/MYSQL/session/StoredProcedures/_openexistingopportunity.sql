@@ -33,6 +33,7 @@ proc: begin
 	declare v_isabnormal int;
 	declare v_audit int;
     declare v_isstarted bit;
+	declare v_error varchar(1000);
 
 	set v_today = now(3);
 
@@ -84,9 +85,12 @@ proc: begin
     set v_isstarted = case v_newstatus when 'pending' then 0 else 1 end;
 
     if (not (exists (select * from testeeaccommodations where _fk_testopportunity = v_testoppkey))) then
+		if (v_debug > 0) then select '_initopportunityaccommodations', hex(v_testoppkey), v_accommodations; end if;
         call _initopportunityaccommodations(v_testoppkey, v_accommodations);
     elseif (v_accommodations is not null and length(v_accommodations) > 0) then    
-        call _updateopportunityaccommodations(v_testoppkey, 0, v_accommodations, v_isstarted, 0,  v_restorerts, 0, 0);
+		if (v_debug > 0) then select '_updateopportunityaccommodations', hex(v_testoppkey), v_accommodations, v_isstarted, v_restorerts; end if;
+        call _updateopportunityaccommodations(v_testoppkey, 0, v_accommodations, v_isstarted, 0, v_restorerts, v_error /*output*/, 0);
+		if (v_debug > 0) then select '_updateopportunityaccommodations', v_error; end if;
     end if;
 
     -- do this in case the valuecount on an accommodation has changed since the test started

@@ -47,7 +47,8 @@ proc: begin
 		idx 	int auto_increment primary key
 	  , `code`  varchar(50)
 	);
-
+	
+	if (v_debug > 0) then select '_splitaccomcodes', v_clientname, v_testkey, v_accoms; end if;
 	call _splitaccomcodes(v_clientname, v_testkey, v_accoms);
 
     if (v_debug <> 0) then
@@ -57,6 +58,14 @@ proc: begin
 --         from dbo.testkeyaccommodations(v_testkey) c, tblout_splitaccomcodes s
 --         where s.`code` = c.acccode and cast(segment as unsigned) = v_segment;
     end if;
+
+	drop temporary table if exists tblout_testlanguages;
+	create temporary table tblout_testlanguages (
+		`code`	varchar(150)
+	  , label	varchar(150)
+	);
+
+	call itembank.testlanguages(v_testkey);
 
 	drop temporary table if exists tmp_tblaccoms;
     create temporary table tmp_tblaccoms(atype varchar(50), acode varchar(100), avalue varchar(250), allow bit, control bit, recordusage bit, isdefault bit, isselectable bit, valcount int);
@@ -71,10 +80,10 @@ proc: begin
 					, tt.testmode as toolmode, `type` as acctype, `value` as accvalue, `code` as acccode, isdefault, allowcombine
 					, isfunctional, allowchange, isselectable, isvisible, studentcontrol
 					, (select count(*) from configs.client_testtool tool 
-						where tool.contexttype = 'test' and tool.`context` = `mode`.testid and tool.clientname = `mode`.clientname and tool.`type` = tt.`type`) as valcount
+						where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
 					, dependsontooltype
 					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
-					where md.testkey = v_test and
+					where md.testkey = v_testkey and
 						ttype.contexttype = 'test' and ttype.`context` = md.testid and ttype.clientname = md.clientname
 						and tt.contexttype = 'test' and tt.`context` = md.testid and tt.clientname = md.clientname and tt.type = ttype.toolname
 						and (tt.type <> 'language' or tt.`code` in (select `code` from tblout_testlanguages))
@@ -88,7 +97,7 @@ proc: begin
 						where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
 					, null  -- dependsontooltype
 					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_segmentproperties seg, configs.client_testmode md
-					where parenttest = md.testid and md.testkey = v_test and seg.modekey = v_test
+					where parenttest = md.testid and md.testkey = v_testkey and seg.modekey = v_testkey
 						and ttype.contexttype = 'segment' and ttype.`context` = segmentid and ttype.clientname = md.clientname
 						and tt.contexttype = 'segment' and tt.`context` = segmentid and tt.clientname = md.clientname and tt.`type` = ttype.toolname
 						and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.`mode`)
@@ -101,7 +110,7 @@ proc: begin
 							where tool.contexttype = 'test' and tool.`context` = '*' and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
 						, dependsontooltype
 					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
-					where md.testkey = v_test and ttype.contexttype = 'test' and ttype.`context` = '*' and ttype.clientname = md.clientname
+					where md.testkey = v_testkey and ttype.contexttype = 'test' and ttype.`context` = '*' and ttype.clientname = md.clientname
 						and tt.contexttype = 'test' and tt.`context` = '*' and tt.clientname = md.clientname and tt.`type` = ttype.toolname 
 						and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.`mode`)
 						and not exists (select * from configs.client_testtooltype tool 
@@ -136,7 +145,7 @@ proc: begin
 			and acctype in (select distinct atype from tmp_tblaccoms) and segment = v_segment;
 
 		insert into testeeaccommodations (_fk_testopportunity, acctype, acccode, accvalue, _date, allowchange, recordusage, testeecontrol, segment, valuecount, isapproved, isselectable)
-		select distinct v_oppkey, atype, acode, avalue, getdate(), allow, recordusage, control, v_segment, valcount, case valcount when 1 then 1 else v_approved end, isselectable
+		select distinct v_oppkey, atype, acode, avalue, now(3), allow, recordusage, control, v_segment, valcount, case valcount when 1 then 1 else v_approved end, isselectable
 		from tmp_tblaccoms;
 
 		if (exists (select * from tmp_tblaccoms where atype = 'language')) then
@@ -182,7 +191,7 @@ proc: begin
 	end if;
 
     update testopportunity_readonly 
-	set accommodationstring = p_formataccommodations (v_oppkey)
+	set accommodationstring = p_formataccommodations(v_oppkey)
     where _fk_testopportunity = v_oppkey;
 
 	-- clean-up

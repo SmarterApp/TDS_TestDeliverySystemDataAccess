@@ -48,7 +48,7 @@ proc: begin
 
 	-- split the string into rows as delimited by the family row delimiter v_delim
 	drop temporary table if exists tmp_tblsplitrow;
-    create temporary table tmp_tblsplitrow(idx int, record text)engine=memory;
+    create temporary table tmp_tblsplitrow(idx int, record text);
 
 	/* Call _buildtable stored procedure 
 	-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */

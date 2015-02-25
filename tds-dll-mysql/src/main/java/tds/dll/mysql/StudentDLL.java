@@ -2944,7 +2944,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       strandCount = (tmp == null ? null : tmp.intValue ());
     }
     if (DbComparator.lessThan ((testlen.get () - shortfall), strandCount)) {
-    	// test offgrade items: TODO check
+        // test offgrade items: TODO check
       newlen = (testlen.get () - shortfall > 0)? testlen.get () - shortfall: testlen.get ();
     } else {
       newlen = strandCount;
@@ -5177,7 +5177,25 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return itemposition;
   }
 
+  public SingleDataResultSet T_StartTestOpportunity_SP_Mysql (SQLConnection connection, UUID oppKey, UUID sessionKey, UUID browserId, String formKeyList) throws ReturnStatusException {
+    
+    final String SQL_QUERY = "call t_starttestopportunity(${oppKey}, ${sessionKey}, ${browserId}, ${formKeyList}, ${debug})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppKey", oppKey);
+    params.put ("sessionKey", sessionKey);
+    params.put ("browserId", browserId);
+    params.put ("formKeyList", formKeyList);
+    params.put("debug",0);
+
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+   }
+  
+  
+
+  
   /**
+   * This method is not being used as t_starttestopportunity is migrated to Mysql stored proc. This is the Java version of the t_starttestopportunity procedure
    * @param connection
    * @param oppKey
    * @param sessionKey
@@ -7083,6 +7101,22 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   }
 
+  public SingleDataResultSet T_OpenTestOpportunity_SP_Mysql (SQLConnection connection, Long testee, String testkey, UUID sessionKey, UUID browserKey,
+      String guestAccommodations) throws ReturnStatusException {
+    
+    final String SQL_QUERY = "call T_OpenTestOpportunity(${testee}, ${testkey}, ${sessionKey}, ${browserKey},${guestAccommodations},${debug})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("testee", testee);
+    params.put ("testkey", testkey);
+    params.put ("sessionKey", sessionKey);
+    params.put ("browserKey", browserKey);
+    params.put ("guestAccommodations", guestAccommodations);
+    params.put("debug",0);
+
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+   }
+
   public SingleDataResultSet T_OpenTestOpportunity_SP (SQLConnection connection, Long testee, String testkey, UUID sessionKey, UUID browserKey) throws ReturnStatusException {
 
     return T_OpenTestOpportunity_SP (connection, testee, testkey, sessionKey, browserKey, null);
@@ -7093,6 +7127,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return df.format (new java.util.Date());
   }
   
+  // This method is not being used as T_OpenTestOpportunity is migrated to Mysql stored proc. This is the Java version of the t_starttestopportunity procedure
   public SingleDataResultSet T_OpenTestOpportunity_SP (SQLConnection connection, Long testee, String testkey, UUID sessionKey, UUID browserKey,
       String guestAccommodations) throws ReturnStatusException {
     
@@ -11988,4 +12023,5 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return str.replace ('/', java.io.File.separatorChar).replace ('\\', java.io.File.separatorChar);
   }
 
+  
 }

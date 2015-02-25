@@ -2404,40 +2404,44 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			selectionAlgorithm = record.<String> get("selectionAlgorithm");
 		}
 		// -- First the segment-level specs
-		final String SQL_QUERY0 = " select _Key as segmentkey, coalesce(refreshMinutes, bigtoint(33)) as refreshMinutes "
-				+ " , case when VirtualTest is null then ${segmentKey} else VirtualTest end as ParentTest "
-				+ " , case when TestPosition is null then bigtoint(1) else Testposition end as segmentPosition "
-				+ " , (TestID) as SegmentID, blueprintWeight as bpWeight "
-				+ " , itemWeight, abilityOffset "
-				+ " , cset1size, cset1Order "
-				+ " , cset2random as randomizer, cset2InitialRandom as initialRandom "
-				+ " , case when MinItems is null then bigtoint(0) else MinItems end as minOpItems "
-				+ " , case when MaxItems is null then bigtoint(0) else MaxItems end as maxOpItems "
+		final String SQL_QUERY0 = " select s._Key as segmentkey, coalesce(s.refreshMinutes, bigtoint(33)) as refreshMinutes "
+				+ " , case when s.VirtualTest is null then ${segmentKey} else s.VirtualTest end as ParentTest "
+				+ " , case when s.TestPosition is null then bigtoint(1) else s.Testposition end as segmentPosition "
+				+ " , (s.TestID) as SegmentID, s.blueprintWeight as bpWeight "
+				+ " , s.itemWeight, s.abilityOffset "
+				+ " , s.cset1size, s.cset1Order "
+				+ " , s.cset2random as randomizer, s.cset2InitialRandom as initialRandom "
+				+ " , case when s.MinItems is null then bigtoint(0) else s.MinItems end as minOpItems "
+				+ " , case when s.MaxItems is null then bigtoint(0) else s.MaxItems end as maxOpItems "
 				//
-				+ " , coalesce(startAbility, 0) as startAbility  "
-				+ " , coalesce(startInfo, 0) as startInfo  "
-				+ " , coalesce(slope, 1) as slope  "
-				+ " , coalesce(intercept, 0) as intercept  "
+				+ " , coalesce(s.startAbility, 0) as startAbility  "
+				+ " , coalesce(s.startInfo, 0) as startInfo  "
+				+ " , coalesce(s.slope, 1) as slope  "
+				+ " , coalesce(s.intercept, 0) as intercept  "
 				// -- Field test specs
-				+ " , FTStartPos, FTEndPos, FTMinItems, FTMaxItems "
+				+ " , s.FTStartPos, s.FTEndPos, s.FTMinItems, s.FTMaxItems "
 				// -- Item selection algorithm
-				+ " , selectionAlgorithm "
-				+ " , bpmetricfunction as adaptiveVersion "
+				+ " , s.selectionAlgorithm "
+				+ " , s.bpmetricfunction as adaptiveVersion "
 				// -- 11/6/2013: new fields for new AA
-				+ " , abilityWeight  "
-				+ " , rcAbilityWeight  "
-				+ " , precisionTarget  "
-				+ " , precisionTargetMetWeight  "
-				+ " , precisionTargetNotMetWeight  "
-				+ " , adaptiveCut  "
-				+ " , tooCloseSEs  "
-				+ " , terminationOverallInfo  "
-				+ " , terminationRCInfo  "
-				+ " , terminationMinCount  "
-				+ " , terminationTooClose  "
-				+ " , terminationFlagsAnd  "
-				+ " from  ${ItemBankDB}.tblsetofadminsubjects   "
-				+ " where _Key =${segmentKey}";
+				+ " , s.abilityWeight  "
+				+ " , s.rcAbilityWeight  "
+				+ " , s.precisionTarget  "
+				+ " , s.precisionTargetMetWeight  "
+				+ " , s.precisionTargetNotMetWeight  "
+				+ " , s.adaptiveCut  "
+				+ " , s.tooCloseSEs  "
+				+ " , s.terminationOverallInfo  "
+				+ " , s.terminationRCInfo  "
+				+ " , s.terminationMinCount  "
+				+ " , s.terminationTooClose  "
+				+ " , s.terminationFlagsAnd  "
+				+ " , coalesce(vt.MinItems, s.MinItems, 0) as minOpItemsTest"     
+				+ " , coalesce(vt.MaxItems, s.MaxItems, 0) as maxOpItemsTest"
+				+ " from  ${ItemBankDB}.tblsetofadminsubjects  s "
+				+ " left outer join ${ItemBankDB}.tblsetofadminsubjects vt "
+				+ " on vt._Key = s.VirtualTest"
+				+ " where s._Key =${segmentKey}";
 
 		query = fixDataBaseNames(SQL_QUERY0);
 		SingleDataResultSet res0 = executeStatement(connection, query,
@@ -2550,8 +2554,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		//-- NEW for 2014-15. Generic item selection algorithm control parameters. Append to collection of recordsets to make existing code forward compatible.
 		if(controlTriples)
 		{
-			String proficientTheta = "proficientTheta";
-			String proficientPLevel = "proficientPLevel";
+			String proficientTheta = "proficientTheta"; 	// hardcoded name of the field in OffGradeItemsProps class
+			String proficientPLevel = "proficientPLevel";	// hardcoded name of the field in OffGradeItemsProps class
 			
 			final String SQL_QUERY6 = "select bpElementID, name, value "
 					+ " from ${ItemBankDB}.tblitemselectionparm where _fk_AdminSubject = ${segmentKey}"
@@ -3651,8 +3655,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			record = resItr.next();
 			segkey = record.<String> get("segkey");
 			poolstring = null;
-			// AK: In the file AIROnline2013/​scripts/​offgrade item selection_LA.sql
-			// in this place AA_AddOffgradeItems_SP uses _AA_ItemPoolString_2014_FN
+			// AK: The file AIROnline2013/​scripts/​offgrade item selection_LA.sql 
+			// uses _AA_ItemPoolString_2014_FN not  AA_AddOffgradeItems_SP  
 			// TODO ?
 			poolstring = _AA_ItemPoolString_FN(connection, oppkey, segkey);
 			

@@ -2373,31 +2373,30 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   public SingleDataResultSet SubmitQAReport_SP (SQLConnection connection, UUID oppkey, String statusChange) throws ReturnStatusException
   {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
-    String xmlFile = null;
-    String file = null;
-    SingleDataResultSet res = null;
     String status = null;
-
-    final String cmd = "select status from testopportunity where _Key = ${oppkey}";
+    Long testee = null;
+    final String cmd = "select _efk_testee as testee, status from testopportunity where _Key = ${oppkey}";
     SqlParametersMaps parms = (new SqlParametersMaps ()).put ("oppkey", oppkey);
     SingleDataResultSet result1 = executeStatement (connection, cmd, parms, false).getResultSets ().next ();
     DbResultRecord record = (result1.getCount () > 0 ? result1.getRecords ().next () : null);
     if (record != null) {
       status = record.<String> get ("status");
+      testee = record.<Long> get ("testee");
     }
-
-    if (IsXMLOn_Fn (connection, oppkey) == 0 ||
-        ("submitted".equalsIgnoreCase (status) || "reported".equalsIgnoreCase (status))) {
-      return ReturnStatusReason ("success", null);
+    
+    if(testee!=null && testee>=0) {
+      if (IsXMLOn_Fn (connection, oppkey) == 0 ||
+          ("submitted".equalsIgnoreCase (status) || "reported".equalsIgnoreCase (status))) {
+        return ReturnStatusReason ("success", null);
+      }
+  
+      final String cmd1 = "insert into qareportqueue (_fk_testopportunity, changestatus, dateentered)"
+          + " values (${oppkey}, ${changestatus}, now(3))";
+      SqlParametersMaps parms1 =(new SqlParametersMaps ()).put ("oppkey", oppkey).put ("changestatus", statusChange);
+      executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
+      
+      _LogDBLatency_SP (connection, "SubmitQAReport", starttime, null, true, null, oppkey);
     }
-
-    final String cmd1 = "insert into qareportqueue (_fk_testopportunity, changestatus, dateentered)"
-        + " values (${oppkey}, ${changestatus}, now(3))";
-    SqlParametersMaps parms1 =(new SqlParametersMaps ()).put ("oppkey", oppkey).put ("changestatus", statusChange);
-    int insertedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
-    
-    _LogDBLatency_SP (connection, "SubmitQAReport", starttime, null, true, null, oppkey);
-    
     return ReturnStatusReason ("success", null);
 
 //    String currentRes = null;

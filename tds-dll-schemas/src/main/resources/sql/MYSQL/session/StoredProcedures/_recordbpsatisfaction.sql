@@ -62,4 +62,4 @@ proc: begin
 
 end $$
 
-DELIMITER $$
+DELIMITER ;

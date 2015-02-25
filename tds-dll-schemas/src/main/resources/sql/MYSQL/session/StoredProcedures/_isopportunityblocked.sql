@@ -9,12 +9,13 @@ Description:
 VERSION 	DATE 			AUTHOR 			COMMENTS
 001			02/10/2015		Sai V. 			
 */
-    v_clienname varchar(100)
+    v_clientname varchar(100)
   , v_testee bigint
-  , v_testkey varchar(255)  
-  , v_maxoppps int
+  , v_testid varchar(255)  
+  , v_maxopps int
   , out v_reasonblocked text /*output */
   , v_sessiontype int -- = 0
+  , v_debug bit -- = 0
 )
 sql security invoker 
 proc: begin
@@ -29,6 +30,7 @@ proc: begin
     
     if (exists (select * from _externs where clientname = v_clientname and environment = 'simulation')) then
         -- do not impose any restrictions on simulation environments
+		if (v_debug = 1) then select 'condition 1. exit'; end if;
         leave proc;
     end if;
 
@@ -83,6 +85,7 @@ proc: begin
 	select * from tblout_gettesteetestmodes;	
 
     if (not exists (select * from tmp_tblmodes)) then
+		if (v_debug = 1) then select 'condition 2. exit'; end if;
         set v_reasonblocked = 'na';  -- test is not applicable to this student in this mode
         leave proc;
     end if;
@@ -92,6 +95,7 @@ proc: begin
 					and not exists (select * from testopportunity 
 									 where clientname = v_clientname and _efk_testee = v_testee and _efk_testid = prereqtestid and datecompleted is not null and datedeleted is null))) 
 	then
+		if (v_debug = 1) then select 'condition 3. exit'; end if;
         call _formatmessage(v_clientname, 'enu', '_canopentestopportunity', 'missing prerequisite', v_reasonblocked /*output*/, null, ',', null, null);
         leave proc;
     end if;
@@ -108,7 +112,9 @@ proc: begin
 	  , testkey			varchar(250)
 	) engine = memory;
 
+	if (v_debug = 1) then select '_gettesteetestwindows', v_clientname, v_testid, v_testee, v_sessiontype; end if;
     call _gettesteetestwindows(v_clientname, v_testid, v_testee, v_sessiontype, null, null, 0);
+	if (v_debug = 1) then select '_gettesteetestwindows', w.* from tblout_gettesteetestwindows w; end if;
 
 	insert into tmp_tblwindows (wid, winmax, startdate, enddate, formkey, `mode`, modemax, testkey)
 	select * from tblout_gettesteetestwindows;
@@ -119,6 +125,7 @@ proc: begin
 	where not exists (select * from tmp_tblmodes where winid = wid and modetestkey = testkey);
 
     if (not exists (select * from tmp_tblwindows where wid is not null)) then
+		if (v_debug = 1) then select 'condition 4. exit'; end if;
         call _formatmessage(v_clientname, 'enu', '_canopentestopportunity', 'there is no active testing window for this student on this test', v_reasonblocked /*output*/, null, ',', null, null);
         leave proc;
     end if;
@@ -174,6 +181,7 @@ proc: begin
 					  and `status` in (select `status` from statuscodes where `usage` = 'opportunity' and stage = 'closed'));
 
     if (not exists (select * from tmp_tblwindows where numopps < v_maxopps)) then
+		if (v_debug = 1) then select 'condition 5. exit'; end if;
         call _formatmessage(v_clientname, 'enu', '_canopentestopportunity', 'all opportunities have been used for this test', v_reasonblocked /*output*/, null, ',', null, null);
         leave proc;
     end if;

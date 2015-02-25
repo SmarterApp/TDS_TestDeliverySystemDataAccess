@@ -798,7 +798,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL {
   }
   
   @Override
-  public void SIM_LoaderMain (SQLConnection connection, String xmlTestPackage) throws ReturnStatusException {
+  public void SIM_LoaderMain (SQLConnection connection, String testKey, String xmlTestPackage) throws ReturnStatusException {
     // TODO Auto-generated method stub
     
   }  

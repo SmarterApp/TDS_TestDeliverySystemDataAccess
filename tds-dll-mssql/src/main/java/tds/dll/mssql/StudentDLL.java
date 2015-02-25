@@ -9333,5 +9333,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // TODO Auto-generated method stub
     
   }
+  // We are using Mysql version of this method - Need to implement this if MSSQL version required
+  public void T_InsertStudentPackageDetails(SQLConnection connection,long _fk_studentpackagekey,long studentkey, 
+      String attrname, String attrdesc, String attrvalue) throws ReturnStatusException {
+    
+  }
   
 }

@@ -25,8 +25,6 @@ import tds.dll.api.ICommonDLL;
 import tds.dll.api.IProctorDLL;
 import tds.dll.api.IRtsDLL;
 import tds.dll.api.TestType;
-import TDS.Shared.Data.ReturnStatus;
-import TDS.Shared.Exceptions.ReturnStatusException;
 import AIR.Common.DB.AbstractDLL;
 import AIR.Common.DB.DataBaseTable;
 import AIR.Common.DB.DbComparator;
@@ -38,6 +36,8 @@ import AIR.Common.DB.results.SingleDataResultSet;
 import AIR.Common.Helpers.CaseInsensitiveMap;
 import AIR.Common.Helpers._Ref;
 import AIR.Common.Sql.AbstractDateUtilDll;
+import TDS.Shared.Data.ReturnStatus;
+import TDS.Shared.Exceptions.ReturnStatusException;
 
 
 public class RtsDLL extends AbstractDLL implements IRtsDLL
@@ -944,6 +944,12 @@ public class RtsDLL extends AbstractDLL implements IRtsDLL
     public SingleDataResultSet getTesteeAttributesAsSet (SQLConnection connection, String clientname, long testee) {
       // TODO Auto-generated method stub
       return null;
+    }
+    
+  //Implementation not required  
+    @Override
+    public void _InsertStudentPackageDetails (SQLConnection connection, Long key, String clientName, String xmlPackage) throws ReturnStatusException {
+      
     }
 }
 
