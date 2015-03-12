@@ -45,7 +45,7 @@ begin
 		select v_testpackagekey
 			 , v_segmentid
 			 , v_itemgroupid
-			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/passageref/attribute::passageid'))
+			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/passageref'))
 		;
 
 		-- extract data from <groupitem>

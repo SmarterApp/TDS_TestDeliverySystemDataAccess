@@ -129,8 +129,11 @@ create index `ix_r_proctorpackage_proctorkey`
 create unique index `ix_studentid_statecode`
 	on `r_studentkeyid`(`studentid`, `statecode`);
 	
-create index `ix_r_studentpackage_studentkey`
-	on `r_studentpackage`(`studentkey`);
+create index `ix_r_studentpackage_skey_client_currt`
+	on `r_studentpackage`(`studentkey`, `clientname`, `iscurrent` desc);
+
+create index `ix_r_studentpackagedetails_skey_attr`
+	on `r_studentpackagedetails`(`studentkey`, `attrname`);
 
 create index `ix_reportabnormaldate`
 	on `r_abnormallogins`(`_date`, `clientname`);

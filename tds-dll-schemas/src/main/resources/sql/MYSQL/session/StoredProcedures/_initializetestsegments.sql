@@ -47,21 +47,25 @@ proc: begin
     declare v_segpos int;
 	declare v_msg varchar(400);
 	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+
 
 	declare raise_error condition for sqlstate '45000'; -- 45000 means "unhandled user-defined exception"	
 
-	declare exit handler for sqlexception
-    begin		
-		set v_msg = 'mysql exit handler: sqlexception';
-		call _logdberror('_initializetestsegments', v_msg, null, null, null, v_oppkey, v_clientname, null);
+-- 	declare exit handler for sqlexception
+--     begin		
+-- 		set v_msg = 'mysql exit handler: sqlexception';
+-- 		call _logdberror('_initializetestsegments', v_msg, null, null, null, v_oppkey, v_clientname, null);
+-- 
+-- 		if (v_debug = 1) then 
+-- 			set v_error = v_msg; 
+-- 		else 
+-- 			set v_error = 'segment initialization failed';
+-- 		end if;
+-- 	end; 	
 
-		if (v_debug = 1) then 
-			set v_error = v_msg; 
-		else 
-			set v_error = 'segment initialization failed';
-		end if;
-	end; 	
-
+	set v_starttime = now(3);
+	set v_procname = '_initializetestsegments';
 	
     if (exists (select * from testopportunitysegment where _fk_testopportunity = v_oppkey and v_debug = 0)) then
         if v_debug = 1 then select 'segments already exist'; end if;
@@ -114,8 +118,8 @@ proc: begin
 
     if (v_issimulation = 1) then 
 	begin -- non-segmented test has a record in sim_segment as segment 1
-        insert into tmp_tblsegments (_fk_testopportunity, _efk_segment, segmentid, segmentposition, `algorithm`, opitemcnt) 
-        select v_oppkey, _efk_segment, segmentid, segmentposition, selectionalgorithm, maxitems 
+        insert into tmp_tblsegments (_fk_testopportunity, _efk_segment, segmentid, segmentposition, `algorithm`, opitemcnt, _date) 
+        select v_oppkey, _efk_segment, segmentid, segmentposition, selectionalgorithm, maxitems, now(3) 
         from sim_segment ss
         where _fk_session = v_session and _efk_adminsubject = v_testkey; 
 
@@ -124,13 +128,13 @@ proc: begin
     else 
 	begin
         if (v_issegmented = 1) then
-            insert into tmp_tblsegments (_fk_testopportunity, _efk_segment, segmentid, segmentposition, `algorithm`, opitemcnt)
-            select v_oppkey, _key , testid , testposition , selectionalgorithm, maxitems
+            insert into tmp_tblsegments (_fk_testopportunity, _efk_segment, segmentid, segmentposition, `algorithm`, opitemcnt, _date)
+            select v_oppkey, _key , testid , testposition , selectionalgorithm, maxitems, now(3)
             from itembank.tblsetofadminsubjects ss 
 			where virtualtest = v_testkey;            
         else  -- not segmented, so make the test its own segment
-            insert into tmp_tblsegments (_fk_testopportunity, _efk_segment, segmentid, segmentposition, `algorithm`, opitemcnt)
-            select v_oppkey, v_testkey, testid, 1, selectionalgorithm, maxitems
+            insert into tmp_tblsegments (_fk_testopportunity, _efk_segment, segmentid, segmentposition, `algorithm`, opitemcnt, _date)
+            select v_oppkey, v_testkey, testid, 1, selectionalgorithm, maxitems, now(3)
             from itembank.tblsetofadminsubjects ss 
 			where _key = v_testkey;            
         end if;
@@ -245,6 +249,7 @@ proc: begin
 	-- clean-up
 	drop temporary table tmp_tblsegments;
 
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

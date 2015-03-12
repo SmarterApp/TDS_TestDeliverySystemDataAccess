@@ -48,10 +48,10 @@ proc: begin
 		end if;
 	end if;
 
-    if (exists (select * from ft_opportunityitem where _fk_testopportunity = v_oppkey)) then  
+    if (exists (select 1 from ft_opportunityitem where _fk_testopportunity = v_oppkey limit 1)) then  
 	begin
         drop temporary table if exists tmp_tblgroups;
-		create temporary table tmp_tblgroups(gid varchar(50), bid varchar(20), seg int, pos int);
+		create temporary table tmp_tblgroups(gid varchar(50), bid varchar(20), seg int, pos int) engine = memory;
 
         insert into tmp_tblgroups (gid, bid, seg, pos)
         select r.groupid, i.blockid, r.segment, min(r.position)
@@ -69,7 +69,10 @@ proc: begin
 	end;
     end if;
 
-    call _logdblatency('_onstatus_completed', v_starttime, v_testee, 1, v_oppkey, null, null, null);
+	-- clean-up
+	drop temporary table if exists tmp_tblgroups;
+
+    call _logdblatency('_onstatus_completed', v_starttime, v_testee, 1, 1, v_oppkey, null, null, null);
 
 end $$
 

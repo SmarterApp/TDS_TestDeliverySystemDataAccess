@@ -29,6 +29,11 @@ proc: begin
 	declare v_sessiontype int;
     declare v_fromrts int;
     declare v_ifrts bit;
+
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_selecttestform_driver';
 		
     select o.clientname, _efk_testid, _efk_adminsubject, sessiontype
 	into v_clientname, v_parenttestid, v_parenttest, v_sessiontype
@@ -73,6 +78,8 @@ proc: begin
 		call _logdberror('_selecttestform_driver', 'unable to select test form', null, null, null, v_oppkey, v_clientname, null);
         leave proc;
     end if;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

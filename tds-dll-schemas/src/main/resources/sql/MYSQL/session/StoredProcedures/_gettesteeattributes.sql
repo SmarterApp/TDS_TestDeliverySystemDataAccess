@@ -20,6 +20,12 @@ proc: begin
     declare v_attval text;
     declare v_err varchar(200);
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+
+	set v_starttime = now(3);
+	set v_procname = '_gettesteeattributes';
+
     drop temporary table if exists tmp_tblattributes;
 	create temporary table tmp_tblattributes(
 		attname varchar(50)
@@ -69,6 +75,8 @@ proc: begin
 	insert into tblout_gettesteeattributes
 	select attname as tds_id, attval 
 	from tmp_tblattributes;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, null, null, null, null);
 
 end $$
 

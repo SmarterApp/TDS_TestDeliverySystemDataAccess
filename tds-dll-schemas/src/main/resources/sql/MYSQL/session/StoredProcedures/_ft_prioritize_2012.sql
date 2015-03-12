@@ -126,14 +126,16 @@ proc: begin
         from ft_opportunityitem o, tmp_tblgroups g     -- the items on the test
         where o._efk_fieldtest = v_testkey and g.active > 0 and o.groupkey = g.gkey 
             and coalesce(o.deleted, 0) = 0 
-        group by gkey, gid, bid, lang, active;
+        group by gkey, gid, bid, lang, active
+		order by null;
     else
         insert into tmp_tblitemgroups (grpkey, groupid, blockid, activeitems, tier, admins)
         select  gkey, gid, bid, active, v_tier, count(*) as admins
         from ft_opportunityitem o, tmp_tblgroups g     -- the items on the test
         where o._efk_fieldtest = v_testkey and g.active > 0 and o.groupkey = g.gkey 
             and coalesce(o.deleted, 0) = 0 and _fk_session = v_session
-        group by gkey, gid, bid, lang, active;
+        group by gkey, gid, bid, lang, active
+		order by null;
     end if;
 
     create index _ix_ftitems on tmp_tblitemgroups(grpkey);
@@ -144,13 +146,12 @@ proc: begin
     select gkey, gid, bid,  active, v_tier, 0
     from tmp_tblgroups;
 
-
-	call _logdblatency ('_ft_prioritize_2012', v_starttime, null, null, null, v_oppkey, null, v_clientname, null);
-
 	insert into tblout_ft_prioritize_2012
     select grpkey, groupid, blockid, activeitems, tier, admins 
 	from tmp_tblitemgroups
     order by tier, admins, uuid();
+
+	call _logdblatency ('_ft_prioritize_2012', v_starttime, null, null, null, v_oppkey, null, v_clientname, null);
 
 	-- clean-up
     drop temporary table tmp_tblgroups;

@@ -7,26 +7,28 @@ create procedure _setupproctorlesssession (
 Description: 
 
 VERSION 	DATE 			AUTHOR 			COMMENTS
-001			1/29/2015		Sai V. 			Converted code from T-SQL to MySQL
+001			01/29/2015		Sai V. 			Converted code from T-SQL to MySQL
+002			03/04/2015		Sai V.			Added logic to check when the session was last updated.
 */
 	v_clientname varchar(100)
   , out v_sessionkey varbinary(16)
   , out v_sessionid varchar(50)
 )
+sql security invoker
 proc: begin
 
 	declare v_environ varchar(100);
 	declare v_status  varchar(50);
 	declare v_enddate datetime(3);
-	declare v_applock int;
+	declare v_applock, v_timeelapsed int;
     declare v_resourcename varchar(200);
 	declare v_consume int;
 
-	declare exit handler for sqlexception
-	begin
-		rollback;
-		call _recordsystemerror ('_setupproctorlesssession', 'mysql exit handler: attempt to set up proctorless failed', null, null, null, null, null, null, null, null, null);
-	end;
+-- 	declare exit handler for sqlexception
+-- 	begin
+-- 		rollback;
+-- 		call _recordsystemerror ('_setupproctorlesssession', 'mysql exit handler: attempt to set up proctorless failed', null, null, null, null, null, null, null, null, null);
+-- 	end;
 
 	-- only allow when anonymous testee login permitted
 	if (_allowanonymoustestee(v_clientname) = 0) then
@@ -36,31 +38,34 @@ proc: begin
 
 	set v_sessionid = 'guest session';
 	set v_environ = (select environment from externs where clientname = v_clientname);
-	
+
+	select _key, `status`, dateend, cast(TIMESTAMPDIFF(microsecond, datechanged, now(3))/1000000 as unsigned)
+	into v_sessionkey, v_status, v_enddate, v_timeelapsed
+    from `session` 
+	where clientname = v_clientname and sessionid = v_sessionid;
+
+	-- check when was last session record is updated. if updated in the last 60 secs, don't do anything
+	if (v_sessionkey is not null and v_timeelapsed <= 60) then
+		leave proc; 
+	end if;
+			
 	drop temporary table if exists tmp_tbltests;
 	create temporary table  tmp_tbltests (
 		testkey varchar(250)
 	  , testid varchar(200)
-	) engine = memory;
+	);
 
     insert into tmp_tbltests (testkey, testid) 
 	-- from getactivetests(v_clientname, 0) 
     select distinct m.testkey, p.testid
     from configs.client_testwindow w, configs.client_testmode m, configs.client_testproperties p
-        , _externs e , itembank.tblsetofadminsubjects bank    -- make sure the itembank we are pointing to coincides with tdsconfigs' data
+        , _externs e , itembank.tblsetofadminsubjects bank
     where p.clientname = v_clientname and e.clientname = v_clientname
         and w.clientname = v_clientname and w.testid = p.testid and (e.environment = 'simulation' or now(3) between w.startdate and w.enddate)
         and m.clientname = v_clientname and m.testid = p.testid
         and (m.sessiontype = -1 or m.sessiontype = 0 /*v_sessiontype*/) and (w.sessiontype = -1 or w.sessiontype = 0 /*v_sessiontype*/)
         and isselectable = 1
         and bank._key = m.testkey;
-
- 
-	select _key, `status`, dateend  
-	into v_sessionkey, v_status, v_enddate
-    from `session` 
-	where clientname = v_clientname and sessionid = v_sessionid;
-
 
 	if (v_sessionkey is null) then 
 	begin

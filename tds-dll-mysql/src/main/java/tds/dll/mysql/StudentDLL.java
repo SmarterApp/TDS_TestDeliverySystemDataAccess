@@ -10,6 +10,7 @@ package tds.dll.mysql;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1931,7 +1933,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @throws ReturnStatusException
    */
   // This function is created to call mysql Stored procedure T_UpdateScoredResponse.
-  public SingleDataResultSet T_UpdateScoredResponse_SP_MYSQL (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
+  public SingleDataResultSet T_UpdateScoredResponse_SP_Mysql (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
       Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
 
     final String SQL_QUERY = "call T_UpdateScoredResponse(${oppkey}, ${session}, ${browserID}, ${itemID},${page}, ${position},${dateCreated}, ${responseSequence},${score}, ${response}, ${isSelected},${isValid},${scoreLatency},${scorestatus},${scoreRationale})";
@@ -3606,7 +3608,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public DataBaseTable GetTestFormWindows_FN (SQLConnection connection, String clientname, String testId, Integer sessionType) throws ReturnStatusException {
     Date now = _dateUtil.getDateWRetStatus (connection);
-
+    long startTime = System.currentTimeMillis ();
     DataBaseTable tbl = getDataBaseTable ("testformwindows").addColumn ("windowID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("windowMax", SQL_TYPE_To_JAVA_TYPE.INT).
         addColumn ("modeMax", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("startDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("endDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).
         addColumn ("formStart", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("formEnd", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("formKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
@@ -3659,6 +3661,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     final String query = fixDataBaseNames (SQL_INSERT);
     executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
+    //_logger.info ("<<<<<<<<< GetTestFormWindows_FN  Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     return tbl;
   }
 
@@ -3668,11 +3671,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public SingleDataResultSet _GetTesteeTestForms_SP (SQLConnection connection, String clientname, String testId, Long testee, Integer sessionType,
       String formList) throws ReturnStatusException {
-
+    long startTimeLong = System.currentTimeMillis ();
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     SingleDataResultSet result = null;
 
     DataBaseTable tbl = GetTestFormWindows_FN (connection, clientname, testId, sessionType);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 1 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("tblName", tbl.getTableName ());
 
@@ -3684,7 +3688,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (tbl);
       return result;
     }
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 2 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     String tideId = null, formField = null;
     Boolean requireFormWindow = null, requireForm = null, ifexists = null;
 
@@ -3705,7 +3709,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       ifexists = record2.<Boolean> get ("ifexists");
 
     }
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 3 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     if (formList != null) {
       if (formList.indexOf (':') > -1)
         requireFormWindow = true;
@@ -3719,10 +3723,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, formField, formListRef);
       formList = formListRef.get ();
     }
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 4 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // forms table ( WID varchar(100), form varchar(50));
     DataBaseTable formsTbl = getDataBaseTable ("gttfForms").addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("form", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
     connection.createTemporaryTable (formsTbl);
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 5 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     if (formList != null && tideId != null) {
       Character delim = ';';
       final String[] rows = _commonDll._BuildTableAsArray (formList, delim.toString (), -1);
@@ -3758,42 +3763,45 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         }
       }, formsTbl, false); // temp table already created
     }
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 6 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     Map<String, String> unquotedParms3 = new HashMap<String, String> ();
     unquotedParms3.put ("formsTblName", formsTbl.getTableName ());
     unquotedParms3.put ("tblName", tbl.getTableName ());
 
     final String SQL_QUERY5 = "select  form from ${formsTblName}, ${tblName} where form = formkey limit 1";
     Map<String, String> unquotedParms5 = unquotedParms3;
-
+    
     if (DbComparator.isEqual (requireFormWindow, true)) {
       final String SQL_QUERY3 = "select distinct windowID, windowMax, startDate, endDate, formkey, mode, modeMax, testkey "
           + " from ${formsTblName}, ${tblName} where WID = windowID and form = formkey";
 
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY3, unquotedParms3), null, false).getResultSets ().next ();
-
+      //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 7 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     } else if (DbComparator.isEqual (requireForm, true)) {
       final String SQL_QUERY4 = "select distinct windowID, windowMax, startDate, endDate, formkey, mode, modeMax, testkey "
           + " from  ${formsTblName} join  ${tblName} on form = formkey ";
       Map<String, String> unquotedParms4 = unquotedParms3;
 
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), null, false).getResultSets ().next ();
-
+      //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 8 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     } else if (DbComparator.isEqual (ifexists, true) && exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquotedParms5), null, false)) == true) {
       final String SQL_QUERY6 = "select distinct windowID, windowMax, startDate, endDate, formkey, mode, modeMax, testkey "
           + " from  ${formsTblName} join  ${tblName} on form = formkey ";
       Map<String, String> unquotedParms6 = unquotedParms3;
 
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY6, unquotedParms6), null, false).getResultSets ().next ();
-
+      //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 9 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     } else {
       final String SQL_QUERY7 = " select windowID, windowMax, startDate, endDate, formkey, mode, modeMax, testkey from  ${tblName}";
       Map<String, String> unquotedParms7 = unquotedParms;
 
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquotedParms7), null, false).getResultSets ().next ();
+      //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 10 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     }
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP 11 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     connection.dropTemporaryTable (tbl);
     connection.dropTemporaryTable (formsTbl);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestForms_SP Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestForms", starttime, testee, true, null, null);
     return result;
   }
@@ -5454,12 +5462,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public void _CanOpenExistingOpportunity_SP (SQLConnection connection, String client, Long testee, String testID, UUID sessionID, Integer maxOpportunities,
       _Ref<Integer> numberRef, _Ref<String> msgRef) throws ReturnStatusException {
-
+    long startTime = System.currentTimeMillis ();
+    long startTimeLong= System.currentTimeMillis ();
     Date today = _dateUtil.getDateWRetStatus (connection);
 
     numberRef.set (0);
     msgRef.set (null);
-
     long ocnt = 0;
     // First check to see if there are any existing opportunities to open
     final String SQL_QUERY1 = "select count(*) as ocnt from testopportunity where _efk_Testee = ${testee} and _efk_TestID = ${testID} and clientname = ${client} and dateDeleted is null";
@@ -5471,7 +5479,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     if (ocnt == 0)
       return; // Open Existing exit 1
-
+    
+    
     Integer lastopp = null;
     String laststatus = null;
     UUID lastsession = null;
@@ -5496,7 +5505,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (exists (executeStatement (connection, SQL_QUERY3, parms3, true))) {
       return; // Open Existing exit 2
     }
-
     Integer lastsessiontype = null, thissessiontype = null;
     // Only allow resuming a test in a session of the same type as opp was
     // opened in
@@ -5507,7 +5515,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       lastsessiontype = record.<Integer> get ("lastsessiontype");
     }
-
     final String SQL_QUERY5 = "select  sessionType as thissessiontype  from session where _Key = ${sessionID}";
     SqlParametersMaps parms5 = (new SqlParametersMaps ()).put ("sessionID", sessionID);
     result = executeStatement (connection, SQL_QUERY5, parms5, false).getResultSets ().next ();
@@ -5515,7 +5522,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       thissessiontype = record.<Integer> get ("thissessiontype");
     }
-
     if (DbComparator.notEqual (lastsessiontype, thissessiontype)) {
       _commonDll._FormatMessage_SP (connection, client, "ENU", "_CanOpenTestOpportunity",
           "You must continue the test in the same type of session it was started in.", msgRef, null, null, null, null);
@@ -5547,7 +5553,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       lastsessionstatus = record.<String> get ("lastsessionstatus");
       lastsessionend = record.<Date> get ("lastsessionend");
     }
-
     if (DbComparator.greaterOrEqual (daysDiff (dateChanged, today), 1) || DbComparator.isEqual (lastsession, sessionID)
         || DbComparator.isEqual ("closed", lastsessionstatus) || DbComparator.greaterThan (today, lastsessionend)) {
       // if (daysDiff (dateChanged, today) >= 1 || (lastsession != null &&
@@ -5565,13 +5570,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public void _CanOpenNewOpportunity_SP (SQLConnection connection, String client, Long testee, String testID, Integer maxOpportunities, Integer delayDays,
       _Ref<Integer> numberRef, _Ref<String> msgRef, UUID session) throws ReturnStatusException {
-
+    long startTime = System.currentTimeMillis ();
     Date today = _dateUtil.getDateWRetStatus (connection);
     numberRef.set (0);
     msgRef.set (null);
 
     String environment = _commonDll.getExternsColumnByClientName (connection, client, "environment");
-
     long ocnt = 0;
     // First check to see if there are any existing opportunities to open
     final String SQL_QUERY1 = "select count(*) as ocnt from testopportunity where _efk_Testee = ${testee} and _efk_TestID = ${testID} and clientname = ${client} and dateDeleted is null";
@@ -5598,7 +5602,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       lastopp = record.<Integer> get ("lastopp");
     }
-
     // pick up info on the most recent opportunity
     Date dateCompleted = null, dateStarted = null;
     String laststatus = null;
@@ -5615,7 +5618,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       dateCompleted = record.<Date> get ("dateCompleted");
       dateStarted = record.<Date> get ("dateStarted");
     }
-
     final String SQL_QUERY4 = "select status from statuscodes where `usage` = 'opportunity' and stage = 'closed' and status = ${laststatus}";
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("laststatus", laststatus);
     if (exists (executeStatement (connection, SQL_QUERY4, parms4, false))) {
@@ -5646,21 +5648,23 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       return;
     }
     _commonDll._LogDBLatency_SP (connection, "_CanOpenNewOpportunity", today, testee, true, null, null, null, null, null);
+    //_logger.info ("<<<<<<<<< _CanOpenNewOpportunity Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
   }
 
   public SingleDataResultSet _GetTesteeTestModes_SP (SQLConnection connection, String clientname, String testID, Long testee, Integer sessionType) throws ReturnStatusException {
 
     return _GetTesteeTestModes_SP (connection, clientname, testID, testee, sessionType, null);
   }
-
+  
   public SingleDataResultSet _GetTesteeTestModes_SP (SQLConnection connection, String clientname, String testID, Long testee, Integer sessionType,
       String modeList) throws ReturnStatusException {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
-
+    long startTimeLong = System.currentTimeMillis ();
     SingleDataResultSet result = null;
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
     // guest testees have no RTS data. If allowed into the system this far, then
     // provide them all modes
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 1 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     if (testee < 0) {
       final String SQL_QUERY1 = "select windowID, windowMax, startDate, endDate, mode, modeMax, testkey from ${ctwTblName}";
       Map<String, String> unquotedParms = new HashMap<String, String> ();
@@ -5669,6 +5673,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (ctwTbl);
       return result;
     }
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 2 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // It is an error for @require = 1 and @modeField = null, however, it is
     // also highly unlikely since both fields have default values in TDSCONFIGS
     String tideId = null;
@@ -5680,7 +5685,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testID", testID);
 
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY2), parms2, false).getResultSets ().next ();
-    
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 3 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
     if (record != null) {
       tideId = record.<String> get ("tideId");
@@ -5704,12 +5709,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, modeField, modeListRef);
       modeList = modeListRef.get ();
     }
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 4 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     DataBaseTable modesTbl = getDataBaseTable ("gttmModes").addColumn ("rtsval", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100)
         .addColumn ("asgnMode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
     connection.createTemporaryTable (modesTbl);
     // TODO Elena: I added tideId check below since it does not have sense to
     // look for like records without it.
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 5 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     if (modeList != null && tideId != null) {
       Character delim = ';';
       final String[] rows = _commonDll._BuildTableAsArray (modeList, delim.toString (), -1);
@@ -5759,6 +5765,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         }
       }, modesTbl, false); // temp table already created
     }
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 6 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     Map<String, String> unquotedParms3 = new HashMap<String, String> ();
     unquotedParms3.put ("modesTbl", modesTbl.getTableName ());
     unquotedParms3.put ("ctwTbl", ctwTbl.getTableName ());
@@ -5771,7 +5778,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (modesTbl);
       connection.dropTemporaryTable (ctwTbl);
       _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestModes", starttime, testee, true, null, null, null, clientname, null);
-
+      //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 7 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       return result;
 
     } else if (DbComparator.isEqual (requiremode, true)) {
@@ -5783,7 +5790,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (modesTbl);
       connection.dropTemporaryTable (ctwTbl);
       _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestModes", starttime, testee, true, null, null, null, clientname, null);
-
+      //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 8 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       return result;
 
     }
@@ -5794,9 +5801,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms5.put ("ctwTbl", ctwTbl.getTableName ());
 
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquotedParms5), null, false).getResultSets ().next ();
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP 9 Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     connection.dropTemporaryTable (modesTbl);
     connection.dropTemporaryTable (ctwTbl);
     _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestModes", starttime, testee, true, null, null, null, clientname, null);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestModes_SP Total Execution Time : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     return result;
   }
 
@@ -5810,7 +5819,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    */
 
   public DataBaseTable GetCurrentTestWindows_FN (SQLConnection connection, String clientname, String testID, Integer sessionType) throws ReturnStatusException {
-
+    long startTime = System.currentTimeMillis ();
     DataBaseTable tbl = getDataBaseTable ("currentTestWindows").addColumn ("windowMax", SQL_TYPE_To_JAVA_TYPE.INT).
         addColumn ("windowID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("startDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).
         addColumn ("endDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
@@ -5839,6 +5848,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     final String query = fixDataBaseNames (SQL_QUERY);
     executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
+    //_logger.info ("<<<<<<<<< GetCurrentTestWindows_FN Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     return tbl;
   }
 
@@ -5849,9 +5859,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   public SingleDataResultSet _GetTesteeTestWindows_SP (SQLConnection connection, String clientname, String testID, Long testee, Integer sessionType,
       String windowList, String formList) throws ReturnStatusException {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
-
+    long startTimeLong = System.currentTimeMillis ();
     SingleDataResultSet result = null;
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 0 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- for guest testees there is no registration data to be found
     if (testee < 0) {
       final String SQL_QUERY1 = "select windowID, windowMax, startDate, endDate, cast(null AS CHAR) as formkey, mode, modeMax, testkey from ${ctwTblName}";
@@ -5859,6 +5870,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       unquotedParms.put ("ctwTblName", ctwTbl.getTableName ());
       result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms), null, false).getResultSets ().next ();
       connection.dropTemporaryTable (ctwTbl);
+      //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 1 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       return result;
     }
     Boolean requireWindow = null;
@@ -5874,12 +5886,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       windowField = record.<String> get ("windowField");
       requireWindow = record.<Boolean> get ("requireWindow");
     }
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 2 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     Boolean isFormTest = false;
     final String SQL_QUERY3 = "select  testID from ${ConfigDB}.client_testformproperties where clientname = ${clientname} and testID = ${testID} limit 1";
     SqlParametersMaps parms3 = parms2;
     if (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY3), parms3, false)))
       isFormTest = true;
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 3 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- form+window assignment takes precedence over window assignment.
     // -- This is a bit complicated. Window assignment is pegged to one or more
     // forms, and we have to match forms up with their start/end dates.
@@ -5894,6 +5907,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       requireWindow = false;
     DataBaseTable windowsTbl = getDataBaseTable ("gttwWindows").addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("form", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
     connection.createTemporaryTable (windowsTbl);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 4 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- independent window selection is used in several different places for
     // form and adaptive tests. Set it up here
     if (DbComparator.isEqual (requireWindow, true)) {
@@ -5903,6 +5917,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, windowField, windowListRef);
         windowList = windowListRef.get ();
       }
+      //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 5 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       // TODO Elena: I added windowList and tideId checks
       if (windowList != null && tideId != null) {
 
@@ -5935,8 +5950,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         }, windowsTbl, false); // temp table already created
       }
     }
-
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 6 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     DataBaseTable tbl = GetTestFormWindows_FN (connection, clientname, testID, sessionType);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 6.1 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY4 = "select  windowID from ${tblName} limit 1";
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("tblName", tbl.getTableName ());
@@ -5944,7 +5960,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms), null, false))) {
       // TODO:Elena remove this latency check, it is for testing only!
       // Date start = new Date ();
+      //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 6.2 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       result = _GetTesteeTestForms_SP (connection, clientname, testID, testee, sessionType, formList);
+      //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 6.3 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       // Date end = new Date ();
       // long diff = end.getTime () - start.getTime ();
       // System.err.println (String.format
@@ -5955,10 +5973,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (tbl);
       connection.dropTemporaryTable (windowsTbl);
       connection.dropTemporaryTable (ctwTbl);
-
+      //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 7 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       return result;
     }
     connection.dropTemporaryTable (tbl);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 8 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- NOT A FIXED FORM TEST. Determine if the WINDOW has been assigned to
     // the student
     // -- test windows are recorded by TIDE_ID (in lieu of testID), which is not
@@ -5981,6 +6000,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (windowsTbl);
       connection.dropTemporaryTable (ctwTbl);
       _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestWindows", starttime, null, true, null, null, null, clientname, null);
+      //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 9 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       return result;
     }
     // -- not a fixed form test and no special window conditions specific to the
@@ -5992,6 +6012,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY6, unquotedParms6), null, false).getResultSets ().next ();
     connection.dropTemporaryTable (windowsTbl);
     connection.dropTemporaryTable (ctwTbl);
+    //_logger.info ("<<<<<<<<< _GetTesteeTestWindows_SP 10 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     _commonDll._LogDBLatency_SP (connection, "_GetTesteeTestWindows", starttime, null, true, null, null, null, clientname, null);
     return result;
   }
@@ -6000,6 +6021,34 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     _IsOpportunityBlocked_SP (connection, clientname, testee, testID, maxopps, reasonBlockedRef, 0);
   }
 
+  
+  public void _IsOpportunityBlocked_SP_Mysql (SQLConnection connection, String clientname, Long testee, String testID, Integer maxopps, _Ref<String> reasonBlockedRef, Integer sessionType)
+      throws ReturnStatusException {
+    
+ try {
+      
+      /*String sessionIdStr = sessionId.toString ().replaceAll ("-", "");
+      sessionIdStr = String.format ("0x%s", sessionIdStr);*/
+      final String SQL_QUERY = "{call _isopportunityblocked(?,?,?,?,?,?,?)}";
+      CallableStatement callableStatement = connection.prepareCall(SQL_QUERY);
+      callableStatement.setString (1, clientname);
+      callableStatement.setLong (2, testee);
+      callableStatement.setString (3, testID);
+      callableStatement.setInt (4, maxopps);
+      callableStatement.registerOutParameter(5, java.sql.Types.VARCHAR);
+      callableStatement.setInt (6, sessionType);
+      callableStatement.setInt (7, 0);
+       
+      callableStatement.executeUpdate();
+       
+      reasonBlockedRef.set (callableStatement.getString(5));
+      
+    } catch (SQLException e) {
+      throw new ReturnStatusException (e);
+    }
+    
+ 
+  }
   // Original port
   public void _IsOpportunityBlocked_SP (SQLConnection connection, String clientname, Long testee, String testID, Integer maxopps, _Ref<String> reasonBlockedRef, Integer sessionType)
       throws ReturnStatusException {
@@ -6009,6 +6058,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // -- As such it should NEVER BE USED to determine test eligibility
     // if (sessionType == null)
     // sessionType = 0;
+    final long startTimeLong = System.currentTimeMillis ();
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     String subject = null;
     final String SQL_QUERY1 = "select subjectname as subject from ${ConfigDB}.client_testproperties "
@@ -6020,12 +6070,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (record != null) {
       subject = record.<String> get ("subject");
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 1 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY2 = "select  clientname from _externs where clientname = ${clientname} and environment = 'SIMULATION' limit 1";
     SqlParametersMaps parameters2 = (new SqlParametersMaps ()).put ("clientname", clientname);
 
     if (exists (executeStatement (connection, SQL_QUERY2, parameters2, false)) == true) {
       return;
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 2 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- prepare for match against RTS value-set
     if (subject != null)
       subject = String.format (";%s;", subject.trim ());
@@ -6044,6 +6096,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         return;
       }
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 3 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- Check for number of tests administered in the current test window.
     // -- There is a maximum number of opportunities for the test over all
     // windows, but also a maximum available to a student in each window
@@ -6056,10 +6109,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // Check for number of tests administered in the current test window.
     // There is a maximum number of opportunities for the test over all windows,
     // but also a maximum available to a student in each window
-
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 4.1 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // WinID, winmax, startDate, endDate, mode, modemax, modeTestKey to table
     // windowID, windowMax, startDate, endDate, mode, modeMax, testkey fromset
     final SingleDataResultSet testModesResult = _GetTesteeTestModes_SP (connection, clientname, testID, testee, sessionType);
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 4.2 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     if (testModesResult.getCount () == 0) {
       reasonBlockedRef.set ("NA");
       return;
@@ -6081,7 +6135,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       record.addColumnValue ("formkey", null);
     }
     connection.createTemporaryTable (modesTbl);
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 5 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     insertBatch (connection, modesTbl.generateInsertStatement (), testModesResult, null);
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 6 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String clientnameFinal = clientname;
     final String testIDFinal = testID;
     final Long testeeFinal = testee;
@@ -6096,6 +6152,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       connection.dropTemporaryTable (modesTbl);
       return;
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 7 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY4 = "select  testID from ${ConfigDB}.client_testprerequisite where clientname = ${clientname} and TestID = ${testID} and isActive = 1 "
         + " and not exists (select * from testopportunity where clientname = ${clientname} and _efk_Testee = ${testee} and _efk_TestID = prereqTestID "
         + "  and dateCompleted is not null and dateDeleted is null)  limit 1";
@@ -6105,6 +6162,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._FormatMessage_SP (connection, clientname, "ENU", "_CanOpenTestOpportunity", "Missing prerequisite", reasonBlockedRef);
       return;
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 8 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     DataBaseTable windowsTbl = getDataBaseTable ("iobWindows").addColumn ("winsession", SQL_TYPE_To_JAVA_TYPE.INT).
         addColumn ("modesessn", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("WID", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).
         addColumn ("numopps", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("winmax", SQL_TYPE_To_JAVA_TYPE.INT).
@@ -6112,6 +6170,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         addColumn ("startDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).addColumn ("endDate", SQL_TYPE_To_JAVA_TYPE.DATETIME).
         addColumn ("formkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("testkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
         addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("modemax", SQL_TYPE_To_JAVA_TYPE.INT);
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 8.001 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     executeMethodAndInsertIntoTemporaryTable (connection, new AbstractDataResultExecutor ()
     {
       @Override
@@ -6121,10 +6180,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         // They will populate WID, winmax, startDate, endDate, formkey, mode,
         // modemax, testkey columns in windows tbl.
         // Still need winsession, modesessn, numopps, winopps, modeopps
+        //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 8.1 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
         SingleDataResultSet result = _GetTesteeTestWindows_SP (connection, clientnameFinal, testIDFinal, testeeFinal, sessionTypeFinal);
+        //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 8.2 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
         result.resetColumnName (1, "wid");
         result.resetColumnName (2, "winmax");
-
+        
         result.addColumn ("winsession", SQL_TYPE_To_JAVA_TYPE.INT);
         result.addColumn ("modesessn", SQL_TYPE_To_JAVA_TYPE.INT);
         result.addColumn ("numopps", SQL_TYPE_To_JAVA_TYPE.INT);
@@ -6142,13 +6203,16 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         return result;
       }
     }, windowsTbl, true);
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 9 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY5 = "delete from ${windowsTblName} where not exists (select * from ${modesTblName} where WinID = WID and modeTestKey = testkey)";
     Map<String, String> unquoted5 = new HashMap<> ();
     unquoted5.put ("windowsTblName", windowsTbl.getTableName ());
     unquoted5.put ("modesTblName", modesTbl.getTableName ());
 
     executeStatement (connection, fixDataBaseNames (SQL_QUERY5, unquoted5), null, false).getUpdateCount ();
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 10 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     connection.dropTemporaryTable (modesTbl);
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 11 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY6 = "select  WID from ${windowsTblName} where WID is not null limit 1";
     Map<String, String> unquoted6 = new HashMap<> ();
     unquoted6.put ("windowsTblName", windowsTbl.getTableName ());
@@ -6158,6 +6222,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (connection, "_IsOpportunityBlocked", starttime, testee, true, null, null, null, clientname, null);
       return;
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 12 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     DataBaseTable ctwTbl = GetCurrentTestWindows_FN (connection, clientname, testID, sessionType);
     final String SQL_QUERY7 = "update ${windowsTblName} W, ${ctwTblName} C set W.winSession = C.WindowSession , W.modeSessn = C.modeSession ";
     Map<String, String> unquoted7 = new HashMap<> ();
@@ -6165,6 +6230,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquoted7.put ("ctwTblName", ctwTbl.getTableName ());
 
     executeStatement (connection, fixDataBaseNames (SQL_QUERY7, unquoted7), null, false).getUpdateCount ();
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 13 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     String statusCodes = _commonDll.GetStatusCodes_FN (connection, "opportunity", "closed");
     final String SQL_QUERY8 = " update ${windowsTblName} set winopps =  (select count(*) from testopportunity O, session S "
         + " where O.clientname = ${clientname} and _efk_Testee = ${testee} and _efk_TestID = ${testID}  and O._fk_Session  = S._Key and (winSession = -1 or S.SessionType = winSession) "
@@ -6174,6 +6240,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms8 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("testID", testID).put ("statusCodes", statusCodes);
 
     executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquoted8), parms8, false).getUpdateCount ();
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 14 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- NOTE: Mode is directly correlated with the testkey (as opposed to
     // testID, which is in a one-to-many correspondence with testKEY)
     final String SQL_QUERY9 = "update ${windowsTblName} set modeopps =  (select count(*) from testopportunity O, session S "
@@ -6183,6 +6250,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("statusCodes", statusCodes);
 
     executeStatement (connection, fixDataBaseNames (SQL_QUERY9, unquoted9), parms9, false).getUpdateCount ();
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 15 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY10 = "select  winopps from ${windowsTblName} where winopps < winmax and modeopps < modeMax  limit 1";
     Map<String, String> unquoted10 = unquoted8;
 
@@ -6193,6 +6261,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
       return;
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 16 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     // -- check for all opportunities used for the logical test (testID as
     // opposed to testkey)
     final String SQL_QUERY11 = "update ${windowsTblName} set numopps = (select count(*) from testopportunity "
@@ -6200,7 +6269,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquoted11 = unquoted8;
     SqlParametersMaps parms11 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("testee", testee).put ("testID", testID).put ("statusCodes", statusCodes);
     executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquoted11), parms11, false).getUpdateCount ();
-
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 17 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     final String SQL_QUERY12 = "select  numopps from ${windowsTblName} where numopps < ${maxopps} limit 1";
     Map<String, String> unquoted12 = unquoted8;
     SqlParametersMaps parms12 = (new SqlParametersMaps ()).put ("maxopps", maxopps);
@@ -6210,6 +6279,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (connection, "_IsOpportunityBlocked", starttime, testee, true, null, null, null, clientname, null);
       return;
     }
+    //_logger.info ("<<<<<<<<< _IsOpportunityBlocked_SP 18 : "+((System.currentTimeMillis ()-startTimeLong)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     connection.dropTemporaryTable (windowsTbl);
     _commonDll._LogDBLatency_SP (connection, "_IsOpportunityBlocked", starttime, testee, true, null, null, null, clientname, null);
 
@@ -6466,9 +6536,38 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     diff = end.getTime () - start.getTime ();
   }
 
+  public void _CanOpenTestOpportunity_SP_Mysql (SQLConnection connection, String clientname, Long testee, String testkey, UUID sessionId,
+      Integer maxOpportunities, _Ref<Boolean> newRef, _Ref<Integer> numberRef, _Ref<String> reasonRef) throws ReturnStatusException {
+    try {
+      
+      String sessionIdStr = sessionId.toString ().replaceAll ("-", "");
+      sessionIdStr = String.format ("0x%s", sessionIdStr);
+      final String SQL_QUERY = "{call _canopentestopportunity(?,?,?,"+sessionIdStr+",?,?,?,?,?)}";
+      CallableStatement callableStatement = connection.prepareCall(SQL_QUERY);
+      callableStatement.setString (1, clientname);
+      callableStatement.setLong (2, testee);
+      callableStatement.setString (3, testkey);
+      callableStatement.setInt (4, maxOpportunities);
+      callableStatement.registerOutParameter(5, java.sql.Types.BOOLEAN);
+      callableStatement.registerOutParameter(6, java.sql.Types.INTEGER);
+      callableStatement.registerOutParameter(7, java.sql.Types.VARCHAR);
+      callableStatement.setInt (8, 0);
+       
+      callableStatement.executeUpdate();
+       
+      newRef.set (callableStatement.getBoolean(5));
+      numberRef.set( callableStatement.getInt(6));
+      reasonRef.set ( callableStatement.getString (7));
+      
+    } catch (SQLException e) {
+      throw new ReturnStatusException (e);
+    }
+    
+  }
   public void _CanOpenTestOpportunity_SP (SQLConnection connection, String clientname, Long testee, String testkey, UUID sessionId,
       Integer maxOpportunities, _Ref<Boolean> newRef, _Ref<Integer> numberRef, _Ref<String> reasonRef) throws ReturnStatusException {
     Date today = _dateUtil.getDateWRetStatus (connection);
+    long startTime = System.currentTimeMillis ();
     newRef.set (false);
     numberRef.set (0);
     reasonRef.set (null);
@@ -6493,10 +6592,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     // -- If simulation environment uses 'real' students then we want the test
     // to proceed anyway
-    if (DbComparator.notEqual (environment, "SIMULATION") && DbComparator.greaterThan (testee, 0)) {
+    // _IsOpportunityBlocked_SP logic is performed by T_GETELIGIBLETESTS, Removing from here as per Jon Cohen's suggestion.
+    /*if (DbComparator.notEqual (environment, "SIMULATION") && DbComparator.greaterThan (testee, 0)) {
       // -- only check eligibility on real students
       _IsOpportunityBlocked_SP (connection, clientname, testee, testId, maxOpportunities, reasonRef, sessionType);
-    }
+    }*/
     if (reasonRef.get () != null) {
       if ("NA".equalsIgnoreCase (reasonRef.get ()))
         numberRef.set (-1); // -- this test is not applicable to the student
@@ -6528,7 +6628,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (DbComparator.greaterThan (numberRef.get (), 0) || reasonRef.get () != null) {
       return;
     }
-
     // -- neither success nor a fatal error, so now try to open a new
     // opportunity
     // -- Important note: This function takes into account that an expired
@@ -6537,6 +6636,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     if (DbComparator.greaterThan (numberRef.get (), 0)) {
       newRef.set (true);
     }
+    //_logger.info ("<<<<<<<<< _CanOpenTestOpportunity_SP Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     _commonDll._LogDBLatency_SP (connection, "_CanOpenTestOpportunity", today, testee, true, null, null, null, clientname, null);
   }
 
@@ -7360,6 +7460,25 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return P_OpenSession_SP (connection, sessionKey, 12, false, null);
   }
 
+  public SingleDataResultSet P_OpenSession_SP_Mysql (SQLConnection connection, UUID sessionKey, Integer numhours, Boolean suppressReport, UUID browserKey)
+      throws ReturnStatusException {
+    
+    final String SQL_QUERY = "call p_opensession (${sessionKey},${numhours},${suppressReport},${browserKey})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("sessionKey", sessionKey);
+    params.put ("numhours", numhours);
+    params.put ("suppressReport", suppressReport);
+    params.put ("browserKey", browserKey);
+
+    SingleDataResultSet resultSet = null;
+    MultiDataResultSet ms = executeStatement (connection, SQL_QUERY, params, false);
+    if(ms.getUpdateCount ()<=0) {
+      resultSet = ms.getResultSets ().next ();
+    }
+    
+    return resultSet;
+    
+  }
   public SingleDataResultSet P_OpenSession_SP (SQLConnection connection, UUID sessionKey, Integer numhours, Boolean suppressReport, UUID browserKey)
       throws ReturnStatusException {
 
@@ -7481,7 +7600,26 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
     return tbl;
   }
-
+  
+ /* public void _SetupProctorlessSession_SP (SQLConnection connection, String clientname, _Ref<UUID> sessionKeyRef, _Ref<String> sessionIdRef) throws ReturnStatusException {
+   try {
+      final String SQL_QUERY = "{call _setupproctorlesssession(?,?,?)}";
+      CallableStatement callableStatement = connection.prepareCall(SQL_QUERY);
+      callableStatement.setString (1, clientname);
+      callableStatement.registerOutParameter(2, java.sql.Types.VARCHAR);
+      callableStatement.registerOutParameter(3, java.sql.Types.VARCHAR);
+       
+      callableStatement.executeUpdate();
+      String sessionKeyStr = callableStatement.getString(2);
+      sessionKeyRef.set (UUID.fromString (sessionKeyStr));
+      sessionIdRef.set ("GUEST Session");
+      
+    } catch (Exception e) {
+      throw new ReturnStatusException (e);
+    }
+    
+  }*/
+  
   public void _SetupProctorlessSession_SP (SQLConnection connection, String clientname, _Ref<UUID> sessionKeyRef, _Ref<String> sessionIdRef) throws ReturnStatusException {
 
     if (_AllowAnonymousTestee_FN (connection, clientname) == false) {
@@ -7489,6 +7627,25 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       return;
     }
     sessionIdRef.set ("GUEST Session");
+    String status = null;
+    Date enddate = null;
+    Float timeelapsed = null;
+    final String SQL_QUERY2 = "select _Key as sessionKey, status, dateend as enddate, cast(TIMESTAMPDIFF(microsecond, datechanged, now(3))/1000000  as char) as timeelapsed from session where clientname = ${clientname} and sessionID = ${sessionID}";
+    SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("sessionId", sessionIdRef.get ());
+    SingleDataResultSet result = executeStatement (connection, SQL_QUERY2, parms2, false).getResultSets ().next ();
+    DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+    if (record != null) {
+      sessionKeyRef.set (record.<UUID> get ("sessionKey"));
+      status = record.<String> get ("status");
+      enddate = record.<Date> get ("enddate");
+      timeelapsed = Float.parseFloat (record.<String> get ("timeelapsed"));
+    }
+    
+    if(sessionKeyRef.get ()!=null && timeelapsed!=null && timeelapsed <= 60) {
+      return;
+    }
+    
+    
     String environ = _commonDll.getExternsColumnByClientName (connection, clientname, "environment");
 
     DataBaseTable activeTestsTbl = GetActiveTests_FN (connection, clientname, 0);
@@ -7504,17 +7661,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     executeStatement (connection, fixDataBaseNames (SQL_QUERY1, unquotedParms1), null, false).getUpdateCount ();
     connection.dropTemporaryTable (activeTestsTbl);
 
-    String status = null;
-    Date enddate = null;
-    final String SQL_QUERY2 = "select _Key as sessionKey, status, dateend as enddate from session where clientname = ${clientname} and sessionID = ${sessionID}";
-    SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("sessionId", sessionIdRef.get ());
-    SingleDataResultSet result = executeStatement (connection, SQL_QUERY2, parms2, false).getResultSets ().next ();
-    DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-    if (record != null) {
-      sessionKeyRef.set (record.<UUID> get ("sessionKey"));
-      status = record.<String> get ("status");
-      enddate = record.<Date> get ("enddate");
-    }
+    
 
     Integer applock = -1;
     String resourcename = String.format ("guestsession %s", clientname);
@@ -9418,7 +9565,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // "@scoreDimension",scorestatus AS "@scoreStatus",
     // Example
     // <ScoreInfo scorePoint="1" scoreDimension="overall" scoreStatus="Scored">
-    String tmp = String.format ("<ScoreInfo scorePoint=\"%d\" scoreDimensions=\"%s\" scoreStatus=\"%s\"><SubScoreList /></ScoreInfo>",
+    String tmp = String.format ("<ScoreInfo scorePoint=\"%d\" scoreDimension=\"%s\" scoreStatus=\"%s\"><SubScoreList /></ScoreInfo>",
         score, scoreDimConstant, scoreStatus);
     return tmp;
   }
@@ -10101,7 +10248,542 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     SqlParametersMaps params1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
     return executeStatement (connection, query1, params1, false).getResultSets ().next ();
   }
+  
+  class EligibleTest {
+    private String testKey;
+    private String testId;
+    private String grade;
+    private String subject;
+    private String enroll;
+    private String mode;
+    private UUID session;
+    private String windowid;
+    private Integer sessionType;
+    private Integer maxOpps;
+    private Integer windowMax;
+    private Integer modeMax;
+    private Integer windowSession;
+    private Integer modeSession;
+    private Long rtsEquiv;
+    private Date startDate;
+    private Date endDate;
+    private Integer opportunity;
+    private String displayName;
+    private int sortOrder;
+    private String status;
+    private String reason;
+    private String clientName;
+    private Integer numRef = 0;
+    private Boolean newoppRef = false;
+    
+    
+    
+    public Boolean getNewoppRef () {
+      return newoppRef;
+    }
+    public void setNewoppRef (Boolean newoppRef) {
+      this.newoppRef = newoppRef;
+    }
+    public Integer getNumRef () {
+      return numRef;
+    }
+    public void setNumRef (Integer numRef) {
+      this.numRef = numRef;
+    }
+    public String getReason () {
+      return reason;
+    }
+    public void setReason (String reason) {
+      this.reason = reason;
+    }
+    public String getStatus () {
+      return status;
+    }
+    public void setStatus (String status) {
+      this.status = status;
+    }
+    public Integer getOpportunity () {
+      return opportunity;
+    }
+    public String getDisplayName () {
+      return displayName;
+    }
+    public int getSortOrder () {
+      return sortOrder;
+    }
+    public void setOpportunity (Integer opportunity) {
+      this.opportunity = opportunity;
+    }
+    public void setDisplayName (String displayName) {
+      this.displayName = displayName;
+    }
+    public void setSortOrder (int sortOrder) {
+      this.sortOrder = sortOrder;
+    }
+    public String getTestKey () {
+      return testKey;
+    }
+    public String getTestId () {
+      return testId;
+    }
+    public String getGrade () {
+      return grade;
+    }
+    public String getSubject () {
+      return subject;
+    }
+    public String getEnroll () {
+      return enroll;
+    }
+    public String getMode () {
+      return mode;
+    }
+    public UUID getSession () {
+      return session;
+    }
+    public String getWindowid () {
+      return windowid;
+    }
+    public Integer getSessionType () {
+      return sessionType;
+    }
+    public Integer getMaxOpps () {
+      return maxOpps;
+    }
+    public Integer getWindowMax () {
+      return windowMax;
+    }
+    public Integer getModeMax () {
+      return modeMax;
+    }
+    public Integer getWindowSession () {
+      return windowSession;
+    }
+    public Integer getModeSession () {
+      return modeSession;
+    }
+    public Long getRtsEquiv () {
+      return rtsEquiv;
+    }
+    
+    public void setRtsEquiv (Long rtsEquiv) {
+      this.rtsEquiv = rtsEquiv;
+    }
+    public Date getStartDate () {
+      return startDate;
+    }
+    public Date getEndDate () {
+      return endDate;
+    }
+    public void setTestKey (String testKey) {
+      this.testKey = testKey;
+    }
+    public void setTestId (String testId) {
+      this.testId = testId;
+    }
+    public void setGrade (String grade) {
+      this.grade = grade;
+    }
+    public void setSubject (String subject) {
+      this.subject = subject;
+    }
+    public void setEnroll (String enroll) {
+      this.enroll = enroll;
+    }
+    public void setMode (String mode) {
+      this.mode = mode;
+    }
+    public void setSession (UUID session) {
+      this.session = session;
+    }
+    public void setWindowid (String windowid) {
+      this.windowid = windowid;
+    }
+    public void setSessionType (Integer sessionType) {
+      this.sessionType = sessionType;
+    }
+    public void setMaxOpps (Integer maxOpps) {
+      this.maxOpps = maxOpps;
+    }
+    public void setWindowMax (Integer windowMax) {
+      this.windowMax = windowMax;
+    }
+    public void setModeMax (Integer modeMax) {
+      this.modeMax = modeMax;
+    }
+    public void setWindowSession (Integer windowSession) {
+      this.windowSession = windowSession;
+    }
+    public void setModeSession (Integer modeSession) {
+      this.modeSession = modeSession;
+    }
+    public void setStartDate (Date startDate) {
+      this.startDate = startDate;
+    }
+    public void setEndDate (Date endDate) {
+      this.endDate = endDate;
+    }
+    
+    public String getClientName () {
+      return clientName;
+    }
+    public void setClientName (String clientName) {
+      this.clientName = clientName;
+    }
+    
+  }
+  
+  public SingleDataResultSet  T_GetEligibleTests_SP (SQLConnection connection, Long testee, UUID sessionKey, String grade) throws ReturnStatusException {
+    
+    SingleDataResultSet returnResultSet = new SingleDataResultSet ();
+    Date startTime = _dateUtil.getDateWRetStatus (connection);
+    String clientName = null;
+    Integer sessionType = null;
+    List<EligibleTest> returnTestList = new ArrayList<EligibleTest> ();
+    
+    //Getting sessiontype and clientName
+    final String SQL_QUERY1 = "select sessionType, clientname from session where _Key = ${sessionKey}";
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey);
+    SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
+    DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+    if (record != null) {
+      sessionType = record.<Integer> get ("sessionType");
+      clientName = record.<String> get ("clientname");
+    }
+    
+    //Getting Tests from ART
+    Set<String> rtsTests = new HashSet<String> ();
+    if(testee>=0) {
+      _Ref<String> refRTSTests = new _Ref<String> ();
+      _rtsDll._GetRTSAttribute_SP (connection, clientName, testee, "--ELIGIBLETESTS--", refRTSTests);
+      
+      if (refRTSTests.get() != null){
+        String rows[] = refRTSTests.get ().split (";");
+        for(String row:rows) {
+          rtsTests.add (row.trim ());
+        }
+      }
+    }
+    
+    
+    
+    //Get EligibleTests for the currentSession
+    result = _GetCurrentTests (connection, sessionKey);
+    Iterator<DbResultRecord> recordsIter = result.getRecords ();
+    List<EligibleTest> eligibleTests = new ArrayList<EligibleTest> ();
+    StringBuilder sbTestIds = new StringBuilder ();    
+    while(recordsIter.hasNext ()) {
+      record = recordsIter.next ();
+      
+      //If guest session and testid do not match with the one in the ART than do not show that test
+      if(testee>=0 && !rtsTests.contains (record.<String>get ("testkey"))) {
+        recordsIter.remove ();
+        continue;
+      }
+      
+      //Eliminate those that are not in a compatible grade.
+      if (__IsGradeEquiv_FN (record.<String> get ("grade"), grade) == false) {
+        recordsIter.remove ();
+        continue;
+      }
+      
+      //Creating EligibleTest object
+      EligibleTest test = new EligibleTest();
+      test.setTestKey (record.<String>get ("testkey"));
+      test.setTestId (record.<String>get ("testid"));
+      test.setGrade (record.<String>get ("grade"));
+      test.setSubject (record.<String>get ("subject"));
+      test.setEnroll (record.<String>get ("enroll"));
+      test.setMaxOpps(record.<Integer>get ("maxopps"));
+      test.setRtsEquiv (record.<Long>get ("rtsequiv"));
+      test.setMode (record.<String>get ("mode"));
+      test.setSession (record.<UUID>get ("session"));
+      test.setWindowMax (record.<Integer>get ("windowmax"));
+      test.setStartDate (record.<Date>get ("startdate"));
+      test.setEndDate (record.<Date>get ("enddate"));
+      test.setWindowid (record.<String>get ("windowid"));
+      test.setModeMax (record.<Integer>get ("modemax"));
+      test.setWindowSession (record.<Integer>get ("windowsession"));
+      test.setModeSession (record.<Integer>get ("modesession"));
+      test.setSessionType (sessionType);
+      test.setDisplayName (record.<String>get ("displayName"));
+      test.setSortOrder (record.<Integer>get ("sortOrder"));
+      test.setClientName(clientName);
+      eligibleTests.add (test);
+      
+      //If sessionType is zero and session is null for the test than update the test with Denied status
+      if (DbComparator.isEqual (test.getSessionType (), 0) && sessionKey != null &&
+          test.getSession () ==null) {
+        test.setOpportunity (0);
+        test.setStatus ("denied");
+        
+        _Ref<String> notAvailRef = new _Ref<> ();
+        _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity",
+            "Test not available for this session.", notAvailRef);
+        
+        test.setReason (notAvailRef.get ());
+        returnTestList.add (test);
+      } else {
+        //Created a string for semicolon seperated testIds
+        sbTestIds.append (test.getTestId ()).append (";");
+      }
+    } //End while loop - Iterating through all the tests.
+    //Remove the last semicolon from the testIds string
+    if(sbTestIds.length ()>1) {
+      sbTestIds.replace ( sbTestIds.length ()-1, sbTestIds.length (), "");
+    }
+    
+    //Getting All the Opportunity info for all the eligible tests
+     SingleDataResultSet resultSet = _GetOpportunityInfo (connection, clientName,sessionKey, testee, sbTestIds.toString ());
+     recordsIter = resultSet.getRecords ();
+     //Store oppInfo inside Map for matching it with the opp
+     Map<String, DbResultRecord> oppInfoMap = new HashMap<String, DbResultRecord> ();
+     while(recordsIter.hasNext ()) {
+       DbResultRecord record1 = recordsIter.next ();
+       oppInfoMap.put (record1.<String>get("_efk_testid"), record1);
+     }
+     
+     // Get Enviornment Details
+    String environment = _commonDll.getExternsColumnByClientName (connection, clientName, "environment");
+    _Ref<String> reasonBlockedRef = new _Ref<String> ();
+    _Ref<String> testeeSubjectsRef = new _Ref<String> ();
+    //If It is not SIMULATION enviornment and not a Guest student than check if _IsOpportunityBlocked
+    if (DbComparator.notEqual (environment, "SIMULATION") && DbComparator.greaterThan (testee, 0)) {
+        _rtsDll._GetRTSAttribute_SP (connection, clientName, testee, "BLOCKEDSUBJECT", testeeSubjectsRef);
+    }
+        String subject = null;
+        for(EligibleTest test:eligibleTests) {
+          Date today = _dateUtil.getDateWRetStatus (connection);
+          //Get Opportunity details for the testId
+          DbResultRecord oppRecord = oppInfoMap.get (test.getTestId ());
+          if (DbComparator.notEqual (environment, "SIMULATION") && DbComparator.greaterThan (testee, 0)) {
+            subject = test.getSubject ();
+            if (subject != null)
+              subject = String.format (";%s;", subject.trim ());
+            else
+              subject = ";;";
+            
+            //if the subject is explicitly blocked by the rts attribute BLOCKED, block the opportunity 
+            String testeeSubjects = testeeSubjectsRef.get ();
+            if (testeeSubjects != null && testeeSubjects.length () > 0) {
+        
+              testeeSubjects = String.format (";%s;", testeeSubjects.trim ());
+              if (testeeSubjects.indexOf (subject) > -1) {
+        
+                _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity",
+                    "This test is administratively blocked. Please check with your test administrator.", reasonBlockedRef);
+                test.setReason (reasonBlockedRef.get ());
+                continue;
+              }
+            }
+            
+            //Check if there is an existing opportunity  _CanOpenExistingOpportunity
+            if(oppRecord!=null && oppRecord.<String>get("oppstatus").equalsIgnoreCase ("paused")) {
+                Integer numOfOpps = oppRecord.<Integer>get("opportunity");
+                Integer maxOpps = test.getMaxOpps ();
+                String lastStatusClosedStage = oppRecord.<String>get("laststatus_closedStage");
+                String lastStatusInactiveStage = oppRecord.<String>get("laststatus_inactiveStage");
+                Integer lastSessionType = oppRecord.<Integer>get("lastsessiontype");
+                Integer thisSessionType = oppRecord.<Integer>get("thissessiontype");
+                String lastSessionStatus = oppRecord.<String>get("lastsessionstatus");
+                Date lastSessionEnd = oppRecord.<Date>get("lastsessionend");
+                Date dateChanged = oppRecord.<Date>get("datechanged");
+                UUID lastSession = oppRecord.<UUID>get("lastsession");
+                
+                test.setNumRef (0);
+                test.setReason (null);
+                
+                // last opportunity terminated normally
+                if (lastStatusClosedStage!=null) {
+                  continue; 
+                }
+                
+                if (DbComparator.notEqual (lastSessionType, thisSessionType)) {
+                  _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity",
+                      "You must continue the test in the same type of session it was started in.", reasonBlockedRef, null, null, null, null);
+                  test.setReason (reasonBlockedRef.get ());
+                  continue;
+                }
+                
+                // final security check;
+                // if opportunity is not in use, then we can open it
+                if (lastStatusInactiveStage==null) {
+                  test.setNumRef (numOfOpps);
+                  continue; 
+                }
+                // else check for possible opportunity 'hijacking' of in use opportunity
+                // if at least 1 day has elapsed since last activity, or
+                // is resuming in same session as previous, or
+                // last session is closed
+                // then allow resume
+                if (sessionKey == null)
+                  continue; 
+                
+                //Check if the number of opportunities in the current window is already hit (windowmax)
+                if(numOfOpps == maxOpps) { 
+                  _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef);
+                  test.setReason (reasonBlockedRef.get ());
+                  continue;
+                }
+                
+                //Check whether the time elapsed since the last opportunity is sufficient
+                if (DbComparator.greaterOrEqual (daysDiff (dateChanged, today), 1) || DbComparator.isEqual (lastSession, sessionKey)
+                    || DbComparator.isEqual ("closed", lastSessionStatus) || DbComparator.greaterThan (today, lastSessionEnd)) {
+                  test.setNumRef (numOfOpps);
+                  continue;
+                } 
+            } 
+            // If OpenexistingOpportunity is executed and teststatus is paused than continue with the next test
+            if (DbComparator.greaterThan (test.getNumRef (), 0) || test.getReason () != null) {
+              continue;
+            }
+          } //If not Guest or Simulation - IsOpportunity
+            //_Can Open New Opportunity 
+            test.setNumRef (0);
+            test.setReason (null);
+            //If no opportunity found than test is eligible for new opportunity
+            if(oppRecord ==null) {
+              if (DbComparator.lessThan (0, test.getMaxOpps ()) || DbComparator.isEqual ("SIMULATION", environment)) {
+                test.setNumRef (1);
+              }
+              else if (DbComparator.notEqual ("SIMULATION", environment)) {
+                _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "No opportunities are available for this test", reasonBlockedRef, null, null, null, null);
+                test.setReason (reasonBlockedRef.get ());
+              }
+              if (DbComparator.greaterThan (test.getNumRef (), 0)) {
+                test.setNewoppRef (true);
+              }
+              continue;
+            } 
+            //If opportunity is found and teststatus is not paused
+            else {
+                  String lastStatusClosedStage = oppRecord.<String>get("laststatus_closedStage");
+                  Integer numOfOpps = oppRecord.<Integer>get("opportunity");
+                  Integer delayDays = oppRecord.<Integer>get("delaydays");
+                  Date dateCompleted = oppRecord.<Date>get("datecompleted");
+                  if (lastStatusClosedStage!=null) {
+                    if (DbComparator.isEqual ("SIMULATION", environment)) {
+                      test.setNumRef (numOfOpps + 1);
+                      if (DbComparator.greaterThan (test.getNumRef (), 0)) {
+                        test.setNewoppRef (true);
+                      }
+                      continue;
+                    }
+                  }
+                  Integer dDiff = daysDiff (dateCompleted, today);
+                  if (DbComparator.lessThan (numOfOpps, test.getMaxOpps ()) && (dateCompleted == null || DbComparator.greaterThan (dDiff, delayDays))) {
+                    test.setNumRef (numOfOpps + 1);
+                  }
+                  else if (DbComparator.greaterOrEqual (numOfOpps, test.getMaxOpps ())) {
+                    _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef, null, null, null, null);
+                    test.setReason (reasonBlockedRef.get ());
+                  } else {
+                    String arg = null;
+      
+                    if (dateCompleted != null) {
+                      Calendar c = Calendar.getInstance ();
+                      c.setTime (dateCompleted);
+                      c.add (Calendar.DATE, delayDays);
+                      Date dateCompldteddAdjusted = c.getTime ();
+                      arg = dateCompldteddAdjusted.toString ();
+                    }
+                  _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "Your next test opportunity is not yet available.", reasonBlockedRef, arg, null, null, null);
+                  test.setReason (reasonBlockedRef.get ());
+                  }
+              }
+            if (DbComparator.greaterThan (test.getNumRef (), 0)) {
+              test.setNewoppRef (true);
+            }
+        } //End for loop for existingTests
+    
+    if (DbComparator.isEqual (sessionType, 1)) {
+      
+      Iterator<EligibleTest> iTests = eligibleTests.iterator ();
+      while(iTests.hasNext ()) {
+        EligibleTest test = iTests.next ();
+        if(test.getStatus ()!=null && test.getStatus().equals ("NA")){
+          iTests.remove ();
+        }
+        final String SQL_QUERY_INSERT1 = "insert into sessiontests (_fk_Session, _efk_AdminSubject, _efk_TestID) "
+            + " values(${sessionKey},${testKey},${testId})";
+        SqlParametersMaps parms2 = (new SqlParametersMaps ());
+        parms2.put ("sessionKey", sessionKey);
+        parms2.put ("testKey", test.getTestKey ());
+        parms2.put ("testId", test.getTestId ());
+  
+        executeStatement (connection, SQL_QUERY_INSERT1, parms2, false).getUpdateCount ();
+      }
+    }
+    Iterator<EligibleTest> iTests = eligibleTests.iterator ();
+    List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
+    while(iTests.hasNext ()) {
+      EligibleTest test = iTests.next();
+      CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object> ();
+      rcd.put ("displayName", test.getDisplayName ());
+      rcd.put ("testkey", test.getTestKey ());
+      rcd.put ("test", test.getTestId ());
+      rcd.put ("opportunity", test.getNumRef ());
+      rcd.put ("mode", test.getMode ());
+      rcd.put ("maxopps", test.getMaxOpps ());
+      rcd.put ("subject", test.getSubject ());
+      rcd.put ("grade",grade );
+      
+      String status = null;
+      if (DbComparator.isEqual (test.getNumRef (), 0))
+        status = "denied";
+      else if (DbComparator.isEqual (test.getNumRef (), -1))
+        status = "N/A";
+      else if (DbComparator.isEqual (test.getNewoppRef (), false))
+        status = "suspended";
+      else
+        status = "pending";
+      
+      rcd.put ("status", status);
+      rcd.put ("reason", test.getReason ());
+      resultList.add (rcd);
+    }
+    returnResultSet.addColumn ("displayName", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("testkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("test", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("opportunity", SQL_TYPE_To_JAVA_TYPE.INT);
+    returnResultSet.addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("maxopps", SQL_TYPE_To_JAVA_TYPE.INT);
+    returnResultSet.addColumn ("sortOrder", SQL_TYPE_To_JAVA_TYPE.INT);
+    returnResultSet.addColumn ("subject", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("grade", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("status", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    returnResultSet.addColumn ("reason", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+    
+    returnResultSet.addRecords (resultList);
+    
+    _commonDll._LogDBLatency_SP (connection, "T_GetEligibleTests", startTime, testee, true, null, null, null, clientName, null);
+    
+    return returnResultSet;
+  }
+  
+  
+  private SingleDataResultSet _GetCurrentTests(SQLConnection connection, UUID sessionKey) throws ReturnStatusException {
+    final String SQL_QUERY = "call _getcurrenttests (${sessionKey})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("sessionKey", sessionKey);
 
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+  }
+  
+  private SingleDataResultSet _GetOpportunityInfo(SQLConnection connection, String clientName, UUID sessionId,Long testee, String testList) throws ReturnStatusException {
+    final String SQL_QUERY = "call _getopportunityinfo (${clientName}, ${sessionId}, ${testee},${testList})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("clientName", clientName);
+    params.put ("testee", testee);
+    params.put ("testList", testList);
+    params.put ("sessionId", sessionId);
+    
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
+  }
+  
+  
   /**
    * @param SQLConnection
    *          the database connection
@@ -10177,9 +10859,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet T_GetEligibleTests_SP (SQLConnection connection, Long testee, UUID sessionKey, String grade) throws ReturnStatusException {
+public SingleDataResultSet T_GetEligibleTests_SP_Old (SQLConnection connection, Long testee, UUID sessionKey, String grade) throws ReturnStatusException {
     Date starttime = _dateUtil.getDateWRetStatus (connection);
-
+    long startTime = System.currentTimeMillis ();
     Integer sessionType = null;
     String clientname = null;
 
@@ -10191,6 +10873,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       sessionType = record.<Integer> get ("sessionType");
       clientname = record.<String> get ("clientname");
     }
+
     DataBaseTable eligibleTbl = getDataBaseTable ("eligible").addColumn ("testKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
         addColumn ("testId", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 350).addColumn ("maxOpps", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
 
@@ -10201,7 +10884,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         addColumn ("sortOrder", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("status", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).
         addColumn ("reason", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 2000);
     connection.createTemporaryTable (resultTbl);
-
     final String clientnameFinal = clientname;
     final Long testeeFinal = testee;
     final Integer sessionTypeFinal = sessionType;
@@ -10220,11 +10902,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     // (or mode) test (testkey)
     // -- hence, all testkeys of the same testID will have the same value for
     // maxopps
-
     _Ref<String> notAvailRef = new _Ref<> ();
     _commonDll._FormatMessage_SP (connection, clientname, "ENU", "_CanOpenTestOpportunity",
         "Test not available for this session.", notAvailRef);
-
     final String SQL_QUERY2 = "select  testkey, testID as testname, maxopps, mode from ${eligibleTblName}  limit 1";
     Map<String, String> unquotedParms2 = new HashMap<> ();
     unquotedParms2.put ("eligibleTblName", eligibleTbl.getTableName ());
@@ -10233,7 +10913,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     Map<String, String> unquotedParms3 = unquotedParms2;
 
     final String SQL_QUERY4 = "select  _fk_Session from sessiontests where _fk_Session = ${sessionKey} and _efk_TestID = ${testname}  limit 1";
-
+    
     final String SQL_QUERY_INSERT5 = "insert into ${resultTblName} (testkey, test, opportunity, displayName, sortOrder, subject, grade, status, reason, mode, maxopps)"
         + " select ${testkey}, ${testname}, 0, label, sortOrder, subjectname, gradeText, 'denied', ${notAvail}, ${mode}, ${maxopps} "
         + " from ${ConfigDB}.client_testproperties where clientname = ${clientname} and testID = ${testname}";
@@ -10252,7 +10932,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String SQL_QUERY7 = "select  P.testID from ${ConfigDB}.client_testprerequisite P "
         + " where P.testID = ${testname} and P.clientname = ${clientname} and P.isActive = 1 limit 1";
     final String query7 = fixDataBaseNames (SQL_QUERY7);
-
     String testkey = null, testname = null, mode = null;
     Integer maxopps = null;
     _Ref<Boolean> newoppRef = new _Ref<> ();
@@ -10280,6 +10959,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         executeStatement (connection, fixDataBaseNames (query5, unquotedParms5), parms5, false).getUpdateCount ();
       } else {
         _CanOpenTestOpportunity_SP (connection, clientname, testee, testkey, sessionKey, maxopps, newoppRef, oppnumRef, reasonRef);
+        
         String status = null;
         if (DbComparator.isEqual (oppnumRef.get (), 0))
           status = "denied";
@@ -10294,7 +10974,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             put ("mode", mode).put ("maxopps", maxopps).put ("status", status).put ("reason", reasonRef.get ()).put ("clientname", clientname);
         executeStatement (connection, fixDataBaseNames (query6, unquotedParms6), parms6, false).getUpdateCount ();
         SqlParametersMaps parms7 = (new SqlParametersMaps ()).put ("testname", testname).put ("clientname", clientname);
-
         // -- Some tests have other tests as prerequisites for which the student
         // may not be naturally eligible.
         // -- Add these tests and run them through normal _CanOpen process
@@ -10325,7 +11004,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     // -- prerequisite tests need to be forced into the session's tests, so just
     // ensure they are all there
-
     if (DbComparator.isEqual (sessionType, 1)) {
 
       final String SQL_QUERY_INSERT9 = "insert into sessiontests (_fk_Session, _efk_AdminSubject, _efk_TestID) "
@@ -10336,7 +11014,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       SqlParametersMaps parms9 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey);
 
       executeStatement (connection, fixDataBaseNames (SQL_QUERY_INSERT9, unquotedParms9), parms9, false).getUpdateCount ();
-
       final String SQL_QUERY_DELETE10 = "delete from ${resultTblName} where status = 'NA'";
       Map<String, String> unquotedParms10 = new HashMap<> ();
       unquotedParms10.put ("resultTblName", resultTbl.getTableName ());
@@ -10349,10 +11026,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     unquotedParms11.put ("resultTblName", resultTbl.getTableName ());
 
     result = executeStatement (connection, fixDataBaseNames (SQL_QUERY11, unquotedParms11), null, false).getResultSets ().next ();
-
     connection.dropTemporaryTable (eligibleTbl);
     connection.dropTemporaryTable (resultTbl);
     _commonDll._LogDBLatency_SP (connection, "T_GetEligibleTests", starttime, testee, true, null, null, null, clientname, null);
+    //_logger.info ("<<<<<<<<< T_GetEligibleTests_SP Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     return result;
   }
 
@@ -11270,10 +11947,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   // attempt to optimize
   public SingleDataResultSet __EligibleTests_SP (SQLConnection connection, String clientname, long testee, int sessiontype, String grade, boolean debug) throws ReturnStatusException {
+    long startTime = System.currentTimeMillis ();
     Date starttime = _dateUtil.getDateWRetStatus (connection);
     _Ref<String> message = new _Ref<String> ();
     LogDBLatencyArgs logargs = new LogDBLatencyArgs (connection);
-
+    
     final String SQL_INSERT = "insert into ${tblName} (testID,subject, maxOpps,  grade,  enroll, "
         + " mode, testkey, rtsEquiv)"
         + " select distinct P.testID, P.subjectname as subject,  P.maxOpportunities, G.grade,  "
@@ -11293,14 +11971,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         addColumn ("maxopps", SQL_TYPE_To_JAVA_TYPE.INT).addColumn ("rtsEquiv", SQL_TYPE_To_JAVA_TYPE.BIT).
         addColumn ("mode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
     connection.createTemporaryTable (tests);
-
+    //_logger.info ("<<<<<<<<< __Eligbletests_SP 1 : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     Map<String, String> unquotedParms = new HashMap<String, String> ();
     unquotedParms.put ("tblName", tests.getTableName ());
     SqlParametersMaps parms = (new SqlParametersMaps ()).put ("clientname", clientname).put ("sessionType", sessiontype).put ("today", starttime);
 
     final String query = fixDataBaseNames (SQL_INSERT);
     executeStatement (connection, fixDataBaseNames (query, unquotedParms), parms, false).getUpdateCount ();
-
+    //_logger.info ("<<<<<<<<< __Eligbletests_SP 2 : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     if (testee < 0) {
       final String SQL_QUERY1 = "select distinct testkey, testid, maxopps, mode, grade from ${tablename} ";
       Map<String, String> unquotedParms1 = new HashMap<String, String> ();
@@ -11323,11 +12001,12 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _commonDll._LogDBLatency_SP (logargs);
 
       connection.dropTemporaryTable (tests);
+      //_logger.info ("<<<<<<<<< __Eligbletests_SP 3 Total : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
       return result1;
     }
 
     _rtsDll._GetRTSAttribute_SP (connection, clientname, testee, "--ELIGIBLETESTS--", message);
-
+    
     if (message.get() == null)
       message.set ("");
     String rows[] = _commonDll._BuildTableAsArray (message.get (), ";", -1);
@@ -11373,6 +12052,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       _logger.debug ("END: Dump of almost-available tests");
     }
     SingleDataResultSet result2 = executeStatement (connection, fixDataBaseNames (SQL_QUERY4, unquotedParms4), null, false).getResultSets ().next ();
+    //_logger.info ("<<<<<<<<< __Eligbletests_SP 4 : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     logargs.procName = "__Eligbletests_SP";
     logargs.startTime = starttime;
     logargs.userKey = testee;
@@ -11381,6 +12061,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     _commonDll._LogDBLatency_SP (logargs);
 
     connection.dropTemporaryTable (tests);
+    //_logger.info ("<<<<<<<<< __Eligbletests_SP Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     return result2;
   }
 

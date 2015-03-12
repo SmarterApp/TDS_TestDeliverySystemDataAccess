@@ -26,6 +26,7 @@ proc: begin
 	declare v_testkey varchar(200);
 	declare v_testid varchar(200);
 	declare v_custom bit;
+	declare v_cachekey bigint;
 
 	declare exit handler for sqlexception
 	begin
@@ -54,9 +55,6 @@ proc: begin
     if (v_debug <> 0) then
         select v_segment as segment;
         select * from tblout_splitaccomcodes;
---         select acctype, acccode, accvalue, allowchange, studentcontrol, isdefault, isselectable, valcount
---         from dbo.testkeyaccommodations(v_testkey) c, tblout_splitaccomcodes s
---         where s.`code` = c.acccode and cast(segment as unsigned) = v_segment;
     end if;
 
 	drop temporary table if exists tblout_testlanguages;
@@ -70,54 +68,66 @@ proc: begin
 	drop temporary table if exists tmp_tblaccoms;
     create temporary table tmp_tblaccoms(atype varchar(50), acode varchar(100), avalue varchar(250), allow bit, control bit, recordusage bit, isdefault bit, isselectable bit, valcount int);
 
-    insert into tmp_tblaccoms (atype, acode, avalue, allow, control, isdefault, isselectable, valcount, recordusage)
-	select distinct acctype, acccode, accvalue, allowchange, studentcontrol, isdefault, isselectable, valcount
-         , coalesce((select 1 from configs.client_toolusage 
-					  where clientname = v_clientname and testid = v_testid and tooltype = acctype and (recordusage = 1 or reportusage = 1)), 0)
-    from -- dbo.testkeyaccommodations(v_testkey) c
-			( -- first, get all tds tools directly related to this client's tests, 0 represents the global test scope, while segment positions are local segment score
-				select distinct 0 as segment,ttype.disableonguestsession, ttype.sortorder as tooltypesortorder, tt.sortorder as toolvaluesortorder, ttype.testmode as typemode
-					, tt.testmode as toolmode, `type` as acctype, `value` as accvalue, `code` as acccode, isdefault, allowcombine
-					, isfunctional, allowchange, isselectable, isvisible, studentcontrol
-					, (select count(*) from configs.client_testtool tool 
-						where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
-					, dependsontooltype
-					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
-					where md.testkey = v_testkey and
-						ttype.contexttype = 'test' and ttype.`context` = md.testid and ttype.clientname = md.clientname
-						and tt.contexttype = 'test' and tt.`context` = md.testid and tt.clientname = md.clientname and tt.type = ttype.toolname
-						and (tt.type <> 'language' or tt.`code` in (select `code` from tblout_testlanguages))
-						and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.mode)
-			-- get all the segment-specific accommodations
-				union all
-				select distinct segmentposition ,ttype.disableonguestsession, ttype.sortorder , tt.sortorder, ttype.testmode , tt.testmode 
-					, `type`, `value`, `code`, isdefault, allowcombine, isfunctional, allowchange
-					, isselectable, isvisible, studentcontrol
-					, (select count(*) from configs.client_testtool tool 
-						where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
-					, null  -- dependsontooltype
-					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_segmentproperties seg, configs.client_testmode md
-					where parenttest = md.testid and md.testkey = v_testkey and seg.modekey = v_testkey
-						and ttype.contexttype = 'segment' and ttype.`context` = segmentid and ttype.clientname = md.clientname
-						and tt.contexttype = 'segment' and tt.`context` = segmentid and tt.clientname = md.clientname and tt.`type` = ttype.toolname
-						and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.`mode`)
-			-- now get all test tools that have 'wild card' (i.e. '*') assignments (segments and languages never have wildcard assignments)
-				union all  
-					select distinct 0,ttype.disableonguestsession,  ttype.sortorder , tt.sortorder, ttype.testmode , tt.testmode 
-						, `type` , `value`, `code`, isdefault, allowcombine
+    -- look in cache of accommodations first, then compute from the query if not exists    
+	set v_cachekey = (select _key from configs.__accommodationcache where testkey = v_testkey and clientname = '--none--' /*v_clientname*/ and dateGenerated is not null);
+
+	if (v_cachekey is not null) then
+		insert into tmp_tblaccoms (atype, acode, avalue, allow, control, isdefault, isselectable, valcount, recordusage)
+		select distinct acctype, acccode, accvalue, allowchange, studentcontrol, isdefault, isselectable, valcount
+			 , coalesce((select 1 from configs.client_toolusage 
+						  where clientname = v_clientname and testid = v_testid and tooltype = acctype and (recordusage = 1 or reportusage = 1)), 0)
+		from configs.__cachedaccommodations c, tblout_splitaccomcodes s
+		where c._fk_accommodationcache = v_cachekey and s.`code` = c.acccode and segment = v_segment;
+	else
+		insert into tmp_tblaccoms (atype, acode, avalue, allow, control, isdefault, isselectable, valcount, recordusage)
+		select distinct acctype, acccode, accvalue, allowchange, studentcontrol, isdefault, isselectable, valcount
+			 , coalesce((select 1 from configs.client_toolusage 
+						  where clientname = v_clientname and testid = v_testid and tooltype = acctype and (recordusage = 1 or reportusage = 1)), 0)
+		from -- dbo.testkeyaccommodations(v_testkey) c
+				( -- first, get all tds tools directly related to this client's tests, 0 represents the global test scope, while segment positions are local segment score
+					select distinct 0 as segment,ttype.disableonguestsession, ttype.sortorder as tooltypesortorder, tt.sortorder as toolvaluesortorder, ttype.testmode as typemode
+						, tt.testmode as toolmode, `type` as acctype, `value` as accvalue, `code` as acccode, isdefault, allowcombine
 						, isfunctional, allowchange, isselectable, isvisible, studentcontrol
 						, (select count(*) from configs.client_testtool tool 
-							where tool.contexttype = 'test' and tool.`context` = '*' and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
+							where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
 						, dependsontooltype
-					from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
-					where md.testkey = v_testkey and ttype.contexttype = 'test' and ttype.`context` = '*' and ttype.clientname = md.clientname
-						and tt.contexttype = 'test' and tt.`context` = '*' and tt.clientname = md.clientname and tt.`type` = ttype.toolname 
-						and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.`mode`)
-						and not exists (select * from configs.client_testtooltype tool 
-										 where tool.contexttype = 'test' and tool.`context` = md.testid and tool.toolname = ttype.toolname and tool.clientname = md.clientname)
-			) c
-		, tblout_splitaccomcodes s
-	where s.`code` = c.acccode and segment = v_segment;
+						from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
+						where md.testkey = v_testkey and
+							ttype.contexttype = 'test' and ttype.`context` = md.testid and ttype.clientname = md.clientname
+							and tt.contexttype = 'test' and tt.`context` = md.testid and tt.clientname = md.clientname and tt.type = ttype.toolname
+							and (tt.type <> 'language' or tt.`code` in (select `code` from tblout_testlanguages))
+							and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.mode)
+				-- get all the segment-specific accommodations
+					union all
+					select distinct segmentposition ,ttype.disableonguestsession, ttype.sortorder , tt.sortorder, ttype.testmode , tt.testmode 
+						, `type`, `value`, `code`, isdefault, allowcombine, isfunctional, allowchange
+						, isselectable, isvisible, studentcontrol
+						, (select count(*) from configs.client_testtool tool 
+							where tool.contexttype = 'test' and tool.`context` = md.testid and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
+						, null  -- dependsontooltype
+						from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_segmentproperties seg, configs.client_testmode md
+						where parenttest = md.testid and md.testkey = v_testkey and seg.modekey = v_testkey
+							and ttype.contexttype = 'segment' and ttype.`context` = segmentid and ttype.clientname = md.clientname
+							and tt.contexttype = 'segment' and tt.`context` = segmentid and tt.clientname = md.clientname and tt.`type` = ttype.toolname
+							and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.`mode`)
+				-- now get all test tools that have 'wild card' (i.e. '*') assignments (segments and languages never have wildcard assignments)
+					union all  
+						select distinct 0, ttype.disableonguestsession, ttype.sortorder, tt.sortorder, ttype.testmode, tt.testmode 
+							, `type` , `value`, `code`, isdefault, allowcombine
+							, isfunctional, allowchange, isselectable, isvisible, studentcontrol
+							, (select count(*) from configs.client_testtool tool 
+								where tool.contexttype = 'test' and tool.`context` = '*' and tool.clientname = md.clientname and tool.`type` = tt.`type`) as valcount
+							, dependsontooltype
+						from configs.client_testtooltype ttype, configs.client_testtool tt, configs.client_testmode md
+						where md.testkey = v_testkey and ttype.contexttype = 'test' and ttype.`context` = '*' and ttype.clientname = md.clientname
+							and tt.contexttype = 'test' and tt.`context` = '*' and tt.clientname = md.clientname and tt.`type` = ttype.toolname 
+							and (ttype.testmode = 'all' or ttype.testmode = md.`mode`) and (tt.testmode = 'all' or tt.testmode = md.`mode`)
+							and not exists (select * from configs.client_testtooltype tool 
+											 where tool.contexttype = 'test' and tool.`context` = md.testid and tool.toolname = ttype.toolname and tool.clientname = md.clientname)
+				) c
+			, tblout_splitaccomcodes s
+		where s.`code` = c.acccode and segment = v_segment;
+	end if;
 
     if (v_debug <> 0) then 
 		select * from tmp_tblaccoms;
@@ -193,6 +203,7 @@ proc: begin
     update testopportunity_readonly 
 	set accommodationstring = p_formataccommodations(v_oppkey)
     where _fk_testopportunity = v_oppkey;
+
 
 	-- clean-up
     drop temporary table tmp_tblaccoms;

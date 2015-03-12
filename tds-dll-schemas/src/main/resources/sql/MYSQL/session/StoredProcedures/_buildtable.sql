@@ -15,10 +15,10 @@ begin
   
 	declare v_modifiedlist text;
 	declare v_searchposition, v_commaposition, v_recordcount int;
-	
-	drop temporary table if exists resulttable;
-	create temporary table resulttable (idx int, record varchar(255));
-  	
+
+	drop temporary table if exists tblout_buildtable;
+	create temporary table tblout_buildtable(idx int, record varchar(255)) engine = memory;
+	  	
 	select trim(both v_delimit from v_list) into v_modifiedlist;
   	
 	set v_searchposition = 1;
@@ -27,7 +27,7 @@ begin
   
 	while (v_commaposition > 1) do
 	begin
-		insert into resulttable (idx, record) values
+		insert into tblout_buildtable (idx, record) values
 		(v_recordcount, substring(v_modifiedlist from v_searchposition for (v_commaposition - v_searchposition)));
     		
 		set v_recordcount = v_recordcount + 1;
@@ -42,13 +42,9 @@ begin
 	end;
 	end while;
 
-	insert into resulttable (idx, record) 
+	insert into tblout_buildtable (idx, record) 
 		 values (v_recordcount, substring(v_modifiedlist from v_searchposition));
  
-	insert into tblout_buildtable
-	select idx, record 
-	from resulttable;
-
 end $$
 
 DELIMITER ;

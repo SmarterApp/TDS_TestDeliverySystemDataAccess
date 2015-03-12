@@ -31,6 +31,11 @@ proc: begin
 	declare v_opportunity int;
     declare v_date datetime(3);
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_selecttestform_predetermined';
+
 	set v_formkey = null;
 	set v_formid = null;
     
@@ -54,27 +59,15 @@ proc: begin
 	into v_clientname, v_testee, v_testid, v_session
     from testopportunity 
 	where _key = v_oppkey;
+	-- lock in share mode;
 
     set v_environment = (select environment from externs where clientname = v_clientname);
 
 	if (v_debug = 1) then select '_gettesteetestforms', v_clientname, v_testid, v_testee, v_sessiontype,  v_formlist; end if;
 
 	/* Call _gettesteetestforms stored procedure 
-	-- To capture and use result set from _gettesteetestforms, a temporary table is created to store the resultset */
-	drop temporary table if exists tblout_gettesteetestforms;
-	create temporary table tblout_gettesteetestforms(
-	    window 		varchar(100)
-	  , windowmax 	int
-	  , startdate 	datetime(3)
-	  , enddate 	datetime(3)
-	  , frmkey 		varchar(50)
-	  , `mode` 		varchar(50)
-	  , modemax 	int
-	  , testkey 	varchar(250)
-	);
-	
-	call _gettesteetestforms(v_clientname, v_testid, v_testee, v_sessiontype,  v_formlist, 0);
-	/* # */
+	-- To capture and use result set from _gettesteetestforms, a temporary table is created to store the resultset */	
+	call _gettesteetestforms(v_clientname, v_testid, v_testee, v_sessiontype,  v_formlist, 0, 0);
     
     insert into tmp_tblassigned (window, windowmax, startdate, enddate, frmkey, mode, modemax, testkey)
 	select * from tblout_gettesteetestforms;
@@ -87,6 +80,7 @@ proc: begin
 	set cnt = (select count(*) 
 				 from testopportunity o, testopportunitysegment s
 				where clientname = v_clientname and _efk_testee = v_testee and s._fk_testopportunity = o._key and formkey = frmkey);
+			  -- lock in share mode);
     
 	drop temporary table if exists tmp_tblforms;
 	create temporary table tmp_tblforms(_formkey varchar(50), id varchar(150), itemcnt int, formcnt int);
@@ -120,6 +114,7 @@ proc: begin
 	drop temporary table tmp_tblforms;
 	drop temporary table tmp_tblassigned;
 
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

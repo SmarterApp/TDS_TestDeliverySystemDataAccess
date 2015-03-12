@@ -15,6 +15,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_suppressreport bit -- = 0
   , v_browserkey varbinary(16) -- = null
 )
+sql security invoker
 proc: begin
 	
     declare v_clientname varchar(100);
@@ -53,6 +54,8 @@ proc: begin
 		set v_sesstart = v_now;
 	end if;
 
+	set transaction isolation level read committed;
+
 	update `session`
 	set `status` = 'open'
 	  , datechanged = v_now
@@ -61,6 +64,8 @@ proc: begin
 	  , datebegin = v_sesstart
 	  , _fk_browser = v_browserkey
     where _key = v_sessionkey;
+
+	set transaction isolation level repeatable read;
 
 	if (auditsessions(v_clientname) = 1) then
         insert into archive.sessionaudit(_fk_session, dateaccessed, accesstype, hostname, browserkey) 

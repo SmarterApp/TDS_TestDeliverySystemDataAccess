@@ -4,6 +4,7 @@ create table `r_studentpackagedetails` (
   `attrname` varchar(200) not null,
   `attrdesc` varchar(200) default null,
   `attrvalue` text not null,
+  `istesteeattribute` bit default 0,
   KEY `fk_studentpackage` (`_fk_studentpackagekey`)
 ) default charset = UTF8;
 
@@ -620,8 +621,9 @@ create table  `sim_defaultitemselectionparameter`(
 
 create table `sim_sessiontestpackage` (
 	`_fk_session`      varbinary(16) not null,
+	`_fk_adminsubject` varchar(250) not null,
 	`_fk_testpackage`  varbinary(16) not null,
-	constraint `pk_sim_sessiontestpackage` primary key clustered(`_fk_session`, `_fk_testpackage`)
+	constraint `pk_sim_sessiontestpackage` primary key clustered(`_fk_session`, `_fk_adminsubject`, `_fk_testpackage`)
 ) default charset = UTF8;
 
 create table `sirve_audit`  ( 

@@ -20,6 +20,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_windowlist text -- = null -- this parameter for debugging purposes only
   , v_formlist text -- = null -- this parameter for debugging purposes only
   , v_debug bit -- = 0 -- this parameter for debugging purposes only
+  , v_returnresult bit -- = 0
 )
 sql security invoker
 proc: begin
@@ -34,12 +35,18 @@ proc: begin
     set v_starttime = now(3);
     set v_isformtest = 0;
 
-	drop temporary table if exists tmp_tblformwindows;
-    create temporary table tmp_tblformwindows(wid varchar(100), form varchar(50))engine = memory;
-
-	drop temporary table if exists tmp_tblforms;
-    create temporary table tmp_tblforms(_key varchar(50))engine = memory;
-
+	drop temporary table if exists tblout_gettesteetestwindows;
+	create temporary table tblout_gettesteetestwindows(
+		windowid		varchar(50)	
+	  , windowmax		int
+	  , startdate		datetime(3)
+	  , enddate			datetime(3)
+	  , formkey			varchar(200)
+	  , `mode`			varchar(50)
+	  , modemax			int
+	  , testkey			varchar(250)
+	) engine = memory;
+/*
 	drop temporary table if exists tmp_tblgetcurrenttestwindows;
 	create temporary table tmp_tblgetcurrenttestwindows(
 		windowid		varchar(50)	
@@ -49,9 +56,9 @@ proc: begin
 	  , `mode`			varchar(50)
 	  , modemax			int
 	  , testkey			varchar(250)
-	)engine = memory;
-   
-    -- getcurrenttestwindows(v_clientname, v_testid, v_sessiontype);
+	) engine = memory;
+
+	-- getcurrenttestwindows(v_clientname, v_testid, v_sessiontype);
 	insert into tmp_tblgetcurrenttestwindows
 	select distinct w.windowid
 		 , w.numopps as windowmax
@@ -68,12 +75,14 @@ proc: begin
 		and m.clientname = v_clientname and m.testid = v_testid
 		and (m.sessiontype = -1 or m.sessiontype = v_sessiontype)
 		and (w.sessiontype = -1 or w.sessiontype = v_sessiontype);
-
+*/   
 
     if (v_testee < 0) then -- for guest testees there is no registration data to be found
+		-- getcurrenttestwindows(v_clientname, v_testid, v_sessiontype);
 		insert into tblout_gettesteetestwindows
         select distinct windowid, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
-        from tmp_tblgetcurrenttestwindows;
+		from tmp_tblgetcurrenttestwindows_global;
+
         leave proc;
     end if;
 
@@ -93,26 +102,25 @@ proc: begin
         set v_requirewindow = 0;
 	end if;
 
+	drop temporary table if exists tmp_tblformwindows;
+	create temporary table tmp_tblformwindows(wid varchar(100), form varchar(50)) engine = memory; 
+
 	-- independent window selection is used in several different places for form and adaptive tests. set it up here    
-    if (v_requirewindow = 1) then 
-	begin                
+    if (v_requirewindow = 1) then
+		if (v_debug = 1) then select 'require window'; end if;         
+
         if (v_windowlist is null) then
             call _getrtsattribute(v_clientname, v_testee, v_windowfield, v_windowlist /*output*/, 'student', 0);
 		end if;
 
 		/* Call _buildtable stored procedure 
 		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-		drop temporary table if exists tblout_buildtable;
-		create temporary table tblout_buildtable(idx int, record varchar(255));
-			  
 		call _buildtable(v_windowlist, ';');
 
 		insert into tmp_tblformwindows (wid)
 		select substring_index(record, ':', -1) 
 		from tblout_buildtable
-		where record like concat(v_tideid, ':%');
-		/* # */		
-    end;
+		where record like concat(v_tideid, ':%');	
 	end if;
 
 	set v_gettestformwindows_cnt = (select 
@@ -146,27 +154,16 @@ proc: begin
 
 
     if (v_gettestformwindows_cnt > 0) then
+		if (v_debug = 1) then select 'cnt > 0'; end if;
 		/* Call _gettesteetestforms stored procedure 
-		-- To capture and use result set from _gettesteetestforms, a temporary table is created to store the resultset */
-		drop temporary table if exists tblout_gettesteetestforms;
-		create temporary table tblout_gettesteetestforms(
-			window 		varchar(100)
-		  , windowmax 	int
-		  , startdate 	datetime(3)
-		  , enddate 	datetime(3)
-		  , frmkey 		varchar(50)
-		  , `mode` 		varchar(50)
-		  , modemax 	int
-		  , testkey 	varchar(250)
-		);
-		
-		call _gettesteetestforms(v_clientname, v_testid, v_testee, v_sessiontype, v_formlist, 0);
-		/* # */
+		-- To capture and use result set from _gettesteetestforms, a temporary table is created to store the resultset */		
+		call _gettesteetestforms(v_clientname, v_testid, v_testee, v_sessiontype, v_formlist, 0, 0);
+
 		insert into tblout_gettesteetestwindows
 		select distinct window, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
-		from tblout_gettesteetestforms;
+		from tblout_gettesteetestforms;	
 
-        call _logdblatency('_gettesteetestwindows', v_starttime, null, null, null, null, null, v_clientname, null);
+        call _logdblatency('_gettesteetestwindows', v_starttime, v_testee, null, null, null, null, v_clientname, 'exit at condition: v_gettestformwindows_cnt > 0');
         leave proc;
     end if;
 
@@ -180,30 +177,25 @@ proc: begin
 
 		insert into tblout_gettesteetestwindows
         select distinct windowid, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
-        from tmp_tblformwindows, tmp_tblgetcurrenttestwindows
+        from tmp_tblformwindows, tmp_tblgetcurrenttestwindows_global
         where wid = windowid;
 		
-		if (v_debug = 1) then 
-			select 'window required'; 
-			select * from tblout_gettesteetestwindows;
-		end if;
-
-        call _logdblatency('_gettesteetestwindows', v_starttime, null, null, null, null, null, v_clientname, null);
+		if (v_debug = 1) then select 'window required'; select * from tblout_gettesteetestwindows; end if;
+        call _logdblatency('_gettesteetestwindows', v_starttime, v_testee, null, null, null, null, v_clientname, null);
         leave proc;
     end;
 	end if;
 
     -- not a fixed form test and no special window conditions specific to the testee. return all windows currently active on this test
-	insert into tblout_gettesteetestwindows
+    insert into tblout_gettesteetestwindows
     select distinct windowid, windowmax , startdate, enddate, null as formkey, `mode`, modemax, testkey
-    from tmp_tblgetcurrenttestwindows;
-    
+    from tmp_tblgetcurrenttestwindows_global;
+	    
 	-- clean-up
 	drop temporary table tmp_tblformwindows;
-	drop temporary table tmp_tblforms;
-	drop temporary table tmp_tblgetcurrenttestwindows;
+-- 	drop temporary table tmp_tblgetcurrenttestwindows;
 
-    call _logdblatency('_gettesteetestwindows', v_starttime, null, null, null, null, null, v_clientname, null);
+    call _logdblatency('_gettesteetestwindows', v_starttime, v_testee, null, null, null, null, v_clientname, null);
 
 end $$
 

@@ -66,19 +66,7 @@ proc: begin
 	  , testkey varchar(250)
 	);
     
-	drop temporary table if exists tblout_gettesteetestwindows;
-	create temporary table tblout_gettesteetestwindows(
-		windowid		varchar(50)	
-	  , windowmax		int
-	  , startdate		datetime(3)
-	  , enddate			datetime(3)
-	  , formkey			varchar(200)
-	  , `mode`			varchar(50)
-	  , modemax			int
-	  , testkey			varchar(250)
-	) engine = memory;
-
-    call _gettesteetestwindows(v_clientname, v_testid, v_testee, v_sessiontype, null, null, 0);
+    call _gettesteetestwindows(v_clientname, v_testid, v_testee, v_sessiontype, null, null, 0, 0);
 
 	insert into tmp_tblwindows(wid, maxopps, startdate, enddate, formkey, testmode, modemax, testkey)
 	select * from tblout_gettesteetestwindows;
@@ -95,13 +83,14 @@ proc: begin
         leave proc;
     end if;
 
-	call _createclientreportingid(v_clientname, v_testoppkey, v_newid /*output*/);
-
-    if (v_newid is null) then
-		call _logdberror(v_procname, 'unable to create a unique reporting id', v_testee, v_testkey, v_opportunity, null, null, null);
-		call _returnerror(v_clientname, v_procname, 'unable to create a unique reporting id', null, null, null, null);
-		leave proc;
-	end if;
+-- 	COMMENTING OUT TEMPORARILY.
+-- 	call _createclientreportingid(v_clientname, v_testoppkey, v_newid /*output*/);
+-- 
+--     if (v_newid is null) then
+-- 		call _logdberror(v_procname, 'unable to create a unique reporting id', v_testee, v_testkey, v_opportunity, null, null, null);
+-- 		call _returnerror(v_clientname, v_procname, 'unable to create a unique reporting id', null, null, null, null);
+-- 		leave proc;
+-- 	end if;
 
     -- version is irrespective of deleted status
     
@@ -121,7 +110,7 @@ proc: begin
 		 , v_browserkey, v_today, v_newid, v_windowid, v_mode, v_segmented, v_algorithm, v_testkey, v_environment, sessionid, proctorname, 1
     from `session` 
 	where _key = v_sessionkey;
-    
+
     set v_context = 'initial';
 
     call _settesteeattributes(v_clientname, v_testoppkey, v_testee, v_context);
@@ -133,9 +122,13 @@ proc: begin
 	-- insert the given accommodations or defaults
     call _initopportunityaccommodations(v_testoppkey, v_guestaccommodations);
 
+	set transaction isolation level read committed;
+
     update testopportunity 
 	set `status` = v_status
     where _key = v_testoppkey; 
+
+	set transaction isolation level repeatable read;
 
 	if (v_auditproc <> 0) then
 		insert into archive.opportunityaudit(_fk_testopportunity, dateaccessed, _fk_session, accesstype, hostname, _fk_browser)

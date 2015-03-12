@@ -57,7 +57,8 @@ proc: begin
     insert into tmp_tblgroups (`page`, gid, itemsrequired , itemcount , maxrequired , answered )
     select `page`, groupid, sum(required), count(*), max(grouprequired), sum(response)
     from tmp_tblitems
-    group by `page`, groupid;
+    group by `page`, groupid
+	order by null;
 
     update tmp_tblgroups 
 	set maxrequired = itemcount
@@ -73,8 +74,8 @@ proc: begin
     2. if there exists a group where maxrequired > answered the group is a candidate for v_firstpage
         (covers cases where there are optional items in a group that requires fewer than all items to be answered)
     */
-	drop temporary table if exists tmp_tblgroups;
-    create temporary table tmp_tblpages(`page` int);
+	drop temporary table if exists tmp_tblpages;
+    create temporary table tmp_tblpages(`page` int) engine = memory;
 
     insert into tmp_tblpages (`page`)
     select distinct `page` 

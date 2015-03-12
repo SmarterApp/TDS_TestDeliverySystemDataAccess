@@ -84,12 +84,11 @@ proc: begin
 							when v_status = 'paused' and status in ('started', 'review') then v_now else datepaused end
 	  , dateinvalidated = case v_status when 'invalidated' then v_now else dateinvalidated end
 	  , invalidatedby   = case v_status when 'invalidated' then v_requestor else invalidatedby end
-	  , xmlhost         = case v_status when 'submitted' then host_name() else xmlhost end
+	  , xmlhost         = case v_status when 'submitted' then @@hostname else xmlhost end
 	  , waitingforsegment = case -- proctor updates segment entry/exit request
 								when v_status in ('approved', 'denied') and status in ('segmententry', 'segmentexit') then null 
 								else waitingforsegment end
 	  , `comment`		= case when v_comment is not null then v_comment else comment end
-	-- important: do not set datestarted in this procedure. that is the provenance of startopportunity only
 	where _key = v_oppkey;
 
 	-- place all the special post-processing calls here

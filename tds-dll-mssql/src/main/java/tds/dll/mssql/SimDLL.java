@@ -767,7 +767,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL {
   }
 
   @Override
-  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String bpElementID, String paramName, String paramValue)
+  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String segmentKey, String bpElementID, String paramName, String paramValue)
       throws ReturnStatusException {
     // TODO Auto-generated method stub
   }

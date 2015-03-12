@@ -19,6 +19,7 @@ begin
     declare v_b float;
     declare v_p int;
 
+	drop temporary table if exists tmp_b_s;
     create temporary table tmp_b_s (b float, parmnum int, _key int primary key auto_increment);
     
     insert into tmp_b_s (b, parmnum)

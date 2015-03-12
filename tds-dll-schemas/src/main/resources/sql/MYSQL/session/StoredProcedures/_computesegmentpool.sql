@@ -25,6 +25,11 @@ begin
     declare v_shortfall int;       -- sum of items on strands that the pool falls below the min
     declare v_strandcnt, v_newlen int;
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_computesegmentpool';
+
 	drop temporary table if exists tmp_tblpool;
 	drop temporary table if exists tmp_tblblueprint;
 
@@ -38,9 +43,6 @@ begin
 
 	/* Call _buildtable stored procedure 
 	-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-	drop temporary table if exists tblout_buildtable;
-	create temporary table tblout_buildtable(idx int, record varchar(255));
-		  
 	call _buildtable(v_poolstring, ',');
 
     insert into tmp_tblpool (itemkey)
@@ -104,6 +106,8 @@ begin
 	-- clean-up
 	drop temporary table tmp_tblpool;
 	drop temporary table tmp_tblblueprint;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

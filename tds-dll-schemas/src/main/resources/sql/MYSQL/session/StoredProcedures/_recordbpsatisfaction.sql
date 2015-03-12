@@ -45,7 +45,8 @@ proc: begin
     insert into testopportunitycontentcounts (_fk_testopportunity, _efk_testid, _efk_adminsubject, contentlevel, itemcount)
     select v_oppkey, v_testid, v_testkey, contentlevel, count(*)
     from tmp_tblitems i
-    group by contentlevel;
+    group by contentlevel
+	order by null;
 
     if (exists (select * from testopportunitysegmentcounts where _fk_testopportunity = v_oppkey)) then
         delete from testopportunitysegmentcounts 
@@ -55,7 +56,8 @@ proc: begin
     insert into testopportunitysegmentcounts (_fk_testopportunity, _efk_testid, _efk_adminsubject, _efk_segment, contentlevel, itemcount)
     select v_oppkey, v_testid, v_testkey, segment, contentlevel, count(*)
     from tmp_tblitems i
-    group by segment, contentlevel;
+    group by segment, contentlevel
+	order by null;
 
     -- clean-up
 	drop temporary table tmp_tblitems;

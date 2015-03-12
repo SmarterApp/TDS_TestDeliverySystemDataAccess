@@ -38,7 +38,7 @@ proc: begin
 	  , allow bit
 	  , control bit
 	  , isdefault bit
-	)engine=memory;
+	)engine = memory;
         
     select k.testid, accommodationfamily
 	into v_testid, v_family
@@ -51,10 +51,7 @@ proc: begin
     create temporary table tmp_tblsplitrow(idx int, record text);
 
 	/* Call _buildtable stored procedure 
-	-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-	drop temporary table if exists tblout_buildtable;
-	create temporary table tblout_buildtable(idx int, record varchar(255))engine=memory;
-		  
+	-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */		  
 	call _buildtable(v_accoms, v_delim);
 
 	insert into tmp_tblsplitrow(idx, record)
@@ -88,11 +85,6 @@ proc: begin
 		end if;
     end;
 	end while;
-
-	/* Call _buildtable stored procedure 
-	-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-	drop temporary table if exists tblout_buildtable;
-	create temporary table tblout_buildtable(idx int, record varchar(255))engine=memory;
 		  
 	call _buildtable(v_cset1, v_codedelim);
 

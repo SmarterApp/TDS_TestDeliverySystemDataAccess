@@ -83,16 +83,12 @@ proc: begin
     if (v_itemkeys is not null) then
 	begin
 		/* Call _buildtable stored procedure 
-		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-		drop temporary table if exists tblout_buildtable;
-		create temporary table tblout_buildtable(idx int, record varchar(255)) engine = memory;
-			  
+		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */			  
 		call _buildtable(v_itemkeys, v_delimiter);
 
         insert into tmp_tblitems (p, itemkey)
         select idx, record
 		from tblout_buildtable;
-		/* # */
 	end;
 	end if;
 
@@ -153,9 +149,9 @@ proc: begin
     from testeeresponse 
 	where _fk_testopportunity = v_oppkey and position = v_lastposition;
 
-	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
-		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 1');
-	set v_starttime = now(3);
+-- 	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+-- 		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 1');
+-- 	set v_starttime = now(3);
 
 	-- get item data from the itembank, filtering by the items that were chosen by the selection algorithm (some may have been excluded)
 	drop temporary table if exists tmp_tblinserts;
@@ -173,7 +169,7 @@ proc: begin
 	  , `format` varchar(50)
 	  , isfieldtest bit
 	  , isrequired bit
-	) engine = memory;
+	);
 
 	insert into tmp_tblinserts(bankitemkey, relativeposition, bankkey, _efk_itsitem, b, scorepoint, `format`, isfieldtest, isrequired, contentlevel, formposition, answer) 
     select a._fk_item 		as bankitemkey
@@ -287,9 +283,9 @@ proc: begin
 
     if (v_noinsert = 1) then leave proc; end if;
 
-	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
-		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 2: before transaction');
-	set v_starttime = now(3);
+-- 	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+-- 		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 2: before transaction');
+-- 	set v_starttime = now(3);
 
 	start transaction;
 
@@ -366,8 +362,8 @@ proc: begin
 
 	commit;
 
-	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
-		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 3: after transaction commit');
+-- 	insert into archive._dblatency (duration, starttime, procname, _fk_testopportunity, _fk_session, clientname, `comment`) 
+-- 		 values (TIMESTAMPDIFF(microsecond, v_starttime, now(3))/1000, v_today, v_procname, v_oppkey, v_session, v_clientname, 'phase 3: after transaction commit');
 
     set v_itemcnt = (select count(*)
 					   from testeeresponse where _fk_testopportunity = v_oppkey and dategenerated is not null);

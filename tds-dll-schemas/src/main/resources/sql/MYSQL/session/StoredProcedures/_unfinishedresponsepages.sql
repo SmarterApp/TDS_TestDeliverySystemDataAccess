@@ -16,6 +16,11 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 sql security invoker
 proc: begin
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_unfinishedresponsepages';
+
 	drop temporary table if exists tmp_tblunfinished;
     create temporary table tmp_tblunfinished(
 		`page` int
@@ -33,7 +38,8 @@ proc: begin
 		 , sum(case when isrequired = 1 and isvalid = 1 then 1 else 0 end)
     from testeeresponse
 	where _fk_testopportunity = v_oppkey and dategenerated is not null 
-    group by `page`, groupitemsrequired;
+    group by `page`, groupitemsrequired
+	order by null;
     
     update tmp_tblunfinished 
 	set grouprequired = numitems where grouprequired = -1;
@@ -53,6 +59,8 @@ proc: begin
 
 	-- clean-up
 	drop temporary table tmp_tblunfinished;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

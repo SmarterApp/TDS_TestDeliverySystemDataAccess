@@ -15,6 +15,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_sessiontype int
   , v_formlist text -- = null
   , v_debug bit -- = 0
+  , v_returnresult bit -- = 0
 )
 sql security invoker
 proc: begin
@@ -23,17 +24,23 @@ proc: begin
 	declare v_requireformwindow, v_requireform, v_ifexists bit;
 	declare v_formfield varchar(50);
 
-	drop temporary table if exists tmp_tblforms;
-    create temporary table tmp_tblforms(
-		wid varchar(100)
-	  , form varchar(50)
-	);
-	
-	drop temporary table if exists tmp_tblrtsvals;
-    create temporary table tmp_tblrtsvals(
-		record varchar(200)
-	);
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_gettesteetestforms';
 
+	drop temporary table if exists tblout_gettesteetestforms;
+	create temporary table tblout_gettesteetestforms(
+		window 		varchar(100)
+	  , windowmax 	int
+	  , startdate 	datetime(3)
+	  , enddate 	datetime(3)
+	  , frmkey 		varchar(50)
+	  , `mode` 		varchar(50)
+	  , modemax 	int
+	  , testkey 	varchar(250)
+	) engine = memory;
+	
 	drop temporary table if exists tmp_tblgettestformwindows;
 	create temporary table tmp_tblgettestformwindows(
 		windowid		varchar(50)	
@@ -50,7 +57,7 @@ proc: begin
 	  , testkey			varchar(250)
 	  , windowsession	int
 	  , modesession		int
-	);
+	) engine = memory;
 
 	insert into tmp_tblgettestformwindows
 	-- dbo.gettestformwindows(v_clientname, v_testid, v_sessiontype)
@@ -99,7 +106,10 @@ proc: begin
 		insert into tblout_gettesteetestforms
         select windowid, windowmax, startdate, enddate, formkey, `mode`, modemax, testkey
         from tmp_tblgettestformwindows;
-        
+
+		if (v_returnresult = 1) then 
+			select * from tblout_gettesteetestforms; 
+		end if;
 		leave proc;
     end if;
     
@@ -109,6 +119,7 @@ proc: begin
     from configs.client_testproperties t, configs.client_testmode f
     where t.clientname = v_clientname and t.testid = v_testid and f.clientname = v_clientname and f.testid = v_testid
         and (sessiontype = -1 or sessiontype = v_sessiontype);
+ 	-- lock in share mode;
 
     if (v_formlist is not null) then 
 	begin -- this block sets up debugging capabilities by simulating conditions we expect to find in the rts   
@@ -127,6 +138,12 @@ proc: begin
 		select v_tideid tideid, v_formfield formfield, v_requireformwindow reqwin, v_requireform reqform, v_ifexists ifexists, v_formlist forms;
 	end if;
 
+	drop temporary table if exists tmp_tblforms;
+	create temporary table tmp_tblforms(
+		wid varchar(100)
+	  , form varchar(50)
+	) engine = memory;
+
 	-- note: we cannot rely on all ';'-delimited values in the test forms field to be window-discriminated. only those for this test
 	-- and we can only tell which test we are looking at by the intersection between the forms and the tests
 	-- so we have to split this string 2 ways: with the window and without the window
@@ -134,25 +151,17 @@ proc: begin
 	begin
 		/* Call _buildtable stored procedure 
 		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-		drop temporary table if exists tblout_buildtable;
-		create temporary table tblout_buildtable(idx int, record varchar(255));
-			  
 		call _buildtable(v_formlist, ';');
-
-		insert into tmp_tblrtsvals (record)
-		select record 
-		from tblout_buildtable;
-		/* # */
 
 		-- first, split the string for all values that have the window
         insert into tmp_tblforms (wid, form)
         select substring_index(record, ':', 1), substring_index(record, ':', -1)
-        from tmp_tblrtsvals 
+        from tblout_buildtable 
 		where locate(':', record) > 0;
 
         insert into tmp_tblforms (form)
         select record
-        from tmp_tblrtsvals 
+        from tblout_buildtable 
 		where locate(':', record) = 0;
         
         if (v_debug = 1) then select * from tmp_tblforms; end if;
@@ -168,11 +177,11 @@ proc: begin
         where wid = windowid 
 			and form = formkey;
 
-        if (v_debug = 1) then 
-			select 'exit 1'; 
-			select * from tblout_gettesteetestforms;
-		end if;
+        if (v_debug = 1) then select 'exit 1'; select * from tblout_gettesteetestforms; end if;
 
+		if (v_returnresult = 1) then 
+			select * from tblout_gettesteetestforms; 
+		end if;
         leave proc;
 	end;
     elseif (v_requireform = 1) then
@@ -183,11 +192,11 @@ proc: begin
         from tmp_tblforms
 			join tmp_tblgettestformwindows on form = formkey;  
 
-		if (v_debug = 1) then 
-			select 'exit 2'; 
-			select * from tblout_gettesteetestforms;
-		end if;
+		if (v_debug = 1) then select 'exit 2'; select * from tblout_gettesteetestforms; end if;
 
+		if (v_returnresult = 1) then 
+			select * from tblout_gettesteetestforms; 
+		end if;
 		leave proc;
 	end;
     elseif (v_ifexists = 1 and exists (select * from tmp_tblforms, tmp_tblgettestformwindows where form = formkey)) then
@@ -198,11 +207,11 @@ proc: begin
 		from tmp_tblforms
 			join tmp_tblgettestformwindows on form = formkey;  
 		
-		if (v_debug = 1) then 
-			select 'exit 3'; 
-			select * from tblout_gettesteetestforms;
-		end if;
+		if (v_debug = 1) then select 'exit 3'; select * from tblout_gettesteetestforms; end if;
 
+		if (v_returnresult = 1) then 
+			select * from tblout_gettesteetestforms; 
+		end if;
 		leave proc;
 	end;
 	end if;
@@ -212,12 +221,18 @@ proc: begin
     select windowid, windowmax, startdate, enddate, formkey, mode, modemax, testkey
     from tmp_tblgettestformwindows;
 
-    if (v_debug = 1) then 
-		select 'exit last'; 
-		select * from tblout_gettesteetestforms;
+    if (v_debug = 1) then select 'exit last'; select * from tblout_gettesteetestforms; end if;
+
+	if (v_returnresult = 1) then 
+		select * from tblout_gettesteetestforms; 
 	end if;
 
-    
+	-- clean-up
+	drop temporary table tmp_tblforms;
+	drop temporary table tmp_tblgettestformwindows;
+
+    call _logdblatency(v_procname, v_starttime, v_testee, null, null, null, null, null, null);
+
 end $$
 
 DELIMITER ;

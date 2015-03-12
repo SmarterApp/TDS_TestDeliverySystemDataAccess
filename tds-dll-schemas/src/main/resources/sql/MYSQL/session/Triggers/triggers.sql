@@ -140,7 +140,6 @@ begin
 	  , environment        	 	= new.environment
 	where _fk_testopportunity = new._key;
 
-
 end$$
 
 DELIMITER ;

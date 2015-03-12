@@ -20,15 +20,21 @@ proc: begin
 	declare v_relation varchar(100);
 	declare v_parentkey bigint;
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+
+	set v_starttime = now(3);
+	set v_procname = '_gettesteerelationships';
+
 	if (v_testee < 0) then -- for guest students, we don't have to retreive any of the relationship data, as there isn't any
 		leave proc;
 	end if;
 
 	drop temporary table if exists tmp_tblrelations;
-    create temporary table tmp_tblrelations (reltype varchar(50), rtsname varchar(100)) engine = memory;
+    create temporary table tmp_tblrelations (reltype varchar(50), rtsname varchar(100))engine = memory;
 
 	drop temporary table if exists tmp_tblattributes;
-    create temporary table tmp_tblattributes (relationtype varchar(50), entitykey bigint, attname varchar(50), rtsname varchar(100), attval varchar(300)) engine = memory;
+    create temporary table tmp_tblattributes (relationtype varchar(50), entitykey bigint, attname varchar(50), rtsname varchar(100), attval varchar(300))engine = memory;
 
 	insert into tmp_tblrelations (reltype, rtsname)
     select tds_id, rtsname
@@ -63,6 +69,8 @@ proc: begin
 	insert into tblout_gettesteerelationships
 	select relationtype, entitykey, attname as tds_id,  attval 
 	from tmp_tblattributes;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, null, null, null, null);
 
 end $$
 

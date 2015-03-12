@@ -53,8 +53,8 @@ proc: begin
             set v_newid = (select initialreportingid from externs where clientname = v_clientname);
 		end if;
 
-        insert into client_reportingid(clientname, reportingid, _fk_testopportunity)
-			 values (v_clientname, v_newid, v_oppkey);
+        insert into client_reportingid(clientname, reportingid, _fk_testopportunity, _date)
+			 values (v_clientname, v_newid, v_oppkey, now(3));
 
 		set v_consume = (select release_lock(v_resourcename));   -- note: commit/rollback will implicitly release the lock
         set v_applock = -1;

@@ -221,7 +221,7 @@ public interface ISimDLL
   
   public SingleDataResultSet SIM_GetItemSelectionParameters (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException;
 
-  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String bpElementID, String paramName, String paramValue) throws ReturnStatusException;
+  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String segmentKey, String bpElementID, String paramName, String paramValue) throws ReturnStatusException;
 
   public void SIM_DeleteAllItemSelectionParameterDefaultRecords (SQLConnection connection) throws ReturnStatusException;
 

@@ -31,6 +31,11 @@ proc: begin
     declare v_formcount int;
     declare v_query text; 
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_selecttestform_eqdist';
+
     set v_date = now(3);
 	set v_formkey = null;
 	set v_formid = null;
@@ -94,6 +99,8 @@ proc: begin
 	from tmp_tblforms
 	order by usercnt, formcnt, uuid()
 	limit 1;
+
+call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

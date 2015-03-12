@@ -10,6 +10,7 @@ package tds.dll.mysql;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1355,6 +1356,14 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     connection.dropTemporaryTable (itemsTable);
   }
 
+  public void _OnStatus_Completed_SP_Mysql (SQLConnection connection, UUID oppkey) throws ReturnStatusException {
+    final String SQL_QUERY = "call _onstatus_completed (${oppkey})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppkey);
+
+    executeStatement (connection, SQL_QUERY, params, false);
+  }
+  
   public void _OnStatus_Completed_SP (SQLConnection connection, UUID oppkey) throws ReturnStatusException {
 
     Date now = _dateUtil.getDateWRetStatus (connection);
@@ -1482,6 +1491,21 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   public SingleDataResultSet SetOpportunityStatus_SP (SQLConnection connection, UUID oppkey, String status, Boolean suppressReport, String requestor) throws ReturnStatusException {
     return SetOpportunityStatus_SP (connection, oppkey, status, suppressReport, requestor, null);
+  }
+  
+  
+  public SingleDataResultSet SetOpportunityStatus_SP_Mysql (SQLConnection connection, UUID oppkey, String status, Boolean suppressReport, String requestor, String comment) throws ReturnStatusException {
+    
+    final String SQL_QUERY = "call setopportunitystatus (${oppkey}, ${status}, ${suppressReport}, ${requestor}, ${comment})";
+    SqlParametersMaps params = new SqlParametersMaps ();
+    params.put ("oppkey", oppkey);
+    params.put ("status", status);
+    params.put ("suppressReport", suppressReport);
+    params.put ("requestor", requestor);
+    params.put("comment",comment);
+
+    SingleDataResultSet resultSet = executeStatement (connection, SQL_QUERY, params, false).getResultSets ().next ();
+    return resultSet;
   }
 
   /**
@@ -2476,6 +2500,33 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   public MultiDataResultSet _UpdateOpportunityAccommodations_SP (SQLConnection connection, UUID oppKey, int segment, String accoms, int isStarted, Boolean approved, Boolean restoreRTS,
       _Ref<String> error) throws ReturnStatusException {
     return _UpdateOpportunityAccommodations_SP (connection, oppKey, segment, accoms, isStarted, approved, restoreRTS, error, 0);
+  }
+  
+  public MultiDataResultSet _UpdateOpportunityAccommodations_SP_Mysql (SQLConnection connection, UUID oppKey, int segment, String accoms, int isStarted, Boolean approved, Boolean restoreRTS,
+      _Ref<String> error, int debug) throws ReturnStatusException {
+    List<SingleDataResultSet> resultsets = new ArrayList<SingleDataResultSet> ();
+    try {
+      
+      String oppKeyStr = oppKey.toString ().replaceAll ("-", "");
+      oppKeyStr = String.format ("0x%s", oppKeyStr);
+      final String SQL_QUERY = "{call _UpdateOpportunityAccommodations ("+oppKeyStr+",?,?,?,?,?,?,?)}";
+      CallableStatement callableStatement = connection.prepareCall(SQL_QUERY);
+      callableStatement.setInt (1, segment);
+      callableStatement.setString (2, accoms);
+      callableStatement.setInt (3, isStarted);
+      callableStatement.setBoolean (4, approved);
+      callableStatement.setBoolean (5, restoreRTS);
+      callableStatement.registerOutParameter(6, java.sql.Types.VARCHAR);
+      callableStatement.setInt(7, debug);
+       
+      callableStatement.executeUpdate();
+       
+      error.set (callableStatement.getString(6));
+      
+    } catch (SQLException e) {
+      throw new ReturnStatusException (e);
+    }
+    return new MultiDataResultSet (resultsets);
   }
 
   // ported by Udaya Kommineni.

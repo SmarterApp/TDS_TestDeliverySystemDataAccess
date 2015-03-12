@@ -15,6 +15,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_sessiontype int
   , v_modelist text -- = null -- this parameter for debugging purposes only
   , v_debug bit -- = 0 -- this parameter for debugging purposes only
+  , v_returnresult bit -- = 0
 )
 sql security invoker
 proc: begin 
@@ -23,16 +24,21 @@ proc: begin
 	declare v_modefield varchar(50);
 	declare v_requiremode, v_requiremodewindow bit;
 
-	drop temporary table if exists tmp_tbltestmodes;
-    create temporary table tmp_tbltestmodes(
-		rtsval varchar(200)
-	  , wid varchar(100)
-	  , asgnmode varchar(50)
-	)engine = memory;
+    declare v_starttime datetime(3);
+    set v_starttime = now(3);
 
-	drop temporary table if exists tmp_tblrtsvals;
-    create temporary table tmp_tblrtsvals(record varchar(200));
+	drop temporary table if exists tblout_gettesteetestmodes;
+	create temporary table tblout_gettesteetestmodes(
+		windowid		varchar(50)	
+	  , windowmax		int
+	  , startdate		datetime(3)
+	  , enddate			datetime(3)
+	  , `mode`			varchar(50)
+	  , modemax			int
+	  , testkey			varchar(250)
+	) engine = memory;
 
+/*
 	drop temporary table if exists tmp_tblgetcurrenttestwindows;
 	create temporary table tmp_tblgetcurrenttestwindows(
 		windowid		varchar(50)	
@@ -42,9 +48,9 @@ proc: begin
 	  , `mode`			varchar(50)
 	  , modemax			int
 	  , testkey			varchar(250)
-	)engine = memory;
+	) engine = memory;
    
-    -- getcurrenttestwindows(v_clientname, v_testid, v_sessiontype);
+	-- getcurrenttestwindows(v_clientname, v_testid, v_sessiontype);
 	insert into tmp_tblgetcurrenttestwindows
 	select distinct w.windowid
 		 , w.numopps as windowmax
@@ -61,11 +67,12 @@ proc: begin
 		and m.clientname = v_clientname and m.testid = v_testid
 		and (m.sessiontype = -1 or m.sessiontype = v_sessiontype)
 		and (w.sessiontype = -1 or w.sessiontype = v_sessiontype);
-
+*/
 
     if (v_testee < 0) then  -- guest testees have no rts data. if allowed into the system this far, then provide them all modes
 		insert into tblout_gettesteetestmodes
-		select * from tmp_tblgetcurrenttestwindows;
+		select * from tmp_tblgetcurrenttestwindows_global;
+
         leave proc;
     end if;
     
@@ -75,17 +82,13 @@ proc: begin
     from configs.client_testproperties 
 	where clientname = v_clientname and testid = v_testid;
 
-    if (v_modelist is not null) then 
-	begin -- this block sets up debugging capabilities by simulating conditions we expect to find
+    if (v_modelist is not null) then -- this block sets up debugging capabilities by simulating conditions we expect to find
         if (locate('&', v_modelist) > 0) then
             set v_requiremodewindow = 1;
         else 
-		begin 
             set v_requiremode = 1;
             set v_requiremodewindow = 0;
-        end;
 		end if;
-    end;
     elseif ((v_requiremodewindow = 1 or v_requiremode = 1) and v_modefield is not null) then   -- this is live production condition
         call _getrtsattribute(v_clientname, v_testee, v_modefield, v_modelist /*output*/, 'student', 0);
 	end if;
@@ -94,73 +97,61 @@ proc: begin
 	-- and we can only tell which test we are looking at by the intersection between the modes and the tests
 	-- so we have to split this string 2 ways: with the window and without the window
     if (v_modelist is not null) then
-	begin
+		drop temporary table if exists tmp_tbltestmodes;
+		create temporary table tmp_tbltestmodes(
+			rtsval varchar(200)
+		  , wid varchar(100)
+		  , asgnmode varchar(50)
+		) engine = memory;
+
 		/* Call _buildtable stored procedure 
 		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-		drop temporary table if exists tblout_buildtable;
-		create temporary table tblout_buildtable(idx int, record varchar(255));
-			  
 		call _buildtable(v_modelist, ';');
-
-		insert into tmp_tblrtsvals (record)
-		select record 
-		from tblout_buildtable;
-		/* # */
 
 		-- each component is of the form <tideid>:<mode> or <tideid>&<windowid>:<mode>
 		-- first, split the string for the tide_id (which is required)
         insert into tmp_tbltestmodes (rtsval, asgnmode)
         select substring_index(record, ':', 1), substring_index(record, ':', -1)
-        from tmp_tblrtsvals 
+        from tblout_buildtable 
 		where record like concat(v_tideid, ':%') or record like concat(v_tideid, '&%:%');
 
 		-- now, parse the windowid out, if applicable
         update tmp_tbltestmodes 
 		set wid = substring_index(rtsval, '&', -1) 
 		where locate('&', rtsval) > 0;
-    end;
 	end if;
 
     if (v_requiremodewindow = 1 ) then 
-	begin
 		insert into tblout_gettesteetestmodes
         select distinct windowid, windowmax, startdate, enddate,  mode, modemax, testkey
-        from tmp_tbltestmodes, tmp_tblgetcurrenttestwindows
+        from tmp_tbltestmodes, tmp_tblgetcurrenttestwindows_global
         where wid = windowid and `mode` = asgnmode;
 
-		if (v_debug = 1) then 
-			select 'require mode window'; 
-			select * from tblout_gettesteetestmodes;
-		end if;
-
+		if (v_debug = 1) then select 'require mode window'; select * from tblout_gettesteetestmodes; end if;
         leave proc;
-    end;
     elseif (v_requiremode = 1 ) then 
-	begin
 		-- window is not assigned, just the mode, so just join the modes
 		insert into tblout_gettesteetestmodes
         select distinct windowid, windowmax, startdate, enddate,  `mode`, modemax, testkey
-        from tmp_tbltestmodes, tmp_tblgetcurrenttestwindows
+        from tmp_tbltestmodes, tmp_tblgetcurrenttestwindows_global
         where `mode` = asgnmode;
 
-		if (v_debug = 1) then 
-			select 'require mode'; 
-			select * from tblout_gettesteetestmodes;
-		end if;
-
+		if (v_debug = 1) then select 'require mode'; select * from tblout_gettesteetestmodes; end if;
         leave proc;
-    end;
 	end if;
 
     -- else there is no specific mode assignment to the testee: return all active windows all modes
 	insert into tblout_gettesteetestmodes
     select windowid, windowmax, startdate, enddate, `mode`, modemax, testkey
-    from tmp_tblgetcurrenttestwindows;
+    from tmp_tblgetcurrenttestwindows_global;
 
-	if (v_debug = 1) then 
-		select  'mode not required'; 
-		select * from tblout_gettesteetestmodes;
-	end if;
+	if (v_debug = 1) then select  'mode not required'; select * from tblout_gettesteetestmodes; end if;
+
+	-- clean-up
+	drop temporary table if exists tmp_tbltestmodes;
+	-- drop temporary table tmp_tblgetcurrenttestwindows;
+
+	call _logdblatency('_gettesteetestmodes', v_starttime, v_testee, null, null, null, null, v_clientname, null);
     
 end $$
 

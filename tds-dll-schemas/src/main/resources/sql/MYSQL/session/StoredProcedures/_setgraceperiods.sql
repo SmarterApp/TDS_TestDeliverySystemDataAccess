@@ -20,6 +20,11 @@ proc: begin
 	declare v_testid, v_clientname varchar(100);
     declare v_fromtime, v_now datetime(3);
 
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_setgraceperiods';
+
     select sessiontype, o._efk_testid, o.clientname
 	into v_sessiontype, v_testid, v_clientname
     from testopportunity o, `session` s
@@ -93,6 +98,8 @@ proc: begin
 
 	-- clean-up
 	drop temporary table tmp_tblsegments;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, null, null);
 
 end $$
 

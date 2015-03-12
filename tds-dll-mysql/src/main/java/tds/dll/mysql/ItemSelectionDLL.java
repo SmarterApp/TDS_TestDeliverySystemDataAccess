@@ -2506,7 +2506,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		// -- Need all items from the virtual test not on this segment
 		if (parentTest != null) {
-			final String SQL_QUERY4 = "select distinct coalesce(S.TestPosition, cast(1 as unsigned)) as segmentPosition"
+			final String SQL_QUERY4 = "select distinct coalesce(S.TestPosition, bigtoint(1)) as segmentPosition"
 					+ ", groupID as GID, _fk_Item as itemkey, ItemPosition as  position , isRequired"
 					+ ", strandName as strand, isActive, isFieldTest"
 					+ ", case ${selectionAlgorithm} when 'adaptive2' then clString else null end as clString "
@@ -2525,7 +2525,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		// -- Need all dims and corresponding IRT params for the new AA - all
 		// segments, including the current
 
-		final String SQL_QUERY5 = "select coalesce(S.TestPosition, cast(1 as unsigned)) as segmentPosition, AI._fk_Item as itemkey,"
+		final String SQL_QUERY5 = "select coalesce(S.TestPosition, bigtoint(1)) as segmentPosition, AI._fk_Item as itemkey,"
 				+ " DIM.Dimension, upper(DIM.ModelName) as irtModel, DIM.parmnum, DIM.parmname, DIM.parmvalue "
 				+ " from  ${ItemBankDB}.tblsetofadminitems AI  "
 				+ " inner join  ${ItemBankDB}.tblsetofadminsubjects S  "

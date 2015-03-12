@@ -1,3 +1,12 @@
+alter table `r_proctorpackage` 
+	drop foreign key `fk_r_proctorpackage_tbluser`;
+
+alter table `r_studentpackagedetails`
+	drop foreign key `fk_studentpackage`;
+
+alter table `r_studentpackage` 
+	drop foreign key `fk_r_studentpackage_r_studentkeyid`;
+
 alter table `qareportqueue` 
 	drop foreign key `fk_qareportqueue`
 	;

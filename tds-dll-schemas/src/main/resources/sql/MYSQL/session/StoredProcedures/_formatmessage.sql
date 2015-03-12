@@ -14,11 +14,12 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_context varchar(200)
   , v_appkey varchar(255)
   , out v_msg text
-  , tmp_tblargstring varchar(1000) -- = null
+  , v_argstring varchar(1000) -- = null
   , v_delim char -- = ','
   , v_subject varchar(100) -- = null
   , v_grade varchar(50) -- = null
 )
+sql security invoker
 proc: begin
 
     declare v_msgkey varbinary(16);    
@@ -26,21 +27,17 @@ proc: begin
     declare v_indx int;
 	declare v_arg varchar(1000);
 
-
-	drop temporary table if exists tmp_tblargs;
-    create temporary table tmp_tblargs (
-		indx int
-	  , arg varchar(1000)
-	) engine = memory;
-
-    if (tmp_tblargstring is not null) then
+    if (v_argstring is not null) then
 	begin
+		drop temporary table if exists tmp_tblargs;
+		create temporary table tmp_tblargs (
+			indx int
+		  , arg varchar(1000)
+		);
+
 		/* Call _buildtable stored procedure 
-		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */
-		drop temporary table if exists tblout_buildtable;
-		create temporary table tblout_buildtable(idx int, record varchar(255))engine = memory;
-			  
-		call _buildtable(tmp_tblargstring, ',');
+		-- To capture and use result set from _buildtable, a temporary table is created to store the resultset */			  
+		call _buildtable(v_argstring, ',');
 
         insert into tmp_tblargs (indx, arg)
         select idx, record
@@ -50,22 +47,15 @@ proc: begin
 
     set v_msgkey = configs.tds_getmessagekey (v_client, 'database', 'database', v_context, v_appkey, v_language, v_grade, v_subject);
 
-    if (v_msgkey is null) then begin  -- no official message
-                  
-        set v_msg = concat(v_appkey, ' [-----]');
+    if (v_msgkey is null) then -- no official message
+		set v_msg = concat(v_appkey, ' [-----]');
         
-        -- begin try
-           insert into _missingmessages(application, contexttype, `context`, appkey, message) 
-            select 'database','database',v_context,v_appkey, v_msg
-			from dual
-			where not exists (select * from _missingmessages 
-							   where application ='database' and `context` = v_context and contexttype = 'database' and appkey = v_appkey and message = v_msg);
-        -- end try
-        -- begin catch
-
-        -- end catch;
+		insert into _missingmessages(application, contexttype, `context`, appkey, message) 
+		select 'database', 'database', v_context, v_appkey, v_msg
+		from dual
+		where not exists (select * from _missingmessages 
+						   where application = 'database' and `context` = v_context and contexttype = 'database' and appkey = v_appkey and message = v_msg);
         leave proc;
-    end;
 	end if;
 
     if (isnumeric(v_msgkey) = 1) then
@@ -80,24 +70,24 @@ proc: begin
         where t._key = v_msgkey and o._key = t._fk_coremessageobject;
 	end if;
 
-    while (exists (select * from tmp_tblargs)) do
-	begin
-        select indx, arg 
-		into v_indx, v_arg
-		from tmp_tblargs order by indx limit 1;
+	if (v_argstring is not null) then
+		while (exists (select * from tmp_tblargs)) do
+		begin
+			select indx, arg 
+			into v_indx, v_arg
+			from tmp_tblargs order by indx limit 1;
 
-        set v_msg = replace(v_msg, concat('{', cast((v_indx - 1) as char(3)), '}'), v_arg);
-        delete from tmp_tblargs where indx = v_indx;
-    end;
-	end while;
-    
+			set v_msg = replace(v_msg, concat('{', cast((v_indx - 1) as char(3)), '}'), v_arg);
+			delete from tmp_tblargs where indx = v_indx;
+		end;
+		end while;
+	end if;
+
 	set v_msg = concat(v_msg, ' [', cast(v_msgid as char(10)), ']');
 
-
 	-- clean-up
-	drop temporary table tmp_tblargs;
+	drop temporary table if exists tmp_tblargs;
 	drop temporary table if exists tblout_buildtable;
-
 
 end $$
 

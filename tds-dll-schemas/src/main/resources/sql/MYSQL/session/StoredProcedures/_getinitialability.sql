@@ -26,6 +26,11 @@ proc: begin
     declare v_subject varchar(200);
     declare v_bysubject bit;
     declare v_slope, v_intercept float;
+
+	declare v_procname varchar(100);
+	declare v_starttime datetime(3);
+	set v_starttime = now(3);
+	set v_procname = '_getinitialability';
     
     select _efk_testee, `subject`, clientname, _efk_adminsubject, _efk_testid
 	into v_testee, v_subject, v_clientname, v_test, v_testid
@@ -110,6 +115,8 @@ proc: begin
     
 	-- clean-up
 	drop temporary table tmp_tbl;
+
+	call _logdblatency(v_procname, v_starttime, null, null, null, v_oppkey, null, v_clientname, null);
 
 end $$
 

@@ -25,8 +25,6 @@ begin
     insert into tblfromtimes (lasttime)
     select datepaused from testopportunity where _key = v_oppkey;
 
-	set transaction isolation level read uncommitted;
-
 	insert into tblfromtimes (lasttime)
 	select  max(datesubmitted) 
 	from testeeresponse

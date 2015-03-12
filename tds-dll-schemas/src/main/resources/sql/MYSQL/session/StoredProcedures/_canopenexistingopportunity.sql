@@ -54,7 +54,7 @@ proc: begin
 
 	-- last opportunity terminated normally
 	if (v_laststatus in (select `status` from statuscodes where `usage` = 'opportunity' and stage = 'closed')) then
-       if (v_debug = 1) then select 'open existing exit 2'; end if;
+        if (v_debug = 1) then select 'open existing exit 2'; end if;
 		leave proc;	
 	end if;
 

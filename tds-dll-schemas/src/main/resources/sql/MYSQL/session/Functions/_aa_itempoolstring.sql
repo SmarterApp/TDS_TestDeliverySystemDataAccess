@@ -43,8 +43,6 @@ begin
     create temporary table if not exists tblpool (itemkey varchar(50) primary key not null);
 	delete from tblpool;
 
-	set transaction isolation level read uncommitted;
-
     insert into tblpool (itemkey)
     select distinct i._fk_item 
     from itembank.tblsetofadminitems i, configs.client_test_itemconstraint c1, 

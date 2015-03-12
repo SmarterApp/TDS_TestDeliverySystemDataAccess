@@ -378,6 +378,12 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         + "FROM sim_itemgroup where _fk_Session = ${fromSession}";
     SqlParametersMaps parms10 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey).put ("fromSession", fromSession);
     insertedCnt = executeStatement (connection, cmd10, parms10, false).getUpdateCount ();
+    
+    final String cmd12 = "insert into sim_sessiontestpackage(_fk_session, _fk_adminsubject, _fk_testpackage) "
+        + "select ${sessionKey}, _fk_adminsubject, _fk_testpackage "
+        + "from sim_sessiontestpackage where _fk_Session = ${fromSession}";
+    SqlParametersMaps parms12 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey).put ("fromSession", fromSession);
+    insertedCnt = executeStatement (connection, cmd12, parms12, false).getUpdateCount ();
 
     final String cmd11 = "select 'success' as status, ${sessionKey} as sessionKey, ${sessionID} as sessionID, ${sessionName} as `Name`, "
         + " ${status} as sessionStatus, "
@@ -584,7 +590,24 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       SqlParametersMaps parmsItemSelectionParam = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
       inserted = executeStatement (connection, fixDataBaseNames (cmdItemSelectionParam), parmsItemSelectionParam, false).getUpdateCount ();
       SIM_CreateItemSelectionParameters (connection, session);
-
+      
+      SqlParametersMaps parmsSelectTestPackage = (new SqlParametersMaps ()).put ("testKey", testkey);
+      final String cmdSelectTestPackage = "select P._fk_testpackage as testpackage "
+                 + " from ${ItemBankDB}.tbladminsubjecttestpackage P "
+                 + " inner join( select _fk_adminsubject, max(dateloaded) as latestdateloaded "
+                             + " from ${ItemBankDB}.tbladminsubjecttestpackage where _fk_adminsubject = ${testKey} ) T "
+                 + " on P._fk_adminsubject = T._fk_adminsubject and P.dateloaded = T.latestdateloaded ";    
+      SingleDataResultSet rsSelectTestPackage = executeStatement (connection, fixDataBaseNames(cmdSelectTestPackage), parmsSelectTestPackage, false).getResultSets ().next ();
+      DbResultRecord rrSelectTestPackage = rsSelectTestPackage.getCount () > 0 ? rsSelectTestPackage.getRecords ().next () : null;
+      if (rrSelectTestPackage != null) {
+        UUID testPackageKey = rrSelectTestPackage.<UUID> get ("testpackage");
+        if (testPackageKey != null){
+          SqlParametersMaps parmsLinkTestPackage = (new SqlParametersMaps ()).put ("session", session).put ("testKey", testkey).put ("testPackage", testPackageKey);
+          final String cmdLinkTestPackage = "insert into sim_sessiontestpackage (_fk_session, _fk_adminsubject, _fk_testpackage) "
+                  + " values ( ${session}, ${testKey}, ${testPackage}) ";
+          executeStatement (connection, fixDataBaseNames(cmdLinkTestPackage), parmsLinkTestPackage, false);
+        }
+      }      
       return _commonDll.ReturnStatusReason ("success", null);
 
     } else if (!testOpportunityExists (connection, session, testkey)) {
@@ -1460,6 +1483,10 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       final String cmd2 = "delete from sessiontests where _fk_Session = ${session} and _efk_adminsubject = ${testkey}";
       SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
       Integer deletedCnt = executeStatement (connection, cmd2, parms2, false).getUpdateCount ();
+      
+      final String cmd3 = "delete from sim_sessiontestpackage where _fk_session = ${session} and _fk_adminsubject = ${testkey}";
+      SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
+      deletedCnt = executeStatement (connection, cmd3, parms3, false).getUpdateCount ();
     }
     return rs1;
   }
@@ -1529,6 +1556,10 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         final String cmd3 = "delete from session where _key = ${session}";
         SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("session", session);
         Integer deletedCnt = executeStatement (connection, cmd3, parms3, false).getUpdateCount ();
+        
+        final String cmd4 = "delete from sim_sessiontestpackage where _fk_session = ${session}";
+        SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("session", session);
+        deletedCnt = executeStatement (connection, cmd4, parms4, false).getUpdateCount ();
       }
 
       return rs2;
@@ -2960,11 +2991,13 @@ public class SimDLL extends AbstractDLL implements ISimDLL
 
   @Override
   public SingleDataResultSet SIM_GetItemSelectionParameters (SQLConnection connection, UUID sessionKey, String testKey) throws ReturnStatusException {
-    final String cmd = "select _fk_session, _fk_adminsubject, bpelementtype, "
-        + " (case bpelementtype when ${testentitytype} then ${emptystring} else bpelementid end) as bpelementid, "
-        + " name, value, label "
-        + " from sim_itemselectionparameter "
-        + " where _fk_session = ${sessionkey} and _fk_adminsubject = ${testkey}";
+    final String cmd = "select P._fk_session, P._fk_adminsubject, P.bpelementtype, "
+        + " (case P.bpelementtype when ${testentitytype} then ${emptystring} else P.bpelementid end) as bpelementid, "
+        + " P.name, P.value, P.label "
+        + " from sim_itemselectionparameter P, "
+        + "      sim_segment S "
+        + " where P._fk_session = ${sessionkey} and P._fk_session = S._fk_session and S._efk_adminsubject = ${testkey}";
+
     SqlParametersMaps parms = (new SqlParametersMaps ())
         .put ("sessionkey", sessionKey).put ("testkey", testKey)
         .put ("testentitytype", "Test").put ("emptystring", "");
@@ -2973,18 +3006,19 @@ public class SimDLL extends AbstractDLL implements ISimDLL
   }
   
   @Override
-  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String bpElementID, String paramName, String paramValue)
+  public void SIM_AlterItemSelectionParameter (SQLConnection connection, UUID sessionKey, String testKey, String segmentKey, String bpElementID, String paramName, String paramValue)
       throws ReturnStatusException {
+     // TODO: ARP - For 'Test' level, replicate change for all segments
     String cmd = "update sim_itemselectionparameter "
         + " set value=${value} "
-        + " where _fk_session = ${sessionkey} and _fk_adminsubject = ${testkey} and name=${name} ";
+        + " where _fk_session = ${sessionkey} and _fk_adminsubject = ${segmentkey} and name=${name} ";
     if (bpElementID.isEmpty ()) {
       cmd += " and bpelementtype=${testentitytype} ";
     } else {
       cmd += " and bpelementid=${bpelementid} ";
     }
     SqlParametersMaps parms = (new SqlParametersMaps ())
-        .put ("sessionkey", sessionKey).put ("testkey", testKey).put ("bpelementid", bpElementID)
+        .put ("sessionkey", sessionKey).put ("segmentkey", segmentKey).put ("bpelementid", bpElementID)
         .put ("name", paramName).put ("value", paramValue).put ("testentitytype", "Test");
     executeStatement (connection, cmd, parms, false);
   }
@@ -3139,13 +3173,14 @@ public class SimDLL extends AbstractDLL implements ISimDLL
 
   private void SIM_CreateItemSelectionParameters (SQLConnection connection, UUID sessionKey)
       throws ReturnStatusException {
-    DataBaseTable tempitemselectionparamsTbl = getDataBaseTable ("tempitemselectionparams").addColumn ("testname", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
+    DataBaseTable tempitemselectionparamsTbl = getDataBaseTable ("tempitemselectionparams").addColumn ("segmentkey", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 250).
         addColumn ("bpelementtype", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("bpelementid", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).
         addColumn ("name", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 100).addColumn ("value", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200).addColumn ("label", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 200);
     connection.createTemporaryTable (tempitemselectionparamsTbl);
     SqlParametersMaps parms = (new SqlParametersMaps ())
         .put ("sessionkey", sessionKey)
-        .put ("testentity", "Test");
+        .put ("testentity", "Test")
+        .put ("segmententity", "Segment");
 
     Map<String, String> dbparams = new HashMap<String, String> ();
     dbparams.put ("tempdbname", tempitemselectionparamsTbl.getTableName ());
@@ -3153,23 +3188,24 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     try {
       boolean preexistingAutoCommitMode = connection.getAutoCommit ();
       connection.setAutoCommit (false);
-      final String cmd1 = " insert into ${tempdbname} (testname, bpelementtype, bpelementid, name, value, label) "
-          + " select S._efk_adminsubject, P.entitytype, S.segmentid, P.name, P.value, P.label "
+      
+      final String cmd1 = " insert into ${tempdbname} (segmentkey, bpelementtype, bpelementid, name, value, label) "
+          + " select S._efk_segment, P.entitytype, S.segmentid, P.name, P.value, P.label "
           + " from sim_defaultitemselectionparameter P, sim_segment S  "
-          + " where P.algorithmtype = S.selectionalgorithm and P.entitytype=${testentity} and S._fk_session=${sessionkey}";
+          + " where P.algorithmtype = S.selectionalgorithm and P.entitytype in (${testentity}, ${segmententity}) and S._fk_session=${sessionkey}";
       executeStatement (connection, fixDataBaseNames (cmd1, dbparams), parms, false);
-
-      final String cmd2 = " update ${tempdbname} T inner join sim_itemselectionparameter P "
-          + " on P._fk_adminsubject = T.testname AND P.bpelementid = T.bpelementid and P.name = T.name "
-          + " set T.value=P.value "
-          + " where P._fk_session=${sessionkey} ";
+      
+      final String cmd2 = " update ${tempdbname} " 
+          + " set value=P.value "
+          + " from sim_itemselectionparameter P, ${tempdbname} T "
+          + " where P._fk_session=${sessionkey} and P._fk_adminsubject = T.segmentkey and P.bpelementid = T.bpelementid and P.name = T.name " ;
       executeStatement (connection, fixDataBaseNames (cmd2, dbparams), parms, false);
-
+      
       final String cmd3 = " delete from sim_itemselectionparameter where _fk_session=${sessionkey}";
       executeStatement (connection, fixDataBaseNames (cmd3, dbparams), parms, false);
 
       final String cmd4 = " insert into sim_itemselectionparameter(_fk_session, _fk_adminsubject, bpelementtype, bpelementid, name, value, label) "
-          + " select ${sessionkey}, testname, bpelementType, bpelementid, name, value, label "
+          + " select ${sessionkey}, segmentkey, bpelementType, bpelementid, name, value, label "
           + " from ${tempdbname} ";
       executeStatement (connection, fixDataBaseNames (cmd4, dbparams), parms, false);
 

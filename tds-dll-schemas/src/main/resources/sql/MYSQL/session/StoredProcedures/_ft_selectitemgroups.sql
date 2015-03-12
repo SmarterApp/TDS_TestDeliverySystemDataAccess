@@ -164,7 +164,7 @@ proc: begin
 	--  every cohort index is assigned an itemratio
 	-- start: declare cohorts variables
 	drop temporary table if exists tmp_tblcohorts;
-    create temporary table tmp_tblcohorts(cohortindex int, ratio float, available int, targetcount float, itemcount int, groupcount int);
+    create temporary table tmp_tblcohorts(cohortindex int, ratio float, available int, targetcount float, itemcount int, groupcount int) engine = memory;
 
     -- cohort is the index of the cohort on the test, ratio is the percent of items to administer in the cohort on each test
     -- targetcount is the number of items to administer from the cohort on each test (ratio * maxitems)

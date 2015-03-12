@@ -40,26 +40,26 @@ proc: begin
 	  , tdsid varchar(100)
 	  , entitykey bigint
 	  , attval varchar(500)
-	) engine = memory;
+	);
 
 
-    if (exists (select * from testeeattribute where _fk_testopportunity = v_oppkey and `context` = v_context)) then
+    if (exists (select 1 from testeeattribute where _fk_testopportunity = v_oppkey and `context` = v_context)) then
         set tmp_tblattsexist = 1;
     else 
 		set tmp_tblattsexist = 0;
 	end if;
 
-    if (exists (select * from testeerelationship where _fk_testopportunity = v_oppkey and `context` = v_context)) then
+    if (exists (select 1 from testeerelationship where _fk_testopportunity = v_oppkey and `context` = v_context)) then
         set tmp_tblrelsexist = 1;
     else 
 		set tmp_tblrelsexist = 0;
 	end if;
 
-    drop temporary table if exists tblout_gettesteeattributes;
-	create temporary table tblout_gettesteeattributes(
+    drop temporary table if exists tmp_tbltesteeattributes;
+	create temporary table tmp_tbltesteeattributes(
 		tdsid varchar(50)
 	  , attval varchar(500)
-	) engine = memory;
+	);
 
     drop temporary table if exists tblout_gettesteerelationships;
 	create temporary table tblout_gettesteerelationships(
@@ -67,10 +67,17 @@ proc: begin
 	  , entitykey bigint
 	  , tdsid varchar(100)
 	  , attval varchar(500)
-	) engine = memory;
+	);
 
 	start transaction;
-		call _gettesteeattributes(v_clientname, v_testee);
+		-- call _gettesteeattributes(v_clientname, v_testee);
+		insert into tmp_tbltesteeattributes
+		select d.attrname, d.attrvalue
+		from r_studentpackage sp, r_studentpackagedetails d
+		where sp._key = d._fk_studentpackagekey
+			and sp.studentkey = 105 -- v_testee 
+			and sp.clientname = 'sbac' -- v_clientname 
+			and sp.iscurrent = 1 and d.istesteeattribute = 1;
 		
 		set v_sofar = 'first. ';
 
@@ -88,9 +95,9 @@ proc: begin
 
 		set v_sofar = 'third. ';
 
-		insert into testeeattribute (_fk_testopportunity, `context`, tds_id, attributevalue)
-		select v_oppkey, v_context, tdsid, attval
-		from tblout_gettesteeattributes;
+		insert into testeeattribute (_fk_testopportunity, `context`, tds_id, attributevalue, _date)
+		select v_oppkey, v_context, tdsid, attval, now(3)
+		from tmp_tbltesteeattributes;
 
 		set v_sofar = 'fourth. ';
 
@@ -101,8 +108,8 @@ proc: begin
 
 		set v_sofar = 'fifth. ';
 
-		insert into testeerelationship (_fk_testopportunity, `context`, relationship, tds_id, entitykey, attributevalue)
-		select v_oppkey, v_context, reltype, tdsid, entitykey, attval
+		insert into testeerelationship (_fk_testopportunity, `context`, relationship, tds_id, entitykey, attributevalue, _date)
+		select v_oppkey, v_context, reltype, tdsid, entitykey, attval, now(3)
 		from tmp_tblrels;
 
 		set v_sofar = 'sixth. ';

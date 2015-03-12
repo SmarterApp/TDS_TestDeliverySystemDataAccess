@@ -12,6 +12,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
 	v_clientname varchar(100)
   , v_sessionid  char(128)
 )
+sql security invoker
 proc: begin
 
 	-- session variables
@@ -38,7 +39,7 @@ proc: begin
             call _setupproctorlesssession (v_clientname, v_sessionkey, v_sessionid);
         else 
 		begin
-            call _returnerror(v_clientname, 't_getsession', 'you are not allowed to log in without a test administrator', null, v_oppkey, '_validateitemsaccess', 'failed');
+            call _returnerror(v_clientname, 't_getsession', 'you are not allowed to log in without a test administrator', null, null, '_validateitemsaccess', 'failed');
             leave proc;
 		end;
         end if;
