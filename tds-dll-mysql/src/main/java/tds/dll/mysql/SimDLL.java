@@ -402,7 +402,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         + " sdProficiency, strandCorrelation, S.handScoreItemTypes, "
         + " bigtoint((select count(*) from testopportunity O "
         + "         where O._fk_Session = ${sessionKey} and O._efk_AdminSubject = S._efk_AdminSubject)) as simulations"
-        + " from sessiontests S where s._fk_Session = ${sessionKey}";
+        + " from sessiontests S where S._fk_Session = ${sessionKey}";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionKey", sessionKey);
     SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms1, false).getResultSets ().next ();
     return rs1;
@@ -584,13 +584,14 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       inserted = executeStatement (connection, fixDataBaseNames (cmd10), parms10, false).getUpdateCount ();
 
       final String cmdItemSelectionParam = " insert into sim_itemselectionparameter (_fk_session, _fk_adminsubject, bpelementid, name, value, label) "
-          + "select ${session}, _fk_adminsubject, bpelementid, name, value, label "
-          + " from ${ItemBankDB}.tblitemselectionparm "
-          + " where _fk_AdminSubject=${testKey} ";
+          + " select ${session}, P._fk_adminsubject, P.bpelementid, P.name, P.value, P.label "
+          + " from ${ItemBankDB}.tblitemselectionparm P, sim_segment T" 
+          + " where P._fk_adminsubject = T._efk_segment and _fk_session= ${session}";
+      
       SqlParametersMaps parmsItemSelectionParam = (new SqlParametersMaps ()).put ("session", session).put ("testkey", testkey);
       inserted = executeStatement (connection, fixDataBaseNames (cmdItemSelectionParam), parmsItemSelectionParam, false).getUpdateCount ();
       SIM_CreateItemSelectionParameters (connection, session);
-      
+                 
       SqlParametersMaps parmsSelectTestPackage = (new SqlParametersMaps ()).put ("testKey", testkey);
       final String cmdSelectTestPackage = "select P._fk_testpackage as testpackage "
                  + " from ${ItemBankDB}.tbladminsubjecttestpackage P "
@@ -1037,7 +1038,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     if (existsInItemsTbl (connection, itemsTbl)) {
       String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', test, 'Test Min > max' from ${itemsTbl}";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1050,7 +1051,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     if (existsInItemsTbl (connection, itemsTbl)) {
       String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', test, concat(obj, ': Content level Min > max') from ${itemsTbl}";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1063,7 +1064,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     if (existsInItemsTbl (connection, itemsTbl)) {
       String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', test, 'Bad start ability on adaptive test' from ${itemsTbl}";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1082,7 +1083,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     if (existsCntInItemsTbl (connection, itemsTbl)) {
       final String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', test, 'Insufficient strand item requirements (sum of maxes) for test length (minitems)' from ${itemsTbl} where cnt > req";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1101,7 +1102,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     if (existsCntInItemsTbl (connection, itemsTbl)) {
       final String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', test, 'Strand item requirements (sum of mins) exceed test length (maxitems)' from ${itemsTbl} where cnt > req";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1148,7 +1149,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
           + " select 'FATAL ERROR', test , concat('Insufficient operational items for strand: ',  obj) "
           + " from ${itemsTbl} where cnt < req";
 
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1170,7 +1171,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', obj, 'Sum of content level mins exceed parent strand min' "
           + "  from ${itemsTbl} where cnt > req";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1204,7 +1205,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       final String errCmd = "insert into ${errorsTbl} (severity, test, err)"
           + "select 'FATAL ERROR', test, 'Insufficient operational items in pool' "
           + "  from ${itemsTbl} where cnt < req";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1241,7 +1242,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       final String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + "select 'WARNING', test, 'Insufficient field test items in pool' "
           + "  from ${itemsTbl} where cnt < req";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1265,7 +1266,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
           + "        req, "
           + "       '). \"Start AFTER minpos, end BEFORE maxpos\"')"
           + "  from ${itemsTbl} where cnt < req";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1285,7 +1286,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       final String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + "select 'FATAL ERROR', test, 'Fixed form has inactive items' "
           + "  from ${itemsTbl} where cnt > 0";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     deleteFromItemsTbl (connection, itemsTbl);
@@ -1300,7 +1301,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     if (existsInItemsTbl (connection, itemsTbl)) {
       String errCmd = "insert into ${errorsTbl} (severity, test, err) "
           + " select 'FATAL ERROR', test, 'Invalid field test specs on fixed form test' from ${itemsTbl}";
-      insertedErr = insertIntoErrorsTbl (connection, errCmd, itemsTbl, errorsTbl);
+      insertedErr = insertIntoErrorsTbl (connection, errCmd, errorsTbl, itemsTbl);
     }
 
     final String cmd20 = "select test from ${errorsTbl} limit 1";
@@ -1313,14 +1314,14 @@ public class SimDLL extends AbstractDLL implements ISimDLL
       Long fatals = 0L;
       Long warnings = 0L;
 
-      final String cmd21 = "select count(*) from ${errorsTbl} where severity = 'FATAL ERROR' as fatals";
+      final String cmd21 = "select count(*) as fatals from ${errorsTbl} where severity = 'FATAL ERROR' ";
       Map<String, String> unquotedParms21 = unquotedParms20;
 
       SingleDataResultSet rs21 = executeStatement (connection, fixDataBaseNames (cmd21, unquotedParms21), null, false).getResultSets ().next ();
       DbResultRecord rcd21 = rs21.getRecords ().next ();
       fatals = rcd21.<Long> get ("fatals");
 
-      final String cmd22 = "select count(*) from ${errorsTbl} where severity = 'WARNINGS' as warnings";
+      final String cmd22 = "select count(*)  as warnings from ${errorsTbl} where severity = 'WARNINGS' ";
       Map<String, String> unquotedParms22 = unquotedParms20;
 
       SingleDataResultSet rs22 = executeStatement (connection, fixDataBaseNames (cmd22, unquotedParms22), null, false).getResultSets ().next ();
@@ -2008,7 +2009,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
 
     final String cmd5 = "insert into ${oppsTbl} (oppkey, oppnum, segment, CL, cnt) "
         + "select O._Key, O.opportunity, C._efk_Segment, BP.ContentLevel, itemcount - BP.minITems "
-        + " from testopportunity O  , testopportunitysegmentcounts C , SIM_SegmentContentLevel BP "
+        + " from testopportunity O  , testopportunitysegmentcounts C , sim_segmentcontentlevel BP "
         + "    where O._fk_Session = ${session} and O._efk_AdminSubject = ${testkey} and C._fk_TestOpportunity = O._Key "
         + "      and BP._fk_Session = ${session} and C._efk_Segment = BP._efk_Segment "
         + "      and BP.contentLevel = C.COntentLEvel and itemcount < BP.minitems";
@@ -2707,7 +2708,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         + "      and dateCompleted is not null) "
         + "  as simulations "
         + "from session N, sessiontests S, _synonyms M "
-        + " where N._Key = ${sessionKey} and s._fk_Session = ${sessionKey} and _efk_AdminSubject = ${testkey} "
+        + " where N._Key = ${sessionKey} and S._fk_Session = ${sessionKey} and _efk_AdminSubject = ${testkey} "
         + "  and M.prefix = 'ITEMBANK_'";
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionkey", session).put ("testkey", testkey);
     SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms1, false).getResultSets ().next ();
@@ -2805,14 +2806,11 @@ public class SimDLL extends AbstractDLL implements ISimDLL
 
   private Integer insertIntoErrorsTbl (SQLConnection connection, String cmd, DataBaseTable errorsTbl, DataBaseTable itemsTbl) throws ReturnStatusException {
 
-    final String cmd1 = "insert into ${errorsTbl} (severity, test, err) "
-        + " select ${severity}, test, ${err} from ${itemsTbl}";
-
     Map<String, String> unquotedParms1 = new HashMap<String, String> ();
     unquotedParms1.put ("itemsTbl", itemsTbl.getTableName ());
     unquotedParms1.put ("errorsTbl", errorsTbl.getTableName ());
 
-    Integer cnt = executeStatement (connection, fixDataBaseNames (cmd1, unquotedParms1), null, false).getUpdateCount ();
+    Integer cnt = executeStatement (connection, fixDataBaseNames (cmd, unquotedParms1), null, false).getUpdateCount ();
     return cnt;
   }
 
@@ -2840,10 +2838,10 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("sessionkey", sessionkey).put ("startDate", startTime).put ("endDate", endTime);
     int updatedCnt = executeStatement (connection, cmd1, parms1, false).getUpdateCount ();
 
-    final String cmd2 = "  select dbname as itembank, clientname, sessionID, _efk_Proctor as proctorKey, "
+    final String cmd2 = "  select ' ' as itembank, clientname, sessionID, _efk_Proctor as proctorKey, "
         + " _fk_Browser as browserKey, sim_language as language, sim_proctorDelay as proctorDelay "
-        + " from session, _synonyms "
-        + " where _key = ${sessionKey} and environment = 'SIMULATION' and prefix = 'ITEMBANK_'";
+        + " from session"
+        + " where _key = ${sessionKey} and environment = 'SIMULATION'"; // TODO: 03/16/2015 ARP  Fix this to remove itembank db name/_synonym table
     SqlParametersMaps parms2 = parms1;
     SingleDataResultSet rs = executeStatement (connection, cmd2, parms2, false).getResultSets ().next ();
     return rs;
@@ -3195,9 +3193,8 @@ public class SimDLL extends AbstractDLL implements ISimDLL
           + " where P.algorithmtype = S.selectionalgorithm and P.entitytype in (${testentity}, ${segmententity}) and S._fk_session=${sessionkey}";
       executeStatement (connection, fixDataBaseNames (cmd1, dbparams), parms, false);
       
-      final String cmd2 = " update ${tempdbname} " 
-          + " set value=P.value "
-          + " from sim_itemselectionparameter P, ${tempdbname} T "
+      final String cmd2 = " update ${tempdbname} T, sim_itemselectionparameter P " 
+          + " set T.value=P.value "
           + " where P._fk_session=${sessionkey} and P._fk_adminsubject = T.segmentkey and P.bpelementid = T.bpelementid and P.name = T.name " ;
       executeStatement (connection, fixDataBaseNames (cmd2, dbparams), parms, false);
       

@@ -75,6 +75,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
 
   @Value ("${logLatencyMaxTime:30000}")
   private int                 gLogLatencyMaxTime;
+  
+  @Value ("${opportunity.isScoredByTDS:false}")
+  private boolean isScoredByTDS;
 
   /**
    * @param connection
@@ -716,8 +719,11 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   }
 
   public Boolean ScoreByTDS_FN (SQLConnection connection, String clientName, String testId) throws ReturnStatusException {
+    if(!isScoredByTDS) {
+      return false;
+    }
     Boolean sc = false;
-
+    
     final String SQL_QUERY = "select clientname from ${ConfigDB}.client_testscorefeatures where clientname = ${client} and TestID = ${testID} "
         + " and (ReportToStudent = 1 or ReportToProctor = 1 or ReportToParticipation = 1 or UseForAbility = 1) limit 1";
     SqlParametersMaps parameters = new SqlParametersMaps ();
@@ -1400,7 +1406,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     _SetTesteeAttributes_SP (connection, clientname, oppkey, testee, "FINAL");
     _RecordBPSatisfaction_SP (connection, oppkey);
 
-    if (IsXMLOn_Fn (connection, oppkey) == 1 && "COMPLETE: Do Not Score".equalsIgnoreCase (CanScoreOpportunity_FN (connection, oppkey))) {
+    if (IsXMLOn_Fn (connection, oppkey) == 1 && (!isScoredByTDS || "COMPLETE: Do Not Score".equalsIgnoreCase (CanScoreOpportunity_FN (connection, oppkey)))) {
       SubmitQAReport_SP (connection, oppkey, "submitted");
     }
 

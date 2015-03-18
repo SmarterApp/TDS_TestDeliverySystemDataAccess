@@ -553,8 +553,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		SingleDataResultSet result;
 		DbResultRecord record;
 
-		String SQL_QUERY = "select clientname, _fk_Session as session "
-				+ " from testopportunity where _Key = ${oppkey}";
+		String SQL_QUERY = "select clientname, _fk_session as session "
+				+ " from testopportunity where _key = ${oppkey}";
 
 		parameters = new SqlParametersMaps().put("oppkey", oppkey);
 		result = executeStatement(connection, SQL_QUERY, parameters, false)
@@ -567,8 +567,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		SQL_QUERY = "select count(distinct propname) as propsin "
 				+ " from testeeaccommodations A, ${ConfigDB}.client_test_itemconstraint C "
-				+ " where A._fk_TestOpportunity = ${oppkey} and A.AccType = C.ToolTYpe and A.AccCode = C.ToolValue"
-				+ " and C.Clientname = ${clientname} and C.testID = ${segmentID}";
+				+ " where A._fk_testopportunity = ${oppkey} and A.acctype = C.tooltype and A.acccode = C.toolvalue"
+				+ " and C.clientname = ${clientname} and C.testid = ${segmentID}";
 
 		parameters.put("clientname", clientname);
 		parameters.put("segmentID", segmentID);
@@ -585,13 +585,13 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ " groupID, blockID, strand, bVector, "
 				+ " IRT_Model, IRT_a, IRT_b, IRT_c, "
 				+ " itemPosition, isRequired, isFieldTest, isActive) "
-				+ " select  _fk_ITem, _fk_Item, I.groupKey, "
-				+ " I.groupID, I.blockID, I.strandname, I.bVector, "
-				+ " I.IRT_model, coalesce(I.IRT_a, 1), I.IRT_b, coalesce(I.IRT_c, 0), "
-				+ " I.itemPosition, I.isrequired, I.isFieldTest, I.isActive "
+				+ " select  _fk_item, _fk_item, I.groupkey, "
+				+ " I.groupid, I.blockid, I.strandname, I.bvector, "
+				+ " I.irt_model, coalesce(I.irt_a, 1), I.irt_b, coalesce(I.irt_c, 0), "
+				+ " I.itemposition, I.isrequired, I.isfieldtest, I.isactive "
 				+ " from ${ItemBankDB}.tblsetofadminitems I "
-				+ " where _fk_AdminSUbject = ${segmentKey} and (${groupID} is null or groupID = ${groupID}) "
-				+ " and (${blockID} is null or blockID = ${blockID})";
+				+ " where _fk_adminsubject = ${segmentKey} and (${groupID} is null or groupid = ${groupID}) "
+				+ " and (${blockID} is null or blockid = ${blockID})";
 
 		String query = fixDataBaseNames(SQL_INSERT);
 		Map<String, String> unquotedparms = new HashMap<String, String>();
@@ -611,10 +611,10 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ " testeeaccommodations A2, ${ItemBankDB}.tblitemprops P2 "
 				+ " where A2._fk_TestOpportunity = ${oppkey} "
 				+ " and C2.Clientname = ${clientname} and C2.testID = ${segmentID} and C2.item_in = 0 "
-				+ " and A2.AccType = C2.ToolType and A2.AccCode = C2.ToolValue "
-				+ " and P2._fk_AdminSubject = ${segmentKey} "
-				+ " and P2._fk_Item  = itemKey "
-				+ " and P2.Propname = C2.propname and P2.Propvalue = C2.Propvalue) ";
+				+ " and A2.acctype = C2.tooltype and A2.acccode = C2.toolvalue "
+				+ " and P2._fk_adminsubject = ${segmentKey} "
+				+ " and P2._fk_item  = itemKey "
+				+ " and P2.propname = C2.propname and P2.propvalue = C2.propvalue) ";
 
 		query = fixDataBaseNames(SQL_QUERY2);
 		int deletedCnt = executeStatement(connection,
@@ -627,12 +627,12 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		String SQL_QUERY3 = "update  ${tblName} set propsin = (select count(distinct C.propname) "
 				+ " from ${ConfigDB}.client_test_itemconstraint C, "
 				+ " testeeaccommodations A, ${ItemBankDB}.tblitemprops P "
-				+ " where A._fk_TestOpportunity = ${oppkey} "
-				+ " and C.Clientname = ${clientname} and C.testID = ${segmentID} and C.item_in = 1 "
-				+ " and A.AccType = C.ToolType and A.AccCode = C.ToolValue "
-				+ " and P._fk_Item  = itemKey "
-				+ " and P._fk_AdminSubject = ${segmentKey} "
-				+ " and P.Propname = C.propname and P.Propvalue = C.Propvalue )";
+				+ " where A._fk_testopportunity = ${oppkey} "
+				+ " and C.clientname = ${clientname} and C.testid = ${segmentID} and C.item_in = 1 "
+				+ " and A.acctype = C.tooltype and A.accCode = C.toolvalue "
+				+ " and P._fk_item  = itemKey "
+				+ " and P._fk_adminsubject = ${segmentKey} "
+				+ " and P.propname = C.propname and P.propvalue = C.propvalue )";
 
 		query = fixDataBaseNames(SQL_QUERY3);
 		int updatedCnt = executeStatement(connection,
@@ -641,12 +641,11 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		_logger.info("updated rows after update query in temporary table in AF_GetItempool_FN are "
 				+ updatedCnt);
-
+		
 		if (IsSimulation_FN(connection, oppkey)) {
-			String SQL_QUERY4 = "update ${tblName} set isRequired = S.isRequired, isActive = S.isActive"
-					+ " from sim_segmentitem S where S._fk_Session = ${session} "
-					+ " and S._efk_Segment = ${segmentKey} "
-					+ " and S._efk_Item = itemkey";
+			String SQL_QUERY4 = " update ${tblName} T, sim_segmentitem S "
+			    + " set T.isRequired = S.isrequired, T.isActive = S.isactive "
+					+ " where S._fk_session = ${session} and S._efk_segment = ${segmentKey} and S._efk_item = T.itemkey ";			
 			parameters.put("session", session);
 			updatedCnt = executeStatement(connection,
 					fixDataBaseNames(SQL_QUERY4, unquotedparms), parameters,
@@ -1002,9 +1001,9 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			if (isSim) // -- then the 'proctor' may have altered the group's max
 						// items for the simulation
 			{
-				final String SQL_QUERY4 = "select S.maxItems as simMax from sim_itemgroup S "
-						+ " where S._fk_Session = ${session} and S._efk_Segment = ${segmentKey} "
-						+ " and S.groupID = ${groupID}";
+				final String SQL_QUERY4 = "select S.maxitems as simMax from sim_itemgroup S "
+						+ " where S._fk_session = ${session} and S._efk_segment = ${segmentKey} "
+						+ " and S.groupid = ${groupID}";
 				parameters.put("session", session);
 				result = executeStatement(connection, SQL_QUERY4, parameters,
 						false).getResultSets().next();
@@ -1480,7 +1479,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ ", bpweight, adaptiveCut, StartAbility, StartInfo, Scalar "
 				+ ", case when adaptiveCut is not null then true else false end as isStrand "
 				+ " from  ${ItemBankDB}.tbladminstrand S   "
-				+ " where S._fk_AdminSubject = ${segmentKey} ) "
+				+ " where S._fk_adminsubject = ${segmentKey} ) "
 				+ " union all "
 				+ " (select GroupID, minitems, maxitems, isStrictmax, weight, null, null, null, null, false "
 				+ " from ${ItemBankDB}.affinitygroup G   where G._fk_AdminSubject = ${segmentKey}) "
@@ -1522,7 +1521,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 					+ " from  ${ItemBankDB}.tblsetofadminsubjects S  ,  ${ItemBankDB}.tblsetofadminitems I1  "
 					+ "  where S.VirtualTest = ${parentTest} and S._Key <> ${segmentKey} and _fk_AdminSubject = S._Key "
 					+ " and not exists (select * from  ${ItemBankDB}.tblsetofadminitems I2 "
-					+ " where I2._fk_AdminSubject = ${segmentKey} and I1._fk_Item = I2._fk_Item)";
+					+ " where I2._fk_adminsubject = ${segmentKey} and I1._fk_Item = I2._fk_Item)";
 
 			parameters.put("parentTest", parentTest);
 			query = fixDataBaseNames(SQL_QUERY4);
@@ -2360,7 +2359,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			throws ReturnStatusException {
 
 		Date startTime = _dateUtil.getDateWRetStatus(connection);
-		String SQL_QUERY = "update TestOpportunitySegment set IsSatisfied = 1, SatisfiedReason = ${termReason} "
+		String SQL_QUERY = "update testopportunitysegment set IsSatisfied = 1, SatisfiedReason = ${termReason} "
 				+ " where _fk_TestOpportunity = ${oppkey} and SegmentPosition = ${segmentPosition}";
 
 		SqlParametersMaps parameters = new SqlParametersMaps()
@@ -2625,6 +2624,21 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			parameters.put("parentTest", parentTest);
 			parameters.put("selectionAlgorithm", algorithm);
 		}
+				
+		// Get the min and max Operational items
+		long minItems = 0; 
+		long maxItems = 0;
+		
+		final String cmdMinMax =  " select cast(sum(minitems) as signed integer) as minitems, cast(sum(maxitems) as signed integer) as maxitems from sim_segment " 
+                            + " where _fk_session = ${sessionKey} and _efk_Segment = ${segmentkey} ";
+    SingleDataResultSet resMinMax = executeStatement(connection, cmdMinMax, parameters, true).getResultSets().next();
+    record = resMinMax.getCount() > 0 ? resMinMax.getRecords().next() : null;
+    if (record != null) {
+      minItems = record.<Long> get("minitems");
+      maxItems = record.<Long> get("maxitems");
+    }
+    parameters.put("minitems", minItems);
+    parameters.put("maxitems", maxItems);    
 
 		// -- Segment-level specs
 		final String SQL_QUERY0 = " select _efk_Segment as segmentkey, bigtoint(1000000) as refreshMinutes "
@@ -2642,6 +2656,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ ", S.rcAbilityWeight, S.abilityWeight, S.precisionTargetNotMetWeight, S.precisionTargetMetWeight "
 				+ ", S.precisionTarget, S.adaptiveCut, S.tooCloseSEs, S.terminationMinCount, S.terminationOverallInfo"
 				+ ", S.terminationRCInfo, S.terminationTooClose, S.terminationFlagsAnd"
+		    + ", ${minitems} as minOpItemsTest "
+		    + ", ${maxitems} as maxOpItemsTest "
 				+ " from sim_segment S  , ${ItemBankDB}.tblsetofadminsubjects A   "
 				+ " where  S._fk_Session = ${sessionKey} and S._efk_Segment = ${segmentkey} and A._Key =${segmentkey}";
 		query = fixDataBaseNames(SQL_QUERY0);
@@ -2657,8 +2673,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ ", case when AG.GroupID is not null then 2 when SS._fk_Parent is null then 0 else 1 end as elementType"
 				+ ", S.abilityWeight, S.precisionTargetNotMetWeight, S.precisionTargetMetWeight, S.precisionTarget"
 				+ " from sim_segmentcontentlevel S   "
-				+ " left outer join ${ItemBankDB}.AffinityGroup AG on AG._fk_AdminSubject = S._efk_Segment and AG.GroupID = S.contentLevel"
-				+ " left outer join ${ItemBankDB}.tblStrand SS on SS._Key = S.contentLevel"
+				+ " left outer join ${ItemBankDB}.affinitygroup AG on AG._fk_AdminSubject = S._efk_Segment and AG.GroupID = S.contentLevel"
+				+ " left outer join ${ItemBankDB}.tblstrand SS on SS._Key = S.contentLevel"
 				+ " where S._fk_Session = ${sessionKey} and S._efk_Segment =${segmentKey}"
 				+ " order by isReportingCategory desc, contentLevel";
 		query = fixDataBaseNames(SQL_QUERY1);
@@ -2706,17 +2722,17 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		// segments, including the current
 		final String SQL_QUERY5 = " select coalesce(S.TestPosition, 1) as segmentPosition, AI._fk_Item as itemkey "
 				+ ", DIM.Dimension, upper(DIM.ModelName) as irtModel, DIM.parmnum, DIM.parmname, DIM.parmvalue"
-				+ " from ${ItemBankDB}.tblSetofadminItems AI"
-				+ " inner join ${ItemBankDB}.tblSetofAdminSubjects S"
+				+ " from ${ItemBankDB}.tblsetofadminitems AI"
+				+ " inner join ${ItemBankDB}.tblsetofadminsubjects S"
 				+ " on S._Key = AI._fk_AdminSubject"
 				+ " inner join"
 				+ " (select D._fk_AdminSubject, D._fk_Item, D.Dimension,m.ModelName, p.parmnum, p.parmname, ip.parmvalue"
-				+ " from ${ItemBankDB}.ItemScoreDimension AS D"
-				+ "	inner join ${ItemBankDB}.MeasurementModel m"
+				+ " from ${ItemBankDB}.itemscoredimension AS D"
+				+ "	inner join ${ItemBankDB}.measurementmodel m"
 				+ " on m.ModelNumber = D._fk_MeasurementModel"
-				+ " inner join ${ItemBankDB}.MeasurementParameter p"
+				+ " inner join ${ItemBankDB}.measurementparameter p"
 				+ " on p._fk_measurementModel = m.ModelNumber"
-				+ " inner join ${ItemBankDB}.ItemMeasurementParameter ip"
+				+ " inner join ${ItemBankDB}.itemmeasurementparameter ip"
 				+ " on ip._fk_ItemScoreDimension = D._Key"
 				+ " and ip._fk_MeasurementParameter = p.parmnum) as DIM"
 				+ " on DIM._fk_AdminSubject = AI._fk_AdminSubject"
@@ -3640,7 +3656,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		
 		// NO Table 'adaptive%'
 		
-		final String query4 = "select _efk_Segment as segkey from TestOpportunitySegment "
+		final String query4 = "select _efk_Segment as segkey from testopportunitysegment "
 				+ " where _fk_TestOpportunity = ${oppkey}"
 				+ " and algorithm like ${adaptive} and isSatisfied = 0 "
 				+ " and (${segmentkey} is null or _efk_segment = ${segmentkey})";
@@ -3660,7 +3676,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			// TODO ?
 			poolstring = _AA_ItemPoolString_FN(connection, oppkey, segkey);
 			
-			final String query45 = "select itempool from TestOpportunitySegment where _fk_TestOpportunity = ${oppkey} and _efk_Segment = ${segkey}";
+			final String query45 = "select itempool from testopportunitysegment where _fk_TestOpportunity = ${oppkey} and _efk_Segment = ${segkey}";
 			parameters.put("segkey", segkey);
 			res1 = executeStatement(connection, query45, parameters, true).getResultSets().next();
 			record = res1.getCount() > 0 ? res1.getRecords().next() : null;
@@ -3672,7 +3688,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			{
 				itempool = itempool + "," + poolstring;
 			}
-			final String query5 = "update TestOpportunitySegment set itempool =  ${itempool}, "
+			final String query5 = "update testopportunitysegment set itempool =  ${itempool}, "
 					+ " offgradeItems = ${poolfilterProperty} "
 					+ " where _fk_TestOpportunity = ${oppkey} and _efk_Segment = ${segkey}";
 			parameters.put("itempool", itempool);
@@ -3680,7 +3696,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		}
 		
 		String sessionDB = getTdsSettings ().getTDSSessionDBName ();
-		final String query6 = "insert into ${ArchiveDB}.OpportunityAudit (_fk_TestOpportunity, AccessType, comment, dateaccessed, dbname) "
+		final String query6 = "insert into ${ArchiveDB}.opportunityaudit (_fk_TestOpportunity, AccessType, comment, dateaccessed, dbname) "
 				+ " values (${oppkey}, ${setoffgrade}, ${poolfilterProperty}, now(3), ${sessionDB})";
 		parameters.put("setoffgrade", "SET OFFGRADE").put("sessionDB", sessionDB);
 		int insertCnt = executeStatement(connection, fixDataBaseNames(query6), parameters, true).getUpdateCount();

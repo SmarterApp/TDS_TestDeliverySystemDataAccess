@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10249,7 +10250,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return executeStatement (connection, query1, params1, false).getResultSets ().next ();
   }
   
-  class EligibleTest {
+  class EligibleTest implements Comparable<EligibleTest>{
     private String testKey;
     private String testId;
     private String grade;
@@ -10431,6 +10432,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       this.clientName = clientName;
     }
     
+    
+    public int compareTo(EligibleTest other) {
+      return Integer.compare(this.sortOrder, other.sortOrder);
+  }
   }
   
   public SingleDataResultSet  T_GetEligibleTests_SP (SQLConnection connection, Long testee, UUID sessionKey, String grade) throws ReturnStatusException {
@@ -10466,32 +10471,34 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     
     
-    
     //Get EligibleTests for the currentSession
     result = _GetCurrentTests (connection, sessionKey);
     Iterator<DbResultRecord> recordsIter = result.getRecords ();
     List<EligibleTest> eligibleTests = new ArrayList<EligibleTest> ();
+    Set<String> eligibleTestKeys = new HashSet<String> ();
     StringBuilder sbTestIds = new StringBuilder ();    
     while(recordsIter.hasNext ()) {
       record = recordsIter.next ();
-      
+      String testKey = record.<String>get ("testkey").trim ();
       //If guest session and testid do not match with the one in the ART than do not show that test
-      if(testee>=0 && !rtsTests.contains (record.<String>get ("testkey"))) {
-        recordsIter.remove ();
-        continue;
+      if(testee>=0) { 
+          if(!rtsTests.contains (testKey) || eligibleTestKeys.contains (testKey)) {
+              recordsIter.remove ();
+              continue;
+          }
       }
       
       //Eliminate those that are not in a compatible grade.
-      if (__IsGradeEquiv_FN (record.<String> get ("grade"), grade) == false) {
+      if (testee<0 && __IsGradeEquiv_FN (record.<String> get ("grade"), grade) == false) {
         recordsIter.remove ();
         continue;
       }
       
       //Creating EligibleTest object
       EligibleTest test = new EligibleTest();
-      test.setTestKey (record.<String>get ("testkey"));
+      test.setTestKey (testKey);
       test.setTestId (record.<String>get ("testid"));
-      test.setGrade (record.<String>get ("grade"));
+      test.setGrade (grade);
       test.setSubject (record.<String>get ("subject"));
       test.setEnroll (record.<String>get ("enroll"));
       test.setMaxOpps(record.<Integer>get ("maxopps"));
@@ -10510,7 +10517,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       test.setSortOrder (record.<Integer>get ("sortOrder"));
       test.setClientName(clientName);
       eligibleTests.add (test);
-      
+      eligibleTestKeys.add (testKey);
       //If sessionType is zero and session is null for the test than update the test with Denied status
       if (DbComparator.isEqual (test.getSessionType (), 0) && sessionKey != null &&
           test.getSession () ==null) {
@@ -10714,6 +10721,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         executeStatement (connection, SQL_QUERY_INSERT1, parms2, false).getUpdateCount ();
       }
     }
+    Collections.sort(eligibleTests);
     Iterator<EligibleTest> iTests = eligibleTests.iterator ();
     List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>> ();
     while(iTests.hasNext ()) {
@@ -10755,7 +10763,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     returnResultSet.addColumn ("reason", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
     
     returnResultSet.addRecords (resultList);
-    
     _commonDll._LogDBLatency_SP (connection, "T_GetEligibleTests", startTime, testee, true, null, null, null, clientName, null);
     
     return returnResultSet;

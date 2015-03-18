@@ -626,12 +626,65 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       //Alex needs to test case when where clause in the above statement 
       // does not return any rows
       // In any case we need to have xml root like <oportynity .... />
-      if(res == null || res.isEmpty ())
+      if(res == null || res.isEmpty ()) // case when proctor session was closed
       {
-        res = "<" + opps + " server=\"" // server value is empty
-            + "\" database=\"" + dbName 
-            + "\" itemcount=\"" + itemcount + "\" ftcount=\"" + ftcount 
-            + "\" windowOpportunity=\"" + winopp + "\" " + "/>";
+          List<String> orderedColumnsSmall = new ArrayList<String> (Arrays.asList (
+                  "@server",
+                  "@database",
+                  "@clientName",
+                  "@key",
+                  "@oppId",
+                  "@startDate",
+                  "@status",
+                  "@opportunity",
+                  "@statusDate",
+                  "@dateCompleted",
+                  "@pauseCount",
+                  "@itemCount",
+                  "@ftCount",
+                  "@abnormalStarts",
+                  "@gracePeriodRestarts",
+                  "@windowId"
+                  ));
+
+    	  int oneAttempt = 1;
+    	  query = "select @@hostname as \"@server\", "
+    			  + " ${dbName} as \"@database\", "
+    	          + " O.clientname as \"@clientName\", "
+    	          + " O._Key as\"@key\", "
+    	          + " ${reportingID} as \"@oppId\", "
+    	          + " DateStarted as \"@startDate\", "
+    	          + " O.status as \"@status\", "
+    	          + " ${opportunity} as \"@opportunity\", "
+    	          + " O.DateChanged as \"@statusDate\", "
+    	          + " DateCompleted as \"@dateCompleted\", "
+    	          + " Restart as \"@pauseCount\", "
+    	          + " ${itemcount} as \"@itemCount\", "
+    	          + " ${ftcount} as \"@ftCount\", "
+    	          + " abnormalStarts as \"@abnormalStarts\", "
+    	          + " gracePeriodRestarts as \"@gracePeriodRestarts\", "
+    	          + " windowID as \"@windowId\" "
+    	          + " from testopportunity O, session S where O._Key = ${oppkey}"
+    	          + " and O._fk_Session = S._Key ";
+	      parameters.put ("opportunity", oneAttempt);
+	      result = executeStatement (connection, this.fixDataBaseNames (query), parameters, false).getResultSets ().next ();
+	      resItr = result.getRecords ();
+	      if (resItr.hasNext ())
+	      {
+	        record = resItr.next ();
+	        recordToXML (record, orderedColumnsSmall, strBuilder, opps, debug);
+	      }
+	      res = strBuilder.toString ();
+	      if(res == null || res.isEmpty ()) // case when proctor session was closed
+	      {
+	
+	    	  res = "<" + opps + " server=\"" // server value is empty
+	            + "\" database=\"" + dbName 
+	            + "\" itemCount=\"" + itemcount + "\" ftCount=\"" + ftcount 
+	            + "\" windowOpportunity=\"" + winopp + "\" clientName=\"" + client 
+	            + "\" oppId= \"" + newReportingIdRef.get() + "\" />";
+	
+	      }
       }
 
       String segmentsXML 		= XML_GetSegments_F (connection, oppkey, debug);
