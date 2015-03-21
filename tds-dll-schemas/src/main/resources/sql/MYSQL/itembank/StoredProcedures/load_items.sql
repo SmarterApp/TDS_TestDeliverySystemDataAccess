@@ -23,7 +23,7 @@ begin
 	create temporary table tmp_scorepoints (
 		testitemid  varchar(150)
 	  , scorepoints int
-	);
+	)engine = memory;
 
 	--  load the nonexistent items barbones conditionally first, then update from Loader_Items
 	insert into tblitem (_efk_itembank, _efk_Item, itemtype, filepath, filename, datelastupdated, itemid, _key, loadconfig)

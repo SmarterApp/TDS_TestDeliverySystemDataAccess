@@ -23,7 +23,7 @@ begin
 		, recoderule			varchar(255)
 		, scorepoints 			int
 		, weight 				float
-	);
+	)engine = memory;
 
 	insert into tmp_itemdimension (_fk_adminsubject, _fk_item, _fk_measurementmodel, scorepoints, weight, dimension, recoderule)
 	select distinct ais._fk_adminsubject

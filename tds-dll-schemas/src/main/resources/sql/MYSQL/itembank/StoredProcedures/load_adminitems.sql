@@ -42,7 +42,7 @@ begin
 	  , irt_a float
 	  , irt_b varchar(150)
 	  , irt_c float
-	);
+	)engine = memory;
 
 
 	-- first gather the linked item and adminsubject information	
@@ -102,7 +102,7 @@ begin
 		 , ai.isactive 		= sp.isactive
 		 , ai.blockid 		= sp.blockid
 		 , ai.isrequired    = sp.responserequired
-		 , ai.groupkey		= concat(sp.groupitemid, '_', sp.blockid)
+		 , ai.groupkey		= concat(sp.itemgroupid, '_', sp.blockid)
 	 where _fk_package = v_testpackagekey;
 
 

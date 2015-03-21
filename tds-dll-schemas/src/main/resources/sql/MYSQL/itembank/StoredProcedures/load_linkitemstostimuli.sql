@@ -16,12 +16,12 @@ begin
 	create temporary table tmp_segments (
 		testitemid	varchar(150)
 	  , segments    varchar(250)
-	);
+	)engine = memory;
 
 	create temporary table tmp_passages (
 		testitemid	varchar(150)
 	  , passages   	varchar(150)
-	);
+	)engine = memory;
 
 	-- load items related to segments   
 	insert into tmp_segments
@@ -42,10 +42,7 @@ begin
 	-- first delete all strand links for these items
 	delete s
 	  from tblsetofitemstimuli s 
-	 where exists (select * 
-					 from tmp_segments seg 
-				    where seg.testitemid = s._fk_item 
-					  and seg.segments = s._fk_adminsubject);
+	  join tmp_segments seg on seg.testitemid = s._fk_item and seg.segments = s._fk_adminsubject;
 
 	insert into tblsetofitemstimuli
 	select p.testitemid
@@ -57,7 +54,6 @@ begin
 	  join loader_testitem ti on ti.testitemid = seg.testitemid
 	 where _fk_package = v_testpackagekey;
 	
-
 	-- clean-up
 	drop temporary table tmp_segments;
 	drop temporary table tmp_passages;

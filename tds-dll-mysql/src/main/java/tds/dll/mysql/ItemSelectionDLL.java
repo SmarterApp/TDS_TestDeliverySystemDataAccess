@@ -1014,7 +1014,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				}
 			}
 			final String SQL_QUERY5 = "select  groupID, numItemsRequired as numRequired, "
-					+ " coalesce(${simMax}, maxItems) as maxItems "
+					+ " coalesce(bigtoint(${simMax}), maxItems) as maxItems "
 					+ " from ${ItemBankDB}.tbladminstimulus "
 					+ " where _fk_AdminSubject = ${segmentKey} and groupID = ${groupID}";
 			parameters.put("simMax", simMax);
@@ -1456,9 +1456,10 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ " , case when MaxItems is null then 0 else MaxItems end as maxOpItems "
 				//
 				+ " , coalesce(startAbility, 0) as startAbility  "
-				+ " , coalesce(startInfo, 0) as startInfo  "
+				+ " , coalesce(startInfo, 0.2) as startInfo  "
 				+ " , coalesce(slope, 1) as slope  "
 				+ " , coalesce(intercept, 0) as intercept  "
+				+ " , coalesce(abilityweight, bigtoint(1)) as abilityweight  "
 				// -- Field test specs
 				+ " , FTStartPos, FTEndPos, FTMinItems, FTMaxItems "
 				// -- Item selection algorithm
@@ -1580,7 +1581,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		}
 		// -- First the segment-level specs
 
-		final String SQL_QUERY0 = " select _efk_Segment as segmentkey, 1000000 as refreshMinutes "
+		final String SQL_QUERY0 = " select _efk_Segment as segmentkey, bigtoint(1000000) as refreshMinutes "
 				+ " , _efk_AdminSubject as ParentTest "
 				+ " , S.segmentPosition,  S.SegmentID, S.blueprintWeight as bpWeight "
 				+ " , S.itemWeight, S.abilityOffset, S.cset1size, S.cset1Order "
@@ -1589,6 +1590,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				+ " , S.startAbility, S.startInfo "
 				+ " , coalesce(A.Slope, 1) as slope "
 				+ " , coalesce(A.Intercept, 0) as intercept "
+				+ " , coalesce(A.abilityweight, bigtoint(1)) as abilityweight "
 				// -- Field test specs
 				+ " , S.FTStartPos, S.FTEndPos, S.FTMinItems, S.FTMaxItems "
 				+ " , S.selectionAlgorithm "
@@ -1621,7 +1623,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		// -- Next the itemgroups (note that itemsRequired refers to how many a
 		// student must answer which is irrelevant to the simulator)
 		// -- and that bpweight is unused and therefore unavailable
-		final String SQL_QUERY2 = " select groupID as itemGroup, -1 as itemsRequired, maxItems, 1 as bpweight "
+		final String SQL_QUERY2 = " select groupID as itemGroup, bigtoint(-1) as itemsRequired, maxItems, 1 as bpweight "
 				+ " from sim_itemgroup   "
 				+ " where _fk_Session = ${sessionKey} and _efk_Segment = ${segmentKey} ";
 
@@ -2683,7 +2685,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		resultsSets.add(res1);
 
 		// -- Itemgroups
-		final String SQL_QUERY2 = " select groupID as itemGroup, -1 as itemsRequired, maxItems, 1 as bpweight "
+		final String SQL_QUERY2 = " select groupID as itemGroup, bigtoint(-1) as itemsRequired, maxItems, 1 as bpweight "
 				+ " from sim_itemgroup   "
 				+ " where _fk_Session = ${sessionKey} and _efk_Segment = ${segmentKey} ";
 		SingleDataResultSet res2 = executeStatement(connection, SQL_QUERY2,

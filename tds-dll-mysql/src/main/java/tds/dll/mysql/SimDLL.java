@@ -2602,7 +2602,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         + "   where T._fk_TestOPportunity = O.oppkey and T.MeasureOf = 'OVERALL' and T.measureLabel = 'ThetaScore'";
     updatedCnt = executeStatement (connection, fixDataBaseNames (cmd3, unquotedParms), null, true).getUpdateCount ();
 
-    final String cmd4 = "update ${oppsTbl} O, TestOpportunityScores T "
+    final String cmd4 = "update ${oppsTbl} O, testopportunityscores T "
         + " set O.scaledScore = (T.value +0.0), scaledSE = standardError "
         + "    where T._fk_TestOPportunity = O.oppkey and T.MeasureOf = 'OVERALL' and T.measureLabel = 'ScaleScore'";
     updatedCnt = executeStatement (connection, fixDataBaseNames (cmd4, unquotedParms), null, true).getUpdateCount ();
@@ -2612,17 +2612,17 @@ public class SimDLL extends AbstractDLL implements ISimDLL
         + "   where _fk_TestOPportunity = oppkey and MeasureOf = 'OVERALL' and measureLabel = 'PerformanceLevel'";
     updatedCnt = executeStatement (connection, fixDataBaseNames (cmd5, unquotedParms), null, true).getUpdateCount ();
 
-    final String cmd6 = "update ${oppsTbl} O,  TestOpportunityScores T "
+    final String cmd6 = "update ${oppsTbl} O,  testopportunityscores T "
         + " set O.rawScore = cast(T.value as SIGNED) "
         + "   where _fk_TestOPportunity = oppkey and MeasureOf = 'OVERALL' and measureLabel = 'RawScore'";
     updatedCnt = executeStatement (connection, fixDataBaseNames (cmd6, unquotedParms), null, true).getUpdateCount ();
 
-    final String cmd7 = "update ${oppsTbl} O,  TestOpportunityScores T "
+    final String cmd7 = "update ${oppsTbl} O,  testopportunityscores T "
         + " set O.itemCount = cast(T.value as SIGNED) "
         + "   where _fk_TestOPportunity = oppkey and MeasureOf = 'OVERALL' and measureLabel = 'ItemCount'";
     updatedCnt = executeStatement (connection, fixDataBaseNames (cmd7, unquotedParms), null, true).getUpdateCount ();
 
-    final String cmd8 = "update ${oppsTbl} O,  TestOpportunityScores T "
+    final String cmd8 = "update ${oppsTbl} O,  testopportunityscores T "
         + " set O.itemCountScored = cast(T.value as SIGNED) "
         + "   where _fk_TestOPportunity = oppkey and MeasureOf = 'OVERALL' and measureLabel = 'ItemCountScored'";
     updatedCnt = executeStatement (connection, fixDataBaseNames (cmd8, unquotedParms), null, true).getUpdateCount ();
@@ -3058,7 +3058,7 @@ public class SimDLL extends AbstractDLL implements ISimDLL
     resultsets.add (rs1);
 
     // Session test information
-    final String cmd2 = " select S._efk_adminsubject, S._efk_testid, s.iterations, S.opportunities, "
+    final String cmd2 = " select S._efk_adminsubject, S._efk_testid, S.iterations, S.opportunities, "
         + " S.meanproficiency, S.sdproficiency, S.strandcorrelation, S.handscoreitemtypes "
         + " from sessiontests S "
         + " where S._fk_session=${sessionkey} ";

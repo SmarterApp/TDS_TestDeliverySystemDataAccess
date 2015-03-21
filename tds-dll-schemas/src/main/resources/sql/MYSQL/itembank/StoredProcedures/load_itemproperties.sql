@@ -16,7 +16,7 @@ begin
 	create temporary table tmp_segments (
 		testitemid	varchar(150)
 	  , segments    varchar(250)
-	);
+	)engine = memory;
 
 	create temporary table tmp_itemprops (
 		_fk_item 		 varchar(150)
@@ -24,7 +24,7 @@ begin
 	  , propvalue 		 varchar(128)
 	  , propdescription  varchar(150)
 	  , _fk_adminsubject varchar(250)
-	);
+	)engine = memory;
 
 	-- load items related to segments   
 	insert into tmp_segments

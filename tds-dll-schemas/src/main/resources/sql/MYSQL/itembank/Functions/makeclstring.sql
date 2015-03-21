@@ -21,6 +21,7 @@ begin
     declare v_str text;
 	declare v_cl varchar(100);
 	
+	drop temporary table if exists tmp_cltbl;
 	create temporary table tmp_cltbl (
 		cl varchar(100)
 	);

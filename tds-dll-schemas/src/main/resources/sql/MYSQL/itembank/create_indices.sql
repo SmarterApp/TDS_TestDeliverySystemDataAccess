@@ -1,3 +1,70 @@
+create index `ix_loader_itemscoredimension`
+	on `loader_itemscoredimension`(`_fk_package`(250));
+
+create index `ix_loader_itemscoredimensionproperties`
+	on `loader_itemscoredimensionproperties`(`_fk_package`(250));
+
+create index `ix_loader_segmentblueprint`
+	on `loader_segmentblueprint`(`_fk_package`(250));
+
+create index `ix_loader_segmentform`
+	on `loader_segmentform`(`_fk_package`(250));
+
+create index `ix_loader_segmentitemselectionproperties`
+	on `loader_segmentitemselectionproperties`(`_fk_package`(250));
+
+create index `ix_loader_segmentpool`
+	on `loader_segmentpool`(`_fk_package`(250));
+
+create index `ix_loader_segmentpoolgroupitem`
+	on `loader_segmentpoolgroupitem`(`_fk_package`(250));
+
+create index `ix_loader_segmentpoolpassageref`
+	on `loader_segmentpoolpassageref`(`_fk_package`(250));
+
+create index `ix_loader_setofitemstrands`
+	on `loader_setofitemstrands`(`_fk_package`(250));
+
+create index `ix_loader_testblueprint`
+	on `loader_testblueprint`(`_fk_package`(250));
+
+create index `ix_loader_testformgroupitems`
+	on `loader_testformgroupitems`(`_fk_package`(250));
+
+create index `ix_loader_testformitemgroup`
+	on `loader_testformitemgroup`(`_fk_package`(250));
+
+create index `ix_loader_testformpartition`
+	on `loader_testformpartition`(`_fk_package`(250));
+
+create index `ix_loader_testformproperties`
+	on `loader_testformproperties`(`_fk_package`(250));
+
+create index `ix_loader_testforms`
+	on `loader_testforms`(`_fk_package`(250));
+
+create index `ix_loader_testitem`
+	on `loader_testitem`(`_fk_package`(250));
+
+create index `ix_loader_testitempoolproperties`
+	on `loader_testitempoolproperties`(`_fk_package`(250));
+
+create index `ix_loader_testitemrefs`
+	on `loader_testitemrefs`(`_fk_package`(250));
+
+create index `ix_loader_testpackage`
+	on `loader_testpackage`(`packagekey`(250));
+
+create index `ix_loader_testpackageproperties`
+	on `loader_testpackageproperties`(`_fk_package`(250));
+
+create index `ix_loader_testpassages`
+	on `loader_testpassages`(`_fk_package`(250));
+
+create index `ix_loader_testpoolproperties`
+	on `loader_testpoolproperties`(`_fk_package`(250));
+
+
 create index `ix_aaitemkey`
 	on `aa_itemcl`(`_fk_item`);
 

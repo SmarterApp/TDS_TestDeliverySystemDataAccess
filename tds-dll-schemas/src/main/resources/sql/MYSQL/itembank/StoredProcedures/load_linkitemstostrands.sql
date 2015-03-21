@@ -21,20 +21,26 @@ begin
 	create temporary table tmp_segments (
 		testitemid	varchar(150)
 	  , segments    varchar(250)
-	);
+	)engine = memory;
 
 	drop temporary table if exists tmp_strands;
 	create temporary table tmp_strands (
 		testitemid	varchar(150)
 	  , strands   	varchar(150)
 	  , lvl			int
-	);
+	)engine = memory;
+
+	drop temporary table if exists tmp_affinity;
+	create temporary table tmp_affinity (
+		testitemid	varchar(150)
+	  , affinity   	varchar(150)
+	)engine = memory;
 
 	drop temporary table if exists tmp_maxlvlstrands;
 	create temporary table tmp_maxlvlstrands (
 		testitemid	varchar(150)
 	  , max_lvl		int
-	);
+	)engine = memory;
 
 	-- load items related to segments   
 	insert into tmp_segments
@@ -54,6 +60,13 @@ begin
 	   and refcategory in ('strand', 'contentlevel')
 	   and _fk_package = v_testpackagekey; 
 
+	insert into tmp_affinity (testitemid, affinity)
+	select distinct testitemid
+		 , ref
+	  from loader_testitemrefs 
+	 where reftype = 'bp'
+	   and refcategory = 'affinitygroup'
+	   and _fk_package = v_testpackagekey; 
 
 	insert into tmp_maxlvlstrands
 	select testitemid, max(lvl) max_lvl
@@ -62,9 +75,7 @@ begin
 
     delete cl
 	  from aa_itemcl cl
-	 where exists ( select * 
-					  from tmp_segments seg 
-					 where seg.segments = cl._fk_adminsubject and seg.testitemid = cl._fk_item);
+	  join tmp_segments seg on seg.segments = cl._fk_adminsubject and seg.testitemid = cl._fk_item;
 
 	insert into aa_itemcl
 	select seg.segments
@@ -73,10 +84,17 @@ begin
 	  from tmp_strands s
 	  join tmp_segments seg on seg.testitemid = s.testitemid;
 
+	insert into aa_itemcl
+	select seg.segments
+		 , a.testitemid
+		 , a.affinity
+	  from tmp_affinity a
+	  join tmp_segments seg on seg.testitemid = a.testitemid;
+
+
 	delete s
 	  from tmp_strands s
-	  join tmp_maxlvlstrands ms on ms.testitemid = s.testitemid
-							   and ms.max_lvl <> s.lvl;
+	  join tmp_maxlvlstrands ms on ms.testitemid = s.testitemid and ms.max_lvl <> s.lvl;
 
 
 	insert into loader_setofitemstrands
@@ -94,10 +112,8 @@ begin
 	-- first delete all strand links for these items
 	delete s
 	  from tblsetofitemstrands s 
-	 where exists (select * 
-					 from tmp_segments seg 
-				    where seg.testitemid = s._fk_item 
-					  and seg.segments = s._fk_adminsubject);
+	  join tmp_segments seg on seg.testitemid = s._fk_item and seg.segments = s._fk_adminsubject;
+
 
 	insert into tblsetofitemstrands
 	select _fk_item
@@ -111,6 +127,7 @@ begin
 	drop temporary table tmp_segments;
 	drop temporary table tmp_strands;
 	drop temporary table tmp_maxlvlstrands;
+	drop temporary table tmp_affinity;
 
 end $$
 

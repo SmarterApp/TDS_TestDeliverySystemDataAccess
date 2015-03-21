@@ -27,7 +27,7 @@ proc: begin
 -- 	  , bpweight 		 float 
 	  , version 		 bigint
 	  , groupid 		 varchar(50)
-	);
+	)engine = memory;
 
 	-- ?? have to write logic load passages when fixedform test
 	insert into tmp_tblstimulus (_fk_stimulus, _fk_adminsubject, numitemsrequired, maxitems, version, groupid)

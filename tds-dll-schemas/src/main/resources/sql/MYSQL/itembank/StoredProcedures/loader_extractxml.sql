@@ -30,14 +30,19 @@ proc: begin
 	declare v_testformpath			 varchar(300);
 	declare v_segmentpath			 varchar(300);
 
+	declare v_testblueprintxml	longtext;
+	declare v_testitempoolxml	longtext;
+	declare v_adminsegxml		longtext;
+
 	declare v_testformcount int;
 	declare v_segmentcount  int;
 
-	declare v_counter int default 1;
+	declare v_counter  int default 1;
+	declare v_strindex int default 2;
 
 	-- This path has been seperated from the subpaths declared below to ensure flexibility during testing
- -- set v_root = 'testpackage/';
- -- set v_path = 'testpackage/administration/';
+	-- set v_root = 'testpackage/';
+	-- set v_path = 'testpackage/administration/';
 
  	set v_root = 'testspecification/';
  	set v_path = 'testspecification/administration/';
@@ -64,7 +69,7 @@ proc: begin
 	select v_testpackagekey
 		 , extractvalue(v_xml, concat(v_root, 'attribute::purpose'))
 		 , extractvalue(v_xml, concat(v_root, 'attribute::publisher'))
-		 , STR_TO_DATE(extractvalue(v_xml, concat(v_root, 'attribute::publishdate')), '%b %d %Y %h:%i %p')
+		 , str_to_date(extractvalue(v_xml, concat(v_root, 'attribute::publishdate')), '%b %d %Y %h:%i %p')
 		 , extractvalue(v_xml, concat(v_root, 'attribute::version'))
 		 , v_testkey
 		 , extractvalue(v_xml, concat(v_root, 'identifier/attribute::name'))
@@ -79,16 +84,18 @@ proc: begin
 	call loader_testpackageproperties(v_testpackagekey, v_xml, v_testpackageproppath);
 
 	-- ** extract testblueprint attributes ** --
-	set v_testblueprintpath = concat(v_path, 'testblueprint/bpelement');
-	call loader_testblueprint(v_testpackagekey, v_xml, v_testblueprintpath);
+	set v_testblueprintpath = 'testblueprint/bpelement';
+	set v_testblueprintxml = substring(v_xml, locate('<testblueprint>', v_xml), (locate('</testblueprint>', v_xml) - locate('<testblueprint>', v_xml)) + length('</testblueprint>') + 1);
+	call loader_testblueprint(v_testpackagekey, v_testblueprintxml, v_testblueprintpath);
 
 	-- ** extract testpoolproperties attributes ** --
 	set v_testpoolpropertiespath = concat(v_path, 'poolproperty');
 	call loader_testpoolproperties(v_testpackagekey, v_xml, v_testpoolpropertiespath);
 
 	-- ** extract testitempool attributes ** --
-	set v_testitempoolpath = concat(v_path, 'itempool/');
-	call loader_testitempool(v_testpackagekey, v_xml, v_testitempoolpath);
+	set v_testitempoolpath = 'itempool/';
+	set v_testitempoolxml = substring(v_xml, locate('<itempool>', v_xml), (locate('</itempool>', v_xml) - locate('<itempool>', v_xml)) + length('</itempool>') + 1);
+	call loader_testitempool(v_testpackagekey, v_testitempoolxml, v_testitempoolpath);
 
 	-- ** extract testform attributes ** --
 	-- there can be more than 1 <testform>, so have to extract data iteratively  
@@ -110,10 +117,21 @@ proc: begin
 	set v_segmentcount = extractvalue(v_xml, concat('count(', v_segmentpath, ')'));
 
 	while v_counter <= v_segmentcount do
-		call loader_segment(v_testpackagekey, v_xml, concat(v_segmentpath, '[', v_counter, ']'));
+		if v_counter = 1 then -- first admin segment
+			set v_adminsegxml = concat('<adminsegment ', substring_index(substring_index(substring_index(v_xml, '<adminsegment', v_strindex), '<adminsegment', -1), '</adminsegment>', 1), '</adminsegment>');
+							 -- concat('<adminsegment ', substring_index(substring_index(v_xml, '<adminsegment', v_strindex), '<adminsegment', -1));			
+		elseif v_counter = v_segmentcount then -- last admin segment 
+			set v_adminsegxml = concat(substring_index(substring_index(substring_index(v_xml, '<adminsegment', v_strindex), '</adminsegment>', -2), '</adminsegment>', 1), '</adminsegment>');
+		else -- all inbetween admin segments
+			set v_adminsegxml = substring_index(substring_index(v_xml, '<adminsegment', v_strindex), '</adminsegment>', -2);
+		end if;
+
+		call loader_segment(v_testpackagekey, v_adminsegxml, 'adminsegment');
 
 		-- increment counter
 		set v_counter = v_counter + 1;
+		set v_strindex = v_strindex + 1;
+
 	end while;
 
 

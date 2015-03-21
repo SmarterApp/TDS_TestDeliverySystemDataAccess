@@ -18,12 +18,12 @@ begin
 	create temporary table tmp_gradelist (
 		gradename  varchar(100)
 	  , gradelabel varchar(200)
-	);
+	)engine = memory;
 
 	create temporary table tmp_testkeys (
 		testkey varchar(250)
 	  , testid  varchar(255)
-	);
+	)engine = memory;
 		
 	-- load grades for the corresponding testpackage into temp table
 	insert into tmp_gradelist
@@ -44,9 +44,9 @@ begin
 					   and _fk_package = v_testpackagekey);
 	
 	-- delete existing set of grades for that test
-    delete 
-	  from setoftestgrades 
-	 where _fk_adminsubject in (select testkey from tmp_testkeys);
+    delete g
+	  from setoftestgrades g
+	  join tmp_testkeys t on t.testkey = g._fk_adminsubject;
 
 
 	insert into setoftestgrades

@@ -18,7 +18,7 @@ begin
 
 /*** STEP 1: extract data from xml and load it into loader_* tables ***/
 	call loader_extractxml(v_xml, v_testpackagekey /*output*/);
-	select v_testpackagekey;
+	-- select v_testpackagekey;
 
 
 /*** STEP 2: Prep the loader_* tables with missing/computed column data ***/	

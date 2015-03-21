@@ -428,7 +428,9 @@ begin
                        where c.clientname = s.`client` and c.contexttype = 'TEST' and c.`context` = testid and c.toolname = p.tooltype);
 
     insert into configs.client_testtool (clientname, `type`, `code`, `value`, isdefault, allowcombine, valuedescription, `context`, contexttype)
-    select distinct c.clientname, c.tooltype, c.toolvalue, c.toolvalue, 0, 1, 'Item Pool Filter', c.testid, 'TEST'
+    select distinct c.clientname, c.tooltype, c.toolvalue, c.toolvalue
+		 , case when c.toolvalue like 'offgrade % out' then 1 else 0 end   -- make offgrade items off-limits to every test by default, all others are not default
+		 , 1, 'Item Pool Filter', c.testid, 'TEST'
       from tmp_tests t
 	  join configs.client_test_itemconstraint c on t.`client` = c.clientname and t.test = c.testid
      where c.propname = 'TDSPoolFilter'    -- handle language and itemtype exclusions separately
