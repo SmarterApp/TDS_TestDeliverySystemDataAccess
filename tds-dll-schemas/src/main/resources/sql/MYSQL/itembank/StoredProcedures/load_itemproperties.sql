@@ -24,7 +24,7 @@ begin
 	  , propvalue 		 varchar(128)
 	  , propdescription  varchar(150)
 	  , _fk_adminsubject varchar(250)
-	)engine = memory;
+	);
 
 	-- load items related to segments   
 	insert into tmp_segments
