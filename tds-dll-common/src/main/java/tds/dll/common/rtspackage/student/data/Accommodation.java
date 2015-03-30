@@ -63,9 +63,9 @@ public class Accommodation implements Serializable
   @XmlElement (name = "StreamlinedInterface")
   protected String          streamlinedInterface;
   @XmlElement (name = "NonEmbeddedDesignatedSupports")
-  protected String          nonEmbeddedDesignatedSupports;
+  protected NonEmbeddedDesignatedSupports   nonEmbeddedDesignatedSupports;
   @XmlElement (name = "NonEmbeddedAccommodations")
-  protected String          nonEmbeddedAccommodations;
+  protected NonEmbeddedAccommodations  nonEmbeddedAccommodations;
   @XmlElement (name = "Other")
   protected String          other;
 
@@ -327,7 +327,7 @@ public class Accommodation implements Serializable
    * @return possible object is {@link String }
    *
    */
-  public String getNonEmbeddedDesignatedSupports () {
+  public NonEmbeddedDesignatedSupports getNonEmbeddedDesignatedSupports () {
     return nonEmbeddedDesignatedSupports;
   }
 
@@ -338,7 +338,7 @@ public class Accommodation implements Serializable
    *          allowed object is {@link String }
    *
    */
-  public void setNonEmbeddedDesignatedSupports (String value) {
+  public void setNonEmbeddedDesignatedSupports (NonEmbeddedDesignatedSupports value) {
     this.nonEmbeddedDesignatedSupports = value;
   }
 
@@ -348,7 +348,7 @@ public class Accommodation implements Serializable
    * @return possible object is {@link String }
    *
    */
-  public String getNonEmbeddedAccommodations () {
+  public NonEmbeddedAccommodations  getNonEmbeddedAccommodations () {
     return nonEmbeddedAccommodations;
   }
 
@@ -359,7 +359,7 @@ public class Accommodation implements Serializable
    *          allowed object is {@link String }
    *
    */
-  public void setNonEmbeddedAccommodations (String value) {
+  public void setNonEmbeddedAccommodations (NonEmbeddedAccommodations value) {
     this.nonEmbeddedAccommodations = value;
   }
 

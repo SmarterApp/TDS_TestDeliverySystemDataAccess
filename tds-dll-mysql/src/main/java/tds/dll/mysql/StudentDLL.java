@@ -34,6 +34,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2135,6 +2136,9 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       parms5.put ("responseSequence", responseSequence);
       executeStatement (connection, SQL_UPDATE, parms5, false).getUpdateCount ();
     } else {
+      
+      response = StringUtils.replace (response, "\\", "\\\\");
+      
       String tmp = null;
 //      if (methodVersion == 1)
 //        tmp = "Update testeeresponse set IsSelected = ${isSelected}, IsValid = ${isValid}, _fk_ResponseSession = ${session}, _fk_Browser = ${browserID}, " +

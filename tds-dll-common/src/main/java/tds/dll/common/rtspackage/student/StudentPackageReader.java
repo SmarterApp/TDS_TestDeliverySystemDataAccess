@@ -229,11 +229,19 @@ public class StudentPackageReader implements IRtsPackageReader
       appendAccommodation (sb, subject, ac.getLanguage ());
       appendAccommodation (sb, subject, ac.getPrintOnDemand ());
       appendAccommodation (sb, subject, ac.getPrintSize ());
-      appendAccommodation (sb, subject, ac.getNonEmbeddedAccommodations ());
-      appendAccommodation (sb, subject, ac.getNonEmbeddedDesignatedSupports ());
       appendAccommodation (sb, subject, ac.getPermissiveMode ());
       appendAccommodation (sb, subject, ac.getStreamlinedInterface ());
       appendAccommodation (sb, subject, ac.getOther ());
+      if ( ac.getNonEmbeddedAccommodations () != null && ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () != null) {
+        for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () ) {
+            appendAccommodation (sb, subject, nonEmbeddedAccommodation);
+        }
+      }
+      if ( ac.getNonEmbeddedDesignatedSupports () != null && ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () != null) {
+        for (String nonEmbeddedDesignatedSupport : ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () ) {
+            appendAccommodation (sb, subject, nonEmbeddedDesignatedSupport);
+        }
+      }
     }
     if (sb.length () > 0) {
       sb.setLength (sb.length () - 1);
@@ -256,11 +264,19 @@ public class StudentPackageReader implements IRtsPackageReader
       addAccommodation (accommodationList, subjectCode, ac.getLanguage ());
       addAccommodation (accommodationList, subjectCode, ac.getPrintOnDemand ());
       addAccommodation (accommodationList, subjectCode, ac.getPrintSize ());
-      addAccommodation (accommodationList, subjectCode, ac.getNonEmbeddedAccommodations ());
-      addAccommodation (accommodationList, subjectCode, ac.getNonEmbeddedDesignatedSupports ());
       addAccommodation (accommodationList, subjectCode, ac.getPermissiveMode ());
       addAccommodation (accommodationList, subjectCode, ac.getStreamlinedInterface ());
       addAccommodation (accommodationList, subjectCode, ac.getOther ());
+      if ( ac.getNonEmbeddedAccommodations () != null && ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () != null) {
+        for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () ) {
+            addAccommodation (accommodationList, subjectCode, nonEmbeddedAccommodation);
+        }
+      }
+      if ( ac.getNonEmbeddedDesignatedSupports () != null && ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () != null) {
+        for (String nonEmbeddedDesignatedSupport : ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () ) {
+            addAccommodation (accommodationList, subjectCode, nonEmbeddedDesignatedSupport);
+        }
+      }
     }
     return accommodationList;
   }
