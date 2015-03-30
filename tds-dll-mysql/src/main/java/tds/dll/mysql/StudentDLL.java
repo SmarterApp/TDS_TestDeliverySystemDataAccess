@@ -10627,11 +10627,11 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
                   continue; 
                 
                 //Check if the number of opportunities in the current window is already hit (windowmax)
-                if(numOfOpps == maxOpps) { 
+                /*if(numOfOpps == maxOpps) { 
                   _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef);
                   test.setReason (reasonBlockedRef.get ());
                   continue;
-                }
+                }*/
                 
                 //Check whether the time elapsed since the last opportunity is sufficient
                 if (DbComparator.greaterOrEqual (daysDiff (dateChanged, today), 1) || DbComparator.isEqual (lastSession, sessionKey)
