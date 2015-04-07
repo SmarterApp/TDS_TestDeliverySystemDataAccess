@@ -200,6 +200,22 @@ INSERT INTO `system_networkdiagnostics` VALUES ('SBAC_PT','Student','Mathematics
 INSERT INTO `system_networkdiagnostics` VALUES ('SBAC','Student','Mathematics',50,100,60,'ìºdYïFJ‘ÂÏB©TZa');
 /*!40000 ALTER TABLE `system_networkdiagnostics` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping data for table `client_itemscoringconfig`
+--
+
+LOCK TABLES `client_itemscoringconfig` WRITE;
+/*!40000 ALTER TABLE `client_itemscoringconfig` DISABLE KEYS */;
+INSERT INTO `client_itemscoringconfig` VALUES ('SBAC','*','*','*','HTQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/item-scoring-service/Scoring/ItemScoring','Development')
+											 ,('SBAC','*','*','*','*','',0,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+											 ,('*','*','*','*','QTI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+											 ,('SBAC','*','*','*','EQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+											 ,('SBAC','*','*','*','GI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development');
+/*!40000 ALTER TABLE `client_itemscoringconfig` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

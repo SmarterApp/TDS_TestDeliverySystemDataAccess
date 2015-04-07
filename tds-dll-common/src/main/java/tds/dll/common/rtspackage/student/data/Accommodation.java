@@ -9,6 +9,7 @@
 package tds.dll.common.rtspackage.student.data;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -63,9 +64,9 @@ public class Accommodation implements Serializable
   @XmlElement (name = "StreamlinedInterface")
   protected String          streamlinedInterface;
   @XmlElement (name = "NonEmbeddedDesignatedSupports")
-  protected NonEmbeddedDesignatedSupports   nonEmbeddedDesignatedSupports;
+  protected List<String>   nonEmbeddedDesignatedSupports;
   @XmlElement (name = "NonEmbeddedAccommodations")
-  protected NonEmbeddedAccommodations  nonEmbeddedAccommodations;
+  protected List<String>  nonEmbeddedAccommodations;
   @XmlElement (name = "Other")
   protected String          other;
 
@@ -327,7 +328,7 @@ public class Accommodation implements Serializable
    * @return possible object is {@link String }
    *
    */
-  public NonEmbeddedDesignatedSupports getNonEmbeddedDesignatedSupports () {
+  public List<String> getNonEmbeddedDesignatedSupports () {
     return nonEmbeddedDesignatedSupports;
   }
 
@@ -338,7 +339,7 @@ public class Accommodation implements Serializable
    *          allowed object is {@link String }
    *
    */
-  public void setNonEmbeddedDesignatedSupports (NonEmbeddedDesignatedSupports value) {
+  public void setNonEmbeddedDesignatedSupports (List<String> value) {
     this.nonEmbeddedDesignatedSupports = value;
   }
 
@@ -348,7 +349,7 @@ public class Accommodation implements Serializable
    * @return possible object is {@link String }
    *
    */
-  public NonEmbeddedAccommodations  getNonEmbeddedAccommodations () {
+  public List<String>  getNonEmbeddedAccommodations () {
     return nonEmbeddedAccommodations;
   }
 
@@ -359,7 +360,7 @@ public class Accommodation implements Serializable
    *          allowed object is {@link String }
    *
    */
-  public void setNonEmbeddedAccommodations (NonEmbeddedAccommodations value) {
+  public void setNonEmbeddedAccommodations (List<String> value) {
     this.nonEmbeddedAccommodations = value;
   }
 

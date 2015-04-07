@@ -36,6 +36,7 @@ import tds.dll.api.IRtsDLL;
 import tds.dll.api.LogDBErrorArgs;
 import tds.dll.api.LogDBLatencyArgs;
 import tds.dll.api.ReturnErrorArgs;
+import tds.dll.common.rtspackage.student.data.AccommodationOther;
 import AIR.Common.DB.AbstractDLL;
 import AIR.Common.DB.AbstractDataResultExecutor;
 import AIR.Common.DB.DataBaseTable;
@@ -49,6 +50,7 @@ import AIR.Common.DB.results.SingleDataResultSet;
 import AIR.Common.Helpers.CaseInsensitiveMap;
 import AIR.Common.Helpers._Ref;
 import AIR.Common.Sql.AbstractDateUtilDll;
+import AIR.Common.Utilities.UrlEncoderDecoderUtils;
 import TDS.Shared.Exceptions.ReturnStatusException;
 
 public class CommonDLL extends AbstractDLL implements ICommonDLL
@@ -2651,14 +2653,40 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       int deletedCnt = executeStatement (connection, fixDataBaseNames (SQL_DELETE3, unquotedParms3), parms5, false).getUpdateCount ();
       // System.err.println (deletedCnt); // for testing
 
+
       final String SQL_INSERT2 = "insert into testeeaccommodations (_fk_TestOpportunity, AccType, AccCode, AccValue, _date, allowChange, recordUsage, testeeControl, segment, "
           + " valueCount, isApproved, IsSelectable)"
           + " select distinct ${oppkey}, atype, acode, avalue, ${starttime}, allow, recordUsage, control, ${segment}, "
           + " valcount, case valcount when 1 then 1 else ${approved} end, isSelectable from ${accomsTableName};";
+
       SqlParametersMaps parms6 = (new SqlParametersMaps ()).put ("oppkey", oppKey).put ("starttime", starttime).put ("segment", segment).put ("approved", approved);
+
       int insertedCnt1 = executeStatement (connection, fixDataBaseNames (SQL_INSERT2, unquotedParms3), parms6, false).getUpdateCount ();
       // System.err.println (insertedCnt1); // for testing
-
+      
+      //insert other accommodation
+      final String SQL_SELECT_OTHER = "select code from ${splitTblName} where code like ${otherAccomPrefix} limit 1";
+      Map<String, String> unquotedParmsOther = new HashMap<String, String> ();
+      unquotedParmsOther.put ("splitTblName", splitAccomCodesTbl.getTableName ());
+      SqlParametersMaps paramsOther = (new SqlParametersMaps ()).put ("otherAccomPrefix", AccommodationOther.VALUE_PREFIX + "%");
+      String otherAccomValue =  null;
+      SingleDataResultSet rsOther = executeStatement (connection, fixDataBaseNames (SQL_SELECT_OTHER, unquotedParmsOther), paramsOther, false).getResultSets ().next ();
+      if (rsOther != null) {
+          DbResultRecord recordOther = (rsOther.getCount() > 0 ? rsOther.getRecords().next() : null);
+          if (recordOther != null) {
+               otherAccomValue = UrlEncoderDecoderUtils.decode(recordOther.<String> get ("code").substring (AccommodationOther.VALUE_PREFIX.length()));
+               final String SQL_INSERT_OTHER = "insert into testeeaccommodations (_fk_TestOpportunity, AccType, AccCode, AccValue, _date, allowChange, recordUsage, testeeControl, segment, "
+                   + " valueCount, isApproved, IsSelectable)"
+                   + " select ${oppkey}, ${otherType}, ${otherCode}, ${otherValue}, ${starttime}, ${otherAllowChange}, ${otherRecordUsage}, ${otherTesteeControl}, ${segment}, "
+                   + " ${otherValueCount},  ${otherIsApproved}, ${otherIsSelectable}";
+               SqlParametersMaps parmsOther = (new SqlParametersMaps ()).put ("oppkey", oppKey).put ("starttime", starttime).put ("segment", segment);
+               parmsOther.put ("otherType", AccommodationOther.NAME).put("otherCode", AccommodationOther.CODE).put ("otherValue", otherAccomValue); 
+               parmsOther.put ("otherAllowChange", 0).put("otherRecordUsage", 0).put("otherTesteeControl", 0).put("otherValueCount", 1).put("otherIsApproved", 1).put("otherIsSelectable", 0);
+               executeStatement (connection, SQL_INSERT_OTHER, parmsOther, false);
+          }
+      }
+    
+  
       final String SQL_QUERY8 = "select  atype from ${accomsTableName} where atype = 'Language' limit 1";
       if (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquotedParms3), null, false))) {
         final String SQL_UPDATE1 = " update testopportunity T, ${accomsTableName} set T.Language = avalue, T.customAccommodations = ${custom}  where atype = 'Language' and _Key = ${oppkey}; ";

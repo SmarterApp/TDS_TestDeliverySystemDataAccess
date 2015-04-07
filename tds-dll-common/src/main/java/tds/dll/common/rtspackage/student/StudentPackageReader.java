@@ -22,16 +22,15 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.lang3.StringUtils;
 import org.opentestsystem.shared.trapi.data.Ethnicity;
 import org.opentestsystem.shared.trapi.data.RoleLevel;
-import org.opentestsystem.shared.trapi.data.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tds.dll.common.rtspackage.IRtsPackageReader;
 import tds.dll.common.rtspackage.common.exception.RtsPackageReaderException;
-import tds.dll.common.rtspackage.common.exception.RtsPackageWriterException;
 import tds.dll.common.rtspackage.common.table.RtsRecord;
 import tds.dll.common.rtspackage.common.table.RtsTable;
 import tds.dll.common.rtspackage.student.data.Accommodation;
+import tds.dll.common.rtspackage.student.data.AccommodationOther;
 import tds.dll.common.rtspackage.student.data.Student;
 import tds.dll.common.rtspackage.student.data.StudentPackage;
 import tds.dll.common.rtspackage.student.data.Test;
@@ -231,14 +230,14 @@ public class StudentPackageReader implements IRtsPackageReader
       appendAccommodation (sb, subject, ac.getPrintSize ());
       appendAccommodation (sb, subject, ac.getPermissiveMode ());
       appendAccommodation (sb, subject, ac.getStreamlinedInterface ());
-      appendAccommodation (sb, subject, ac.getOther ());
-      if ( ac.getNonEmbeddedAccommodations () != null && ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () != null) {
-        for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () ) {
+      appendAccommodation (sb, subject, AccommodationOther.getValue (ac));
+      if ( ac.getNonEmbeddedAccommodations () != null ) {
+        for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations () ) {
             appendAccommodation (sb, subject, nonEmbeddedAccommodation);
         }
       }
-      if ( ac.getNonEmbeddedDesignatedSupports () != null && ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () != null) {
-        for (String nonEmbeddedDesignatedSupport : ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () ) {
+      if ( ac.getNonEmbeddedDesignatedSupports () != null ) {
+        for (String nonEmbeddedDesignatedSupport : ac.getNonEmbeddedDesignatedSupports () ) {
             appendAccommodation (sb, subject, nonEmbeddedDesignatedSupport);
         }
       }
@@ -266,14 +265,14 @@ public class StudentPackageReader implements IRtsPackageReader
       addAccommodation (accommodationList, subjectCode, ac.getPrintSize ());
       addAccommodation (accommodationList, subjectCode, ac.getPermissiveMode ());
       addAccommodation (accommodationList, subjectCode, ac.getStreamlinedInterface ());
-      addAccommodation (accommodationList, subjectCode, ac.getOther ());
-      if ( ac.getNonEmbeddedAccommodations () != null && ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () != null) {
-        for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations ().getNonEmbeddedAccommodation () ) {
+      addAccommodation (accommodationList, subjectCode, AccommodationOther.getValue (ac));
+      if ( ac.getNonEmbeddedAccommodations () != null ) {
+        for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations () ) {
             addAccommodation (accommodationList, subjectCode, nonEmbeddedAccommodation);
         }
       }
-      if ( ac.getNonEmbeddedDesignatedSupports () != null && ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () != null) {
-        for (String nonEmbeddedDesignatedSupport : ac.getNonEmbeddedDesignatedSupports ().getNonEmbeddedDesignatedSupport () ) {
+      if ( ac.getNonEmbeddedDesignatedSupports () != null ) {
+        for (String nonEmbeddedDesignatedSupport : ac.getNonEmbeddedDesignatedSupports ()) {
             addAccommodation (accommodationList, subjectCode, nonEmbeddedDesignatedSupport);
         }
       }
