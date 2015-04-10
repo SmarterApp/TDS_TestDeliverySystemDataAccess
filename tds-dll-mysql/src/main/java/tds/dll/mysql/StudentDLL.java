@@ -5467,8 +5467,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public void _CanOpenExistingOpportunity_SP (SQLConnection connection, String client, Long testee, String testID, UUID sessionID, Integer maxOpportunities,
       _Ref<Integer> numberRef, _Ref<String> msgRef) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
-    long startTimeLong= System.currentTimeMillis ();
     Date today = _dateUtil.getDateWRetStatus (connection);
 
     numberRef.set (0);
@@ -5575,7 +5573,6 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
   public void _CanOpenNewOpportunity_SP (SQLConnection connection, String client, Long testee, String testID, Integer maxOpportunities, Integer delayDays,
       _Ref<Integer> numberRef, _Ref<String> msgRef, UUID session) throws ReturnStatusException {
-    long startTime = System.currentTimeMillis ();
     Date today = _dateUtil.getDateWRetStatus (connection);
     numberRef.set (0);
     msgRef.set (null);
@@ -10589,119 +10586,14 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
             }
             
             //Check if there is an existing opportunity  _CanOpenExistingOpportunity
-            if(oppRecord!=null && oppRecord.<String>get("oppstatus").equalsIgnoreCase ("paused")) {
-                Integer numOfOpps = oppRecord.<Integer>get("opportunity");
-                Integer maxOpps = test.getMaxOpps ();
-                String lastStatusClosedStage = oppRecord.<String>get("laststatus_closedStage");
-                String lastStatusInactiveStage = oppRecord.<String>get("laststatus_inactiveStage");
-                Integer lastSessionType = oppRecord.<Integer>get("lastsessiontype");
-                Integer thisSessionType = oppRecord.<Integer>get("thissessiontype");
-                String lastSessionStatus = oppRecord.<String>get("lastsessionstatus");
-                Date lastSessionEnd = oppRecord.<Date>get("lastsessionend");
-                Date dateChanged = oppRecord.<Date>get("datechanged");
-                UUID lastSession = oppRecord.<UUID>get("lastsession");
-                
-                test.setNumRef (0);
-                test.setReason (null);
-                
-                // last opportunity terminated normally
-                if (lastStatusClosedStage!=null) {
-                  continue; 
-                }
-                
-                if (DbComparator.notEqual (lastSessionType, thisSessionType)) {
-                  _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity",
-                      "You must continue the test in the same type of session it was started in.", reasonBlockedRef, null, null, null, null);
-                  test.setReason (reasonBlockedRef.get ());
-                  continue;
-                }
-                
-                // final security check;
-                // if opportunity is not in use, then we can open it
-                if (lastStatusInactiveStage==null) {
-                  test.setNumRef (numOfOpps);
-                  continue; 
-                }
-                // else check for possible opportunity 'hijacking' of in use opportunity
-                // if at least 1 day has elapsed since last activity, or
-                // is resuming in same session as previous, or
-                // last session is closed
-                // then allow resume
-                if (sessionKey == null)
-                  continue; 
-                
-                //Check if the number of opportunities in the current window is already hit (windowmax)
-                /*if(numOfOpps == maxOpps) { 
-                  _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef);
-                  test.setReason (reasonBlockedRef.get ());
-                  continue;
-                }*/
-                
-                //Check whether the time elapsed since the last opportunity is sufficient
-                if (DbComparator.greaterOrEqual (daysDiff (dateChanged, today), 1) || DbComparator.isEqual (lastSession, sessionKey)
-                    || DbComparator.isEqual ("closed", lastSessionStatus) || DbComparator.greaterThan (today, lastSessionEnd)) {
-                  test.setNumRef (numOfOpps);
-                  continue;
-                } 
-            } 
+            _CanOpenExistingOpportunity_New (connection, oppRecord, test, clientName, reasonBlockedRef, sessionKey, today, testee);
             // If OpenexistingOpportunity is executed and teststatus is paused than continue with the next test
             if (DbComparator.greaterThan (test.getNumRef (), 0) || test.getReason () != null) {
               continue;
             }
           } //If not Guest or Simulation - IsOpportunity
             //_Can Open New Opportunity 
-            test.setNumRef (0);
-            test.setReason (null);
-            //If no opportunity found than test is eligible for new opportunity
-            if(oppRecord ==null) {
-              if (DbComparator.lessThan (0, test.getMaxOpps ()) || DbComparator.isEqual ("SIMULATION", environment)) {
-                test.setNumRef (1);
-              }
-              else if (DbComparator.notEqual ("SIMULATION", environment)) {
-                _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "No opportunities are available for this test", reasonBlockedRef, null, null, null, null);
-                test.setReason (reasonBlockedRef.get ());
-              }
-              if (DbComparator.greaterThan (test.getNumRef (), 0)) {
-                test.setNewoppRef (true);
-              }
-              continue;
-            } 
-            //If opportunity is found and teststatus is not paused
-            else {
-                  String lastStatusClosedStage = oppRecord.<String>get("laststatus_closedStage");
-                  Integer numOfOpps = oppRecord.<Integer>get("opportunity");
-                  Integer delayDays = oppRecord.<Integer>get("delaydays");
-                  Date dateCompleted = oppRecord.<Date>get("datecompleted");
-                  if (lastStatusClosedStage!=null) {
-                    if (DbComparator.isEqual ("SIMULATION", environment)) {
-                      test.setNumRef (numOfOpps + 1);
-                      if (DbComparator.greaterThan (test.getNumRef (), 0)) {
-                        test.setNewoppRef (true);
-                      }
-                      continue;
-                    }
-                  }
-                  Integer dDiff = daysDiff (dateCompleted, today);
-                  if (DbComparator.lessThan (numOfOpps, test.getMaxOpps ()) && (dateCompleted == null || DbComparator.greaterThan (dDiff, delayDays))) {
-                    test.setNumRef (numOfOpps + 1);
-                  }
-                  else if (DbComparator.greaterOrEqual (numOfOpps, test.getMaxOpps ())) {
-                    _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef, null, null, null, null);
-                    test.setReason (reasonBlockedRef.get ());
-                  } else {
-                    String arg = null;
-      
-                    if (dateCompleted != null) {
-                      Calendar c = Calendar.getInstance ();
-                      c.setTime (dateCompleted);
-                      c.add (Calendar.DATE, delayDays);
-                      Date dateCompldteddAdjusted = c.getTime ();
-                      arg = dateCompldteddAdjusted.toString ();
-                    }
-                  _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "Your next test opportunity is not yet available.", reasonBlockedRef, arg, null, null, null);
-                  test.setReason (reasonBlockedRef.get ());
-                  }
-              }
+            _CanOpenNewOpportunity_New (connection, oppRecord, test, clientName, reasonBlockedRef, today, environment);
             if (DbComparator.greaterThan (test.getNumRef (), 0)) {
               test.setNewoppRef (true);
             }
@@ -10770,6 +10662,125 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     _commonDll._LogDBLatency_SP (connection, "T_GetEligibleTests", startTime, testee, true, null, null, null, clientName, null);
     
     return returnResultSet;
+  }
+  
+  private void _CanOpenNewOpportunity_New(SQLConnection connection,DbResultRecord oppRecord,EligibleTest test,String clientName,
+      _Ref<String> reasonBlockedRef,Date today,String environment) throws ReturnStatusException {
+    
+    test.setNumRef (0);
+    test.setReason (null);
+    //If no opportunity found than test is eligible for new opportunity
+    if(oppRecord ==null) {
+      if (DbComparator.lessThan (0, test.getMaxOpps ()) || DbComparator.isEqual ("SIMULATION", environment)) {
+        test.setNumRef (1);
+      }
+      else if (DbComparator.notEqual ("SIMULATION", environment)) {
+        _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "No opportunities are available for this test", reasonBlockedRef, null, null, null, null);
+        test.setReason (reasonBlockedRef.get ());
+      }
+      if (DbComparator.greaterThan (test.getNumRef (), 0)) {
+        test.setNewoppRef (true);
+      }
+      return;
+    } 
+    //If opportunity is found and teststatus is not paused
+    else {
+          String lastStatusClosedStage = oppRecord.<String>get("laststatus_closedStage");
+          Integer numOfOpps = oppRecord.<Integer>get("opportunity");
+          Integer delayDays = oppRecord.<Integer>get("delaydays");
+          Date dateCompleted = oppRecord.<Date>get("datecompleted");
+          if (lastStatusClosedStage!=null) {
+            if (DbComparator.isEqual ("SIMULATION", environment)) {
+              test.setNumRef (numOfOpps + 1);
+              if (DbComparator.greaterThan (test.getNumRef (), 0)) {
+                test.setNewoppRef (true);
+              }
+              return;
+            }
+          }
+          Integer dDiff = daysDiff (dateCompleted, today);
+          if (DbComparator.lessThan (numOfOpps, test.getMaxOpps ()) && (dateCompleted == null || DbComparator.greaterThan (dDiff, delayDays))) {
+            test.setNumRef (numOfOpps + 1);
+          }
+          else if (DbComparator.greaterOrEqual (numOfOpps, test.getMaxOpps ())) {
+            _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef, null, null, null, null);
+            test.setReason (reasonBlockedRef.get ());
+          } else {
+            String arg = null;
+
+            if (dateCompleted != null) {
+              Calendar c = Calendar.getInstance ();
+              c.setTime (dateCompleted);
+              c.add (Calendar.DATE, delayDays);
+              Date dateCompldteddAdjusted = c.getTime ();
+              arg = dateCompldteddAdjusted.toString ();
+            }
+          _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "Your next test opportunity is not yet available.", reasonBlockedRef, arg, null, null, null);
+          test.setReason (reasonBlockedRef.get ());
+          }
+      }
+  }
+  private void _CanOpenExistingOpportunity_New(SQLConnection connection,DbResultRecord oppRecord,EligibleTest test,String clientName,
+      _Ref<String> reasonBlockedRef,UUID sessionKey,Date today,Long testee) throws ReturnStatusException{
+    if(oppRecord!=null /*&& oppRecord.<String>get("oppstatus").equalsIgnoreCase ("paused")*/) {
+      Integer numOfOpps = oppRecord.<Integer>get("opportunity");
+      Integer maxOpps = test.getMaxOpps ();
+      String lastStatusClosedStage = oppRecord.<String>get("laststatus_closedStage");
+      String lastStatusInactiveStage = oppRecord.<String>get("laststatus_inactiveStage");
+      Integer lastSessionType = oppRecord.<Integer>get("lastsessiontype");
+      Integer thisSessionType = oppRecord.<Integer>get("thissessiontype");
+      String lastSessionStatus = oppRecord.<String>get("lastsessionstatus");
+      Date lastSessionEnd = oppRecord.<Date>get("lastsessionend");
+      Date dateChanged = oppRecord.<Date>get("datechanged");
+      UUID lastSession = oppRecord.<UUID>get("lastsession");
+      
+      test.setNumRef (0);
+      test.setReason (null);
+      
+      // last opportunity terminated normally
+      if (lastStatusClosedStage!=null) {
+        return; 
+      }
+      
+      if (DbComparator.notEqual (lastSessionType, thisSessionType)) {
+        _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity",
+            "You must continue the test in the same type of session it was started in.", reasonBlockedRef, null, null, null, null);
+        test.setReason (reasonBlockedRef.get ());
+        return;
+      }
+      
+      // final security check;
+      // if opportunity is not in use, then we can open it
+      if (lastStatusInactiveStage==null) {
+        test.setNumRef (numOfOpps);
+        return; 
+      }
+      // else check for possible opportunity 'hijacking' of in use opportunity
+      // if at least 1 day has elapsed since last activity, or
+      // is resuming in same session as previous, or
+      // last session is closed
+      // then allow resume
+      if (sessionKey == null)
+        return; 
+      
+      //Check if the number of opportunities in the current window is already hit (windowmax)
+      /*if(numOfOpps == maxOpps) { 
+        _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "All opportunities have been used for this test", reasonBlockedRef);
+        test.setReason (reasonBlockedRef.get ());
+        continue;
+      }*/
+      
+      //Check whether the time elapsed since the last opportunity is sufficient
+      if (DbComparator.greaterOrEqual (daysDiff (dateChanged, today), 1) || DbComparator.isEqual (lastSession, sessionKey)
+          || DbComparator.isEqual ("closed", lastSessionStatus) || DbComparator.greaterThan (today, lastSessionEnd)) {
+        test.setNumRef (numOfOpps);
+        return;
+      } 
+      
+      test.setNumRef(0);
+      _commonDll._FormatMessage_SP (connection, clientName, "ENU", "_CanOpenTestOpportunity", "Current opportunity is active", reasonBlockedRef, null, null, null, null);
+      test.setReason (reasonBlockedRef.get ());
+    } 
   }
   
   
