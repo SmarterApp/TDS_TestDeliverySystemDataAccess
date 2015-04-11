@@ -18,7 +18,7 @@ begin
 	drop temporary table if exists tmp_testform;
 	create temporary table tmp_testform (
 		select sf.segmentid				as adminsubject		-- substring_index(tf.testformid, ':', 1)  
-			 , 'Default' 				as cohort 			-- substring_index(substring_index(tf.testformid, ':', -1), '-', 1)
+			 , coalesce(substring_index(substring_index(tfp.testformid, ':', -1), '-', 1), 'Default') 	as cohort
 			 , prop.propvalue			as lang				-- substring_index(substring_index(tf.testformid, ':', -1), '-', -1) 
 			 , tfp.formpartitionid
 			 , tfp.formpartitionname
@@ -35,6 +35,17 @@ begin
 		   and prop.ispool = 0
 		   and tfp._fk_package = v_testpackagekey
 	);
+
+
+	-- update existing form information
+	update testform tf
+	  join tmp_testform tmp on tf._fk_adminsubject = tmp.adminsubject 
+						   and tf._key = tmp.formpartitionid
+	   set tf.cohort = tmp.cohort 
+		 , tf.`language` = tmp.lang
+		 , tf.formid = tmp.formpartitionname
+		 , tf.updateconfig = tmp.version; 
+
 
 	-- insert any missing forms	
 	insert into testform (_fk_adminsubject, cohort, `language`, _key, formid, _efk_itsbank, _efk_itskey, loadconfig)
