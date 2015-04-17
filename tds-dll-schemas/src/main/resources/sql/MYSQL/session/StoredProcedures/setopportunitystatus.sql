@@ -71,7 +71,6 @@ proc: begin
 	-- ===============================================
 	update testopportunity 
 	set prevstatus 		= `status`
-	  , `status` 		= v_status
 	  , datechanged 	= v_now
 	  , datescored      = case v_status when 'scored' then v_now else datescored end
 	  , dateapproved    = case v_status when 'approved' then v_now else dateapproved end
@@ -89,6 +88,7 @@ proc: begin
 								when v_status in ('approved', 'denied') and status in ('segmententry', 'segmentexit') then null 
 								else waitingforsegment end
 	  , `comment`		= case when v_comment is not null then v_comment else comment end
+	  , `status` 		= v_status
 	where _key = v_oppkey;
 
 	-- place all the special post-processing calls here

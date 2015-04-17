@@ -29,10 +29,10 @@ begin
 				   where e.clientname = v_clientname and f.clientname = v_clientname
 					 and e.ispracticetest = f.ispracticetest and auditobject='oppreport');
     
-    set v_guid = (select qabrokerguid 
-					from externs where clientname = v_clientname and environment = v_env);
+--     set v_guid = (select qabrokerguid 
+-- 					from externs where clientname = v_clientname and environment = v_env);
 
-	return (case when v_flag = 0 or v_guid is null then 0 else 1 end); 
+	return (case when v_flag = 0 /*or v_guid is null*/ then 0 else 1 end); 
 
 end $$
 
