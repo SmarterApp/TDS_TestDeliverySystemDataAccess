@@ -7847,30 +7847,31 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     // START: Accounting: how many open test opportunities are there currently
     // for this client?
-    try {
-
-      Integer numOpps = _ActiveOpps_FN (connection, clientname);
-
-      Date lastupdate = null;
-      final String SQL_QUERY1 = "select max(_time) as lastupdate from _maxtestopps where clientname = ${clientname}";
-      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
-      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
-      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-      if (record != null) {
-        lastupdate = record.<Date> get ("lastupdate");
-      }
-
-      if (lastupdate == null || DbComparator.greaterOrEqual (minutesDiff (lastupdate, starttime), 10)) {
-
-        final String SQL_QUERY2 = "insert into _maxtestopps (numopps,  _time, clientname) values (${numopps},  ${now}, ${clientname})";
-        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("numopps", numOpps).put ("now", starttime).put ("clientname", clientname);
-        executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
-      }
-    } catch (ReturnStatusException re) {
-      // TODO: find out:externalId is not set up at this point!
-      String error = String.format (" for testee ID %s: %s", externalId, re.getMessage ());
-      _commonDll._LogDBError_SP (connection, "T_Login", error, null, null, null, null, clientname, null);
-    }
+	//Commented as per SB-1274
+//    try {
+//
+//      Integer numOpps = _ActiveOpps_FN (connection, clientname);
+//
+//      Date lastupdate = null;
+//      final String SQL_QUERY1 = "select max(_time) as lastupdate from _maxtestopps where clientname = ${clientname}";
+//      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
+//      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
+//      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+//      if (record != null) {
+//        lastupdate = record.<Date> get ("lastupdate");
+//      }
+//
+//      if (lastupdate == null || DbComparator.greaterOrEqual (minutesDiff (lastupdate, starttime), 10)) {
+//
+//        final String SQL_QUERY2 = "insert into _maxtestopps (numopps,  _time, clientname) values (${numopps},  ${now}, ${clientname})";
+//        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("numopps", numOpps).put ("now", starttime).put ("clientname", clientname);
+//        executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
+//      }
+//    } catch (ReturnStatusException re) {
+//      // TODO: find out:externalId is not set up at this point!
+//      String error = String.format (" for testee ID %s: %s", externalId, re.getMessage ());
+//      _commonDll._LogDBError_SP (connection, "T_Login", error, null, null, null, null, clientname, null);
+//    }
     // END: Accounting: how many open test opportunities are there currently for
     // this client?
 

@@ -229,3 +229,6 @@ create index `ix_toolopp`
 
 create index `itemdist_testitem`
 	on `itemdistribution`(`_efk_adminsubject`, `_efk_item`, `_fk_session`);
+
+create index `ix_segmentformkey`
+	on `testopportunitysegment`(`_efk_segment`, `formkey`);
