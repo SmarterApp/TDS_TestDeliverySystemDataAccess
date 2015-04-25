@@ -50,7 +50,6 @@ import AIR.Common.DB.results.SingleDataResultSet;
 import AIR.Common.Helpers.CaseInsensitiveMap;
 import AIR.Common.Helpers._Ref;
 import AIR.Common.Sql.AbstractDateUtilDll;
-import AIR.Common.Utilities.UrlEncoderDecoderUtils;
 import TDS.Shared.Exceptions.ReturnStatusException;
 
 public class CommonDLL extends AbstractDLL implements ICommonDLL
@@ -173,29 +172,29 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         .addColumn ("AccCode", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 255).addColumn ("IsDefault", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("AllowCombine", SQL_TYPE_To_JAVA_TYPE.BIT)
         .addColumn ("IsFunctional", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("AllowChange", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("IsSelectable", SQL_TYPE_To_JAVA_TYPE.BIT)
         .addColumn ("IsVisible", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("studentControl", SQL_TYPE_To_JAVA_TYPE.BIT).addColumn ("ValCount", SQL_TYPE_To_JAVA_TYPE.INT)
-        .addColumn ("DependsOnToolType", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50);
+        .addColumn ("DependsOnToolType", SQL_TYPE_To_JAVA_TYPE.VARCHAR, 50).addColumn ("IsEntryControl", SQL_TYPE_To_JAVA_TYPE.BIT);
     connection.createTemporaryTable (testKeyAccomsTable);
 
     final String SQL_INSERT = "insert into ${tblName} (Segment, DisableOnGuestSession, ToolTypeSortOrder, ToolValueSortOrder, TypeMode, ToolMode, AccType, AccValue, AccCode, IsDefault, AllowCombine, IsFunctional, AllowChange,"
-        + "IsSelectable, IsVisible, studentControl, ValCount, DependsOnToolType)"
+        + "IsSelectable, IsVisible, studentControl, ValCount, DependsOnToolType, IsEntryControl)"
         + " (SELECT distinct 0 as Segment, TType.DisableOnGuestSession, TType.SortOrder as ToolTypeSortOrder, TT.SortOrder as ToolValueSortOrder, TType.TestMode as TypeMode,"
         + " TT.TestMode as ToolMode, Type as AccType, Value as AccValue, Code as AccCode, IsDefault, AllowCombine, IsFunctional, AllowChange, IsSelectable, IsVisible, studentControl, "
         + " (select count(*) from ${ConfigDB}.client_testtool TOOL where TOOL.ContextType = ${TEST} and TOOL.Context = MODE.testID  and TOOL.clientname = MODE.clientname and TOOL.Type = TT.Type) as ValCount, "
-        + " DependsOnToolType FROM ${ConfigDB}.client_testtooltype TType, ${ConfigDB}.client_testtool TT, ${ConfigDB}.client_testmode MODE"
+        + " DependsOnToolType, IsEntryControl FROM ${ConfigDB}.client_testtooltype TType, ${ConfigDB}.client_testtool TT, ${ConfigDB}.client_testmode MODE"
         + " where MODE.testkey = ${testkey} and TType.ContextType = ${TEST} and TType.Context = MODE.testID and TType.ClientName = MODE.clientname "
         + " and TT.ContextType = ${TEST} and TT.Context = MODE.testID and TT.ClientName = MODE.clientname and TT.Type = TType.Toolname and (TT.Type <> ${Language} or TT.Code in (${codeStr})) "
         + " and (TType.TestMode = ${ALL} or TType.TestMode = MODE.mode) and (TT.TestMode = ${ALL} or TT.TestMode = MODE.mode)) "
         + " union all "
         + " (SELECT distinct SegmentPosition ,TType.DisableOnGuestSession, TType.SortOrder , TT.SortOrder, TType.TestMode , TT.TestMode, Type , Value , Code , IsDefault, AllowCombine, IsFunctional, AllowChange,"
         + " IsSelectable, IsVisible, studentControl, (select count(*) from ${ConfigDB}.client_testtool TOOL where TOOL.ContextType = ${TEST} and TOOL.Context = MODE.testID and "
-        + " TOOL.clientname = MODE.clientname and TOOL.Type = TT.Type) as ValCount, null FROM ${ConfigDB}.client_testtooltype TType, ${ConfigDB}.client_testtool TT, ${ConfigDB}.client_segmentproperties SEG, "
+        + " TOOL.clientname = MODE.clientname and TOOL.Type = TT.Type) as ValCount, null, IsEntryControl FROM ${ConfigDB}.client_testtooltype TType, ${ConfigDB}.client_testtool TT, ${ConfigDB}.client_segmentproperties SEG, "
         + " ${ConfigDB}.client_testmode MODE where parentTest = MODE.testID and MODE.testkey = ${testkey} and SEG.modekey = ${testkey} and TType.ContextType = ${SEGMENT} and TType.Context = segmentID and "
         + " TType.ClientName = MODE.clientname and TT.ContextType = ${SEGMENT} and TT.Context = segmentID and TT.ClientName = MODE.clientname and TT.Type = TType.Toolname and (TType.TestMode = ${ALL} or "
         + " TType.TestMode = MODE.mode) and (TT.TestMode = ${ALL} or TT.TestMode = MODE.mode)) "
         + " union all "
         + " (select distinct 0,TType.DisableOnGuestSession,  TType.SortOrder , TT.SortOrder, TType.TestMode , TT.TestMode, Type, Value, Code, "
         + " IsDefault, AllowCombine, IsFunctional, AllowChange, IsSelectable, IsVisible, studentControl, (select count(*) from ${ConfigDB}.client_testtool TOOL where TOOL.ContextType = ${TEST} and TOOL.Context = ${starParam}"
-        + " and TOOL.clientname = MODE.clientname and TOOL.Type = TT.Type) as ValCount, DependsOnToolType FROM  ${ConfigDB}.client_testtooltype TType, ${ConfigDB}.client_testtool TT, ${ConfigDB}.client_testmode MODE"
+        + " and TOOL.clientname = MODE.clientname and TOOL.Type = TT.Type) as ValCount, DependsOnToolType, IsEntryControl FROM  ${ConfigDB}.client_testtooltype TType, ${ConfigDB}.client_testtool TT, ${ConfigDB}.client_testmode MODE"
         + " where MODE.testkey = ${testkey} and TType.ContextType = ${TEST} and TType.Context = ${starParam} and TType.ClientName = MODE.clientname and TT.ContextType = ${TEST} and TT.Context = ${starParam} and TT.ClientName = MODE.clientname"
         + " and TT.Type = TType.Toolname and (TType.TestMode = ${ALL} or TType.TestMode = MODE.mode) and (TT.TestMode = ${ALL} or TT.TestMode = MODE.mode)"
         + " and not exists "
@@ -2607,11 +2606,13 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
     Map<String, String> unquotedParms3 = new HashMap<String, String> ();
     unquotedParms3.put ("accomsTableName", accomsTable.getTableName ());
 
+    //TODO: added IsEntryControl = 0 to prevent deletion of Other accommodation in testeeAccommodations table as some calls do not have the 
+    //the correct Othervalue. ApproveOpportunity for example does not. Other value is also not updated so no need of updating in these calls
     final String SQL_INSERT1 = " insert into ${accomsTableName} (atype, acode, avalue, allow, control, isDefault, isSelectable, valcount, recordUsage) "
         + " select distinct AccType, AccCode, AccValue, AllowChange, studentControl, IsDefault, IsSelectable, valcount, "
         + " (select count(*) from ${ConfigDB}.client_toolusage where clientname = ${clientname} "
         + " and testID = ${testID} and tooltype = AccType and (recordUsage = 1 or reportUsage = 1) limit 1) "
-        + " from ${testTblName} C, ${splitTblName} S where S.code = C.AccCode and segment = ${segment};";
+        + " from ${testTblName} C, ${splitTblName} S where S.code = C.AccCode and segment = ${segment} and IsEntryControl = 0;";
     SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("clientname", clientName).put ("testID", testId).put ("segment", segment);
     Map<String, String> unquotedParms4 = new HashMap<String, String> ();
     unquotedParms4.put ("accomsTableName", accomsTable.getTableName ());
@@ -2665,6 +2666,8 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       // System.err.println (insertedCnt1); // for testing
       
       //insert other accommodation
+      //TODO: this is still needed until we can get all calls returning the correct Othervalue. ApproveOpportunity for example does not. Otherwise this part can be merged with insertion
+      //of the rest of the accommodations 
       final String SQL_SELECT_OTHER = "select code from ${splitTblName} where code like ${otherAccomPrefix} limit 1";
       Map<String, String> unquotedParmsOther = new HashMap<String, String> ();
       unquotedParmsOther.put ("splitTblName", splitAccomCodesTbl.getTableName ());
@@ -2674,8 +2677,8 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       if (rsOther != null) {
           DbResultRecord recordOther = (rsOther.getCount() > 0 ? rsOther.getRecords().next() : null);
           if (recordOther != null) {
-               otherAccomValue = UrlEncoderDecoderUtils.decode(recordOther.<String> get ("code").substring (AccommodationOther.VALUE_PREFIX.length()));
-               final String SQL_INSERT_OTHER = "insert into testeeaccommodations (_fk_TestOpportunity, AccType, AccCode, AccValue, _date, allowChange, recordUsage, testeeControl, segment, "
+             otherAccomValue = AccommodationOther.getActualValue (recordOther.<String> get ("code"));
+             final String SQL_INSERT_OTHER = "replace into testeeaccommodations (_fk_TestOpportunity, AccType, AccCode, AccValue, _date, allowChange, recordUsage, testeeControl, segment, "
                    + " valueCount, isApproved, IsSelectable)"
                    + " select ${oppkey}, ${otherType}, ${otherCode}, ${otherValue}, ${starttime}, ${otherAllowChange}, ${otherRecordUsage}, ${otherTesteeControl}, ${segment}, "
                    + " ${otherValueCount},  ${otherIsApproved}, ${otherIsSelectable}";
@@ -2685,7 +2688,6 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
                executeStatement (connection, SQL_INSERT_OTHER, parmsOther, false);
           }
       }
-    
   
       final String SQL_QUERY8 = "select  atype from ${accomsTableName} where atype = 'Language' limit 1";
       if (exists (executeStatement (connection, fixDataBaseNames (SQL_QUERY8, unquotedParms3), null, false))) {

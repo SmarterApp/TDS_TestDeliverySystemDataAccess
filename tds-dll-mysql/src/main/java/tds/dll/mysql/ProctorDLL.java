@@ -1736,8 +1736,10 @@ public class ProctorDLL extends AbstractDLL implements IProctorDLL
       if (rval == null) {
         return _commonDll._ReturnError_SP (connection, client, "P_GetTesteeRequestValues", "Request value not found", null, testoppkey, "P_GetTesteeRequest");
       }
+      // SB-1040: Print preview shows itemkey instead of position, this query
+      // was missing itemposition column
       final String SQL_QUERY3 = "select ${testoppkey} as opportunityKey, ${testee} as _efk_Testee, cast(${testeeID} as CHAR) as testeeID, cast(${testeeName} as CHAR) as TesteeName, cast(${test} as CHAR) as _efk_TestID,"
-          + " bigtoint(${opportunity}) as Opportunity, cast(${rtype} as CHAR) as RequestType, cast(${rval} as CHAR) as ItemFile, Response as ItemResponse, cast(${lang} as CHAR) as AccCode, cast(${lang} as CHAR) as Language, "
+          + " bigtoint(${pos}) as ItemPosition, bigtoint(${opportunity}) as Opportunity, cast(${rtype} as CHAR) as RequestType, cast(${rval} as CHAR) as ItemFile, Response as ItemResponse, cast(${lang} as CHAR) as AccCode, cast(${lang} as CHAR) as Language, "
           + " cast(${rparas} as CHAR) as RequestParameters, cast(${rdesc} as CHAR) as RequestDescription from testeeresponse where _fk_TestOpportunity = ${testoppkey} and Position = ${pos};";
       SqlParametersMaps parms2 = new SqlParametersMaps ().put ("testoppkey", testoppkey).put ("pos", pos).put ("testee", testee).put ("testeeID", testeeID).put ("testeeName", testeeName)
           .put ("test", test).put ("opportunity", opportunity).put ("rtype", rtype).put ("rval", rval).put ("lang", lang).put ("rparas", rparas).put ("rdesc", rdesc);

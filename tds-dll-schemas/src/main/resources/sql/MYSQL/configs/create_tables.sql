@@ -499,6 +499,7 @@ create table `client_testtooltype`  (
 	`disableonguestsession`  	bit not null default 0,
 	`isfunctional`           	bit not null default 1,
 	`testmode`               	varchar(25) not null default 'all',
+	`isentrycontrol`           	bit not null default 0,
 	constraint `pk_clienttesttool` primary key clustered(`clientname`,`context`,`contexttype`,`toolname`)
 ) default charset = UTF8;
 
