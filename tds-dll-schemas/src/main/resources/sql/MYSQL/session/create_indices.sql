@@ -123,14 +123,14 @@ create index `ix_qcexcept_oppkey`
 create index `ix_rtestcounts`
 	on `r_testcounts`(`_date`, `_efk_testid`, `status`);
 
-create index `ix_r_proctorpackage_proctorkey`
-	on `r_proctorpackage`(`proctorkey`);
+create unique index `ix_r_proctorpackage_proctorkey_clientname`
+	on `r_proctorpackage`(`proctorkey`, `clientname`);
 
 create unique index `ix_studentid_statecode`
 	on `r_studentkeyid`(`studentid`, `statecode`);
 	
-create index `ix_r_studentpackage_skey_client_currt`
-	on `r_studentpackage`(`studentkey`, `clientname`, `iscurrent` desc);
+create unique index `ix_r_studentpackage_studentkey_clientname`
+	on `r_studentpackage`(`studentkey`, `clientname`);
 
 create index `ix_r_studentpackagedetails_skey_attr`
 	on `r_studentpackagedetails`(`studentkey`, `attrname`);

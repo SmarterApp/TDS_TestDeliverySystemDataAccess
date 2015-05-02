@@ -1114,7 +1114,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     IRtsPackageWriter<StudentPackage> writer = new StudentPackageWriter ();
     try {
       writer.writeObject (xmlPackage);
-      return create (connection, EntityType.STUDENT, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testTypes);
+      return createOrUpdate (connection, EntityType.STUDENT, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testTypes);
     } catch (RtsPackageWriterException e) {
       _logger.error (e.getMessage (), e);
       throw new ReturnStatusException ("could not create student " + e.getMessage ());
@@ -1137,7 +1137,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     IRtsPackageWriter<ProctorPackage> writer = new ProctorPackageWriter ();
     try {
       writer.writeObject (xmlPackage);
-      return create (connection, EntityType.PROCTOR, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testTypes);
+      return createOrUpdate (connection, EntityType.PROCTOR, key, clientName, writer.getInputStream (), writer.getObject ().getVersion (), testTypes);
     } catch (RtsPackageWriterException e) {
       _logger.error (e.getMessage (), e);
       throw new ReturnStatusException ("could not create proctor " + e.getMessage ());
@@ -1145,7 +1145,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   }
 
   /**
-   * Creates a new record.
+   * Creates or updates a new record.
    * 
    * @param connection
    * @param entityType
@@ -1155,12 +1155,12 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @return number of records created
    * @throws ReturnStatusException
    */
-  private int create (SQLConnection connection, EntityType entityType, Long key, String clientName, InputStream packageStream, String version, List<TestType> testTypes) throws ReturnStatusException {
+  private int createOrUpdate (SQLConnection connection, EntityType entityType, Long key, String clientName, InputStream packageStream, String version, List<TestType> testTypes) throws ReturnStatusException {
     String SQL_INSERT = null;
     if (entityType == EntityType.PROCTOR) {
-          SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) values (?, ?, ?, ?, now(), ?)";
+          SQL_INSERT = "insert into r_proctorpackage (ProctorKey, ClientName, Package, Version, DateCreated, TestType) values (?, ?, ?, ?, now(), ?) on duplicate key update Package=VALUES(Package), DateCreated=VALUES(DateCreated), TestType=VALUES(TestType)";
       } else {
-          SQL_INSERT = "insert into r_studentpackage (StudentKey, ClientName, Package, Version, DateCreated) values (?, ?, ?, ?, now())";
+          SQL_INSERT = "insert into r_studentpackage (StudentKey, ClientName, Package, Version, DateCreated) values (?, ?, ?, ?, now()) on duplicate key update Package=VALUES(Package), DateCreated=VALUES(DateCreated)";
       }
     try (PreparedStatement preparedStatement = connection.prepareStatement (SQL_INSERT)) {
       preparedStatement.setLong (1, key);
@@ -1178,43 +1178,9 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
     }
   }
 
-  /**
-   * Updates IsCurrent for all an Entity records to false and then creates a new
-   * record.
-   * 
-   * @param connection
-   * @param entityType
-   * @param key
-   * @param clientName
-   * @param xmlPackage
-   * @return number of records created
-   * @throws ReturnStatusException
-   */
-  private int createAndUpdateIsCurrent (SQLConnection connection, EntityType entityType, Long key, String clientName, String xmlPackage, List<TestType> testType) throws ReturnStatusException {
-    int insertCount = 0;
-    boolean isCurrent = false;
-    try {
-      updateIsCurrent (connection, entityType, key, clientName, isCurrent);
-    } catch (ReturnStatusException e) {
-      _logger.error (e.getMessage (), e);
-      throw new ReturnStatusException ("Could not update current package record " + e.getMessage ());
-    }
-    try {
-      if (entityType == EntityType.STUDENT) {
-        insertCount = createStudent (connection, key, clientName, xmlPackage, null);
-      } else {
-        insertCount = createProctor (connection, key, clientName, xmlPackage, testType);
-      }
-    } catch (ReturnStatusException e) {
-      _logger.error (e.getMessage (), e);
-      throw new ReturnStatusException ("Could not insert package " + e.getMessage ());
-    }
-    return insertCount;
-  }
 
   /**
-   * Updates IsCurrent for all Student records to false and then creates a new
-   * Student record.
+   * Creates or updates student.
    * 
    * @param connection
    * @param key
@@ -1226,15 +1192,14 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   public int createAndUpdateStudentIsCurrent (SQLConnection connection, Long key, String clientName, String xmlPackage) throws ReturnStatusException {
 
     Date today = _dateUtil.getDateWRetStatus (connection);
-    int ret = createAndUpdateIsCurrent (connection, EntityType.STUDENT, key, clientName, xmlPackage, null);
+    int ret = createStudent (connection, key, clientName, xmlPackage, null); 
     _commonDll._LogDBLatency_SP (connection, "createAndUpdateStudentIsCurrent", today, key, true, null, null, null, clientName, null);
 
     return ret;
   }
 
   /**
-   * Updates IsCurrent for all Proctor records to false and then creates a new
-   * Proctor record.
+   * Creates or updates proctor.
    * 
    * @param connection
    * @param key
@@ -1245,31 +1210,8 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @throws ReturnStatusException
    */
   public int createAndUpdateProctorIsCurrent (SQLConnection connection, Long key, String clientName, String xmlPackage, List<TestType> testType) throws ReturnStatusException {
-    return createAndUpdateIsCurrent (connection, EntityType.PROCTOR, key, clientName, xmlPackage, testType);
-  }
-
-  /**
-   * Updates all records of an Entity's IsCurrent field if the value is
-   * different from the provided value
-   * 
-   * @param connection
-   * @param entityType
-   * @param key
-   * @param clientName
-   * @param isCurrent
-   * @return number of records updated.
-   * @throws ReturnStatusException
-   */
-  private int updateIsCurrent (SQLConnection connection, EntityType entityType, Long key, String clientName, boolean isCurrent) throws ReturnStatusException {
-    final String SQL_UPDATE = "update " + getTableName (entityType) + " set isCurrent = ${isCurrent} where " + entityType.getValue ()
-        + "Key = ${key} and ClientName = ${clientName} and isCurrent <> ${isCurrent}";
-    SqlParametersMaps params = new SqlParametersMaps ();
-    params.put ("key", key);
-    params.put ("clientName", clientName);
-    params.put ("isCurrent", isCurrent);
-    int updateCount = executeStatement (connection, SQL_UPDATE, params, false).getUpdateCount ();
-    return updateCount;
-  }
+    return createProctor (connection, key, clientName, xmlPackage, testType);
+ }
   
 
   @Override
@@ -1886,7 +1828,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   private DbResultRecord findByKeyAndClientName (SQLConnection connection, EntityType entityType, Long key, String clientName) throws ReturnStatusException {
     String testType =  (entityType == EntityType.PROCTOR) ? ", TestType" : "";
        
-    final String SQL_SELECT = "select iscurrent, version " + testType + " from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ${key} and ClientName = ${clientName} and IsCurrent = 1 limit 1";
+    final String SQL_SELECT = "select iscurrent, version " + testType + " from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ${key} and ClientName = ${clientName}";
     SingleDataResultSet result = null;
     SqlParametersMaps params = new SqlParametersMaps ();
     params.put ("key", key);
@@ -1907,7 +1849,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @throws ReturnStatusException
    */
   private byte[] getPackageByKeyAndClientName (SQLConnection connection, EntityType entityType, Long key, String clientName) throws ReturnStatusException {
-    final String SQL_SELECT = "select * from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ? and ClientName = ? and IsCurrent = 1 limit 1";
+    final String SQL_SELECT = "select * from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ? and ClientName = ?";
 
     try (PreparedStatement preparedStatement = connection.prepareStatement (SQL_SELECT)) {
       preparedStatement.setLong (1, key);
@@ -1939,7 +1881,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
    * @throws ReturnStatusException
    */
   private Map<String,Object> getPackageDetailsByKeyAndClientName (SQLConnection connection, EntityType entityType, Long key, String clientName) throws ReturnStatusException {
-    final String SQL_SELECT = "select * from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ? and ClientName = ? and IsCurrent = 1 limit 1";
+    final String SQL_SELECT = "select * from " + getTableName (entityType) + " where " + entityType.getValue () + "Key = ? and ClientName = ?";
     Map<String,Object>  resultMap= null;
     try (PreparedStatement preparedStatement = connection.prepareStatement (SQL_SELECT)) {
       preparedStatement.setLong (1, key);

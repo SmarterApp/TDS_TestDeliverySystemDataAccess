@@ -6661,12 +6661,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     }
     Integer transactionIsolation = null;
     Boolean preexistingAutoCommitMode = null;
+    DataBaseTable tbl = null;
     try {
         transactionIsolation = connection.getTransactionIsolation ();
         preexistingAutoCommitMode = connection.getAutoCommit ();
         connection.setAutoCommit (false);
         connection.setTransactionIsolation (Connection.TRANSACTION_READ_COMMITTED);
-        DataBaseTable tbl = _commonDll.TestKeyAccommodations_FN (connection, test);
+        tbl = _commonDll.TestKeyAccommodations_FN (connection, test);
         final String SQL_QUERY2 = "insert into testeeaccommodations (_fk_TestOpportunity, segment, AccType, AccCode, AccValue, allowChange, "
             + "      testeeControl, isSelectable, IsApproved, valueCount, recordUsage, _date) "
             + " select ${oppkey}, Segment, AccType, AccCode, AccValue, allowChange, studentControl, IsSelectable, case valcount when 1 then 1 else 0 end, "
@@ -6681,6 +6682,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         unquotedParms2.put ("tblName", tbl.getTableName ());
         final String query2 = fixDataBaseNames (SQL_QUERY2);
         executeStatement (connection, fixDataBaseNames (query2, unquotedParms2), parms2, false).getUpdateCount ();
+        connection.dropTemporaryTable (tbl);
+        tbl = null;
         connection.commit ();
     } catch (ReturnStatusException re) {
       try {
@@ -6693,6 +6696,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
         errmsg = "no error message logged";
 
       _commonDll._LogDBError_SP (connection, "_InitOpportunityAccommodations", errmsg, null, null, null, oppkey);
+      if (tbl != null)
+        connection.dropTemporaryTable (tbl);
       throw new ReturnStatusException (re);
       //return null;
 
@@ -7050,7 +7055,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       windowId = record.<String> get ("windowId");
       mode = record.<String> get ("mode");
     }
-
+    connection.dropTemporaryTable (windowsTbl);
+    
     if (windowId == null)
       return _commonDll._ReturnError_SP (connection, clientname, "_OpenNewOpportunity", "There is no active testing window for this student at this time");
 
@@ -7847,31 +7853,39 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 
     // START: Accounting: how many open test opportunities are there currently
     // for this client?
-	//Commented as per SB-1274
-//    try {
-//
-//      Integer numOpps = _ActiveOpps_FN (connection, clientname);
-//
-//      Date lastupdate = null;
-//      final String SQL_QUERY1 = "select max(_time) as lastupdate from _maxtestopps where clientname = ${clientname}";
-//      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
-//      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
-//      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
-//      if (record != null) {
-//        lastupdate = record.<Date> get ("lastupdate");
-//      }
-//
-//      if (lastupdate == null || DbComparator.greaterOrEqual (minutesDiff (lastupdate, starttime), 10)) {
-//
-//        final String SQL_QUERY2 = "insert into _maxtestopps (numopps,  _time, clientname) values (${numopps},  ${now}, ${clientname})";
-//        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("numopps", numOpps).put ("now", starttime).put ("clientname", clientname);
-//        executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
-//      }
-//    } catch (ReturnStatusException re) {
-//      // TODO: find out:externalId is not set up at this point!
-//      String error = String.format (" for testee ID %s: %s", externalId, re.getMessage ());
-//      _commonDll._LogDBError_SP (connection, "T_Login", error, null, null, null, null, clientname, null);
-//    }
+    try {
+
+      //Interval for logging into the _maxtestopps table
+      final int maxTestOppsIntervalInMinutes = 10;
+      Date lastupdate = null;
+      final String SQL_QUERY1 = "select max(_time) as lastupdate from _maxtestopps where clientname = ${clientname}";
+      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
+      SingleDataResultSet result = executeStatement (connection, SQL_QUERY1, parms1, false).getResultSets ().next ();
+      DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+      if (record != null) {
+        lastupdate = record.<Date> get ("lastupdate");
+      }
+  
+      if (lastupdate == null || DbComparator.greaterOrEqual (minutesDiff (lastupdate, starttime), maxTestOppsIntervalInMinutes)) {
+        final String SQL_QUERY2 = "insert into _maxtestopps(numopps,_time,clientname) "
+            + " SELECT -1,now(3), ${clientname} FROM dual WHERE"
+            + " 1 = (select (time_to_sec(TIMEDIFF(now(3),max(_time)))/60) >=${maxTestOppsIntervalInMinutes} as diff_minutes "
+            + " from _maxtestopps where clientname =  ${clientname}) ";
+        SqlParametersMaps parms2 = (new SqlParametersMaps ()).put ("clientname", clientname).put ("maxTestOppsIntervalInMinutes", maxTestOppsIntervalInMinutes);
+        int insertCount = executeStatement (connection, SQL_QUERY2, parms2, false).getUpdateCount ();
+        
+        if(insertCount>0) {
+          Integer numOpps = _ActiveOpps_FN (connection, clientname);
+          final String SQL_QUERY3 = "update _maxtestopps set numopps =  ${numopps},_time = now(3) where numopps= -1 and  clientname = ${clientname}";
+          SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("numopps", numOpps).put ("clientname", clientname);
+          executeStatement (connection, SQL_QUERY3, parms3, false).getUpdateCount ();
+        }
+      }
+    } catch (ReturnStatusException re) {
+      // TODO: find out:externalId is not set up at this point!
+      String error = String.format (" for testee ID %s: %s", externalId, re.getMessage ());
+      _commonDll._LogDBError_SP (connection, "T_Login", error, null, null, null, null, clientname, null);
+    }
     // END: Accounting: how many open test opportunities are there currently for
     // this client?
 

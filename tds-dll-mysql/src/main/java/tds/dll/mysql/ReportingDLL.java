@@ -8,6 +8,8 @@
  ******************************************************************************/
 package tds.dll.mysql;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2326,7 +2328,7 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     while (!isSent) {
       try {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);  
+        headers.setContentType(new MediaType ("application", "xml",StandardCharsets.UTF_8));
         HttpEntity<String> entity = new HttpEntity<String>(xmlReport, headers);
         ResponseEntity<String> response = _restClient.exchange (_tisUrl, HttpMethod.POST, entity, String.class);
         isSent = true;
