@@ -394,8 +394,11 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
       
       strBuilder.append (" >").append(ls);
       
-      String initialContextDate = formatXSDateTime(getContextDate(connection, oppkey, INITIAL));
-      String finalContextDate 	= formatXSDateTime(getContextDate(connection, oppkey, FINAL));
+      //SB-1292
+      //String initialContextDate = formatXSDateTime(getContextDate(connection, oppkey, INITIAL));
+      //String finalContextDate 	= formatXSDateTime(getContextDate(connection, oppkey, FINAL));
+      String initialContextDate = formatNullableDateTime(getContextDate(connection, oppkey, INITIAL));
+      String finalContextDate   = formatNullableDateTime(getContextDate(connection, oppkey, FINAL));
 
       context = INITIAL;
       //strBuilder.append(getTesteeAttributes(_rtsReporting.getTesteeAttributes(connection, clientname, testee), context, initialContextDate));	 
@@ -998,7 +1001,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           rationale 	= record2.<String> get ("rationale");
           responseDate 	= record2.<Date> get ("responseDate");
           respDate 		= (responseDate != null)?  responseDate.toString(): "";
-          respDate		= formatXSDateTime(respDate);
+          // SB-1292
+          respDate		= formatNullableDateTime(respDate);
           scoreStatus   = record2.<String> get ("scoreStatus");
           Integer scint	= record2.<Integer> get ("scorePoint");
           scorePoint 	= scint.toString();
@@ -2279,47 +2283,54 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     // some checks that may fill out errRef
     String status = null;
 
-    final String cmd1 = "select status from testopportunity where _key = ${oppkey}";
-    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
-    SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms1, false).getResultSets ().next ();
-    DbResultRecord rec1 = (rs1.getCount () > 0 ? rs1.getRecords ().next () : null);
-    if (rec1 != null) {
-      status = rec1.<String> get ("status");
-    }
-    if (status == null) {
-      errRef.set (String.format ("No such opportunity: %s", oppkey.toString ()));
-
-    } else if (status.equalsIgnoreCase ("submitted") || status.equalsIgnoreCase ("reported")) {
-      errRef.set ("Opportunity already submitted");
-
-    } else {
-
-      String xmlReport = XML_GetOppXML_SP (connection, oppkey, false);
-      if (xmlReport == null)
-        errRef.set (String.format ("No XML result for: %s", oppkey.toString ()));
-      else {
-        sendQAReportToTis(oppkey, xmlReport, errRef);
+    try {
+      final String cmd1 = "select status from testopportunity where _key = ${oppkey}";
+      SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("oppkey", oppkey);
+      SingleDataResultSet rs1 = executeStatement (connection, cmd1, parms1, false).getResultSets ().next ();
+      DbResultRecord rec1 = (rs1.getCount () > 0 ? rs1.getRecords ().next () : null);
+      if (rec1 != null) {
+        status = rec1.<String> get ("status");
       }
-      if (errRef.get () == null) {
+      if (status == null) {
+        errRef.set (String.format ("No such opportunity: %s", oppkey.toString ()));
 
-        final String cmd3 = "insert into ${ArchiveDB}.opportunityaudit "
-            + "(_fk_TestOpportunity,  AccessType, actor, comment, hostname,  dateaccessed, dbname) "
-            + " values ( ${oppkey},  'SEND XML', 'QA_SendXML', ${xmlreport}, ${localhost},  now(3), ${dbname})";
+      } else if (status.equalsIgnoreCase ("submitted") || status.equalsIgnoreCase ("reported")) {
+        errRef.set ("Opportunity already submitted");
 
-        SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
-            put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ()).
-            put ("xmlreport", xmlReport);
-        int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd3), parms3, false).getUpdateCount ();
- 
-        if (changeStatus != null)
-          // TODO Elena: change the last parameter to name of the deamon?
-          _commonDll.SetOpportunityStatus_SP (connection, oppkey, changeStatus, true, "TDS_XML_SERVICE");
+      } else {
 
+        String xmlReport = XML_GetOppXML_SP (connection, oppkey, false);
+        if (xmlReport == null)
+          errRef.set (String.format ("No XML result for: %s", oppkey.toString ()));
+        else {
+          sendQAReportToTis (oppkey, xmlReport, errRef);
+        }
+        if (errRef.get () == null) {
+
+          final String cmd3 = "insert into ${ArchiveDB}.opportunityaudit "
+              + "(_fk_TestOpportunity,  AccessType, actor, comment, hostname,  dateaccessed, dbname) "
+              + " values ( ${oppkey},  'SEND XML', 'QA_SendXML', ${xmlreport}, ${localhost},  now(3), ${dbname})";
+
+          SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).
+              put ("localhost", _commonDll.getLocalhostName ()).put ("dbname", getTdsSettings ().getTDSSessionDBName ()).
+              put ("xmlreport", xmlReport);
+          int insertedCnt = executeStatement (connection, fixDataBaseNames (cmd3), parms3, false).getUpdateCount ();
+
+          if (changeStatus != null)
+            // TODO Elena: change the last parameter to name of the deamon?
+            _commonDll.SetOpportunityStatus_SP (connection, oppkey, changeStatus, true, "TDS_XML_SERVICE");
+
+        }
       }
+      if (errRef.get () != null)
+        _commonDll._LogDBError_SP (connection, "QA_SendXML", errRef.get (), null, null, null, oppkey);
+      _commonDll._LogDBLatency_SP (connection, "QA_SendXML", starttime, null, true, null, oppkey, null, null, null);
+    } catch (Exception e) {
+      // We do not want this method to throw exception as it causes StudentReportProcessor to repeatedly 
+      // process the same queue record again and again
+      _logger.error ("QA_SendXML::: ");
+      _logger.error (e.getMessage (), e);
     }
-    if (errRef.get () != null)
-      _commonDll._LogDBError_SP (connection, "QA_SendXML", errRef.get (), null, null, null, oppkey);
-    _commonDll._LogDBLatency_SP (connection, "QA_SendXML", starttime, null, true, null, oppkey, null, null, null);
   }
   
   private void sendQAReportToTis (UUID oppkey, String xmlReport, _Ref<String> errRef) {
@@ -2365,7 +2376,9 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
 		    		|| attrName.equalsIgnoreCase("date")
 		    		)
 		    {
-		    	resValue = formatXSDateTime(resValue);
+		      //SB-1292
+		      resValue = formatNullableDateTime(resValue);
+		    	//resValue = formatXSDateTime(resValue);
 		    }
 		    // type = "NullableDateTime"
 		    else if(attrName.equalsIgnoreCase("dateCompleted")
