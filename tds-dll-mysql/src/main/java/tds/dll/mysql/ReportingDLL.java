@@ -323,12 +323,12 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
           + " T.Contract as \"Test/@contract\",  "
           + " ${mode} as \"Test/@mode\", "
           + " case when B.Grade is null or B.Grade = '' then ${gradeSpan} else B.Grade end as \"Test/@grade\"  "
-          + " , \'\' as \"Test/@assessmentType\" "			// Added for new attributes TODO
-          + " , ${academicYear} as \"Test/@academicYear\""			// Added for new attributes
-          + " , case when TA.Updateconfig is null then TA.loadconfig else TA.Updateconfig  end as \"Test/@assessmentVersion\" "// Added for new attributes
+          + " ,case when T.testtype is null then \'\' else  T.testtype end as \"Test/@assessmentType\" "      // Added for new attributes TODO
+          + " , ${academicYear} as \"Test/@academicYear\""      // Added for new attributes
+          + " , case when T.updateconfig is null then T.loadconfig else T.Updateconfig  end as \"Test/@assessmentVersion\" "// Added for new attributes
           + " from ${ItemBankDB}.tblsetofadminsubjects T, ${ItemBankDB}.tblsubject B, "
           + " ${ConfigDB}.client_testproperties P,  ${ConfigDB}.client_subject S,"
-          + " ${ItemBankDB}.tbltestadmin TA"	// Added for new attributes
+          + " ${ItemBankDB}.tbltestadmin TA"  // Added for new attributes
           + " where T._fk_Subject = B._key and T._Key = ${testkey} "
           + " and S.ClientName = ${clientName} and S.Subject = B.Name and P.Clientname = S.ClientName "
           + " and P.TestiD = T.TestID "
@@ -2540,7 +2540,24 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
     Iterator<DbResultRecord> records = result.getRecords ();
     while (records.hasNext ()) {
       DbResultRecord record = records.next ();
-      attributes.put (record.<String>get("tds_id"), record.<String> get("attributevalue"));     
+      
+      String tds_id = record.<String>get("tds_id");
+	  if (tds_id.equalsIgnoreCase("DOB")) {
+		String dob = record.<String> get("attributevalue");
+		SimpleDateFormat formatter = new SimpleDateFormat("MMddyyyy");
+		Date date = null;
+		try {
+			date = formatter.parse(dob);
+			formatter = new SimpleDateFormat("yyyy-MM-dd");
+			dob = formatter.format(date);
+		} catch (ParseException e) {
+			_logger.error(e.getMessage(), e);
+			dob = "1900-01-01";
+		}
+		attributes.put(tds_id, dob);
+	  } else {
+		attributes.put(tds_id, record.<String> get("attributevalue"));
+	  }
     }
     return attributes;
   }
