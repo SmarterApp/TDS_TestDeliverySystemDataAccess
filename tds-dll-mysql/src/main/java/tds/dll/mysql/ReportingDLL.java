@@ -8,7 +8,6 @@
  ******************************************************************************/
 package tds.dll.mysql;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2075,7 +2074,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 			  value = testeeAttributes.get(mapKey);
 		  	  if(value == null)
 		  		  continue;
-			  	
+			  
+		  	  value = xmlSpecialSymbolsReplacer(value);
 			  strBuilder.append("<").append(TESTEEATTRIBUTE_NODE_NAME).append(SPACE);
 			  strBuilder.append("context = \"").append(context).append("\"").append(SPACE);
 			  strBuilder.append("name = \"").append(name).append("\"").append(SPACE);
@@ -2084,7 +2084,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 			  strBuilder.append("/>").append(ls);				  			  
 		  }			  	
 	  } else
-	  {// TODO GUEST from table!
+	  {
 		  strBuilder.append("<").append(TESTEEATTRIBUTE_NODE_NAME).append(SPACE);
 		  strBuilder.append("context = \"").append(context).append("\"").append(SPACE);
 		  strBuilder.append("name = \"").append("GUEST").append("\"").append(SPACE);
@@ -2126,6 +2126,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
 		  	  if(value == null)
 		  		  continue;
 
+		  	  value = xmlSpecialSymbolsReplacer(value);
 			  strBuilder.append("<").append(TESTEERELATIONSHIP_NODE_NAME).append(SPACE);
 			  strBuilder.append("context = \"").append(context).append("\"").append(SPACE);
 			  strBuilder.append("name = \"").append(name).append("\"").append(SPACE);
