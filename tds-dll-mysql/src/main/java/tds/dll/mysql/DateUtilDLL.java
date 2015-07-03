@@ -18,11 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import TDS.Shared.Data.ColumnResultSet;
-import TDS.Shared.Exceptions.ReturnStatusException;
 import AIR.Common.DB.AbstractConnectionManager;
 import AIR.Common.DB.DATABASE_TYPE;
 import AIR.Common.Sql.AbstractDateUtilDll;
+import TDS.Shared.Data.ColumnResultSet;
+import TDS.Shared.Exceptions.ReturnStatusException;
 
 public class DateUtilDLL extends AbstractDateUtilDll
 {
@@ -35,10 +35,16 @@ public class DateUtilDLL extends AbstractDateUtilDll
     DATABASE_TYPE dbType = _connectionManager.getDatabaseDialect ();
     Timestamp timestamp;
     String cmd = null;
-    if (dbType == DATABASE_TYPE.SQLSERVER) {
-      cmd = "select getdate()";
-    } else if (dbType == DATABASE_TYPE.MYSQL) {
-      cmd = "select now(3)";
+    switch(dbType) {
+      case MYSQL:
+        cmd = "select now(3)";
+        break;
+      case  SQLSERVER:
+        cmd = "select getdate()";
+        break;
+      default:
+        cmd = "select now(3)";
+        break;
     }
     
     try (PreparedStatement stm = connection.prepareStatement (cmd)) {
@@ -51,6 +57,7 @@ public class DateUtilDLL extends AbstractDateUtilDll
       if (reader != null && reader.next () == true) {
         timestamp = reader.getTimestamp (1);
         _now = new Date (timestamp.getTime ());
+        return _now;
       } else {
         throw new SQLException ("Failed  get current date!");
       }
@@ -59,15 +66,12 @@ public class DateUtilDLL extends AbstractDateUtilDll
       _logger.error (exp.getMessage (),exp);
       throw exp;
     }
-    return _now;
   }
   public Date getDateWRetStatus (Connection connection) throws ReturnStatusException {
-  Date _now = null;
     try {
-      _now= getDate(connection);
+      return getDate(connection);
     } catch (SQLException se) {
       throw new ReturnStatusException (se);
     }
-    return _now;
   }
 }

@@ -1243,10 +1243,29 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
         sofar = "Third. ";
       }
 
-      final String SQL_INSERT4 = "insert into testeeattribute (_fk_TestOpportunity, context, TDS_ID, attributeValue, _date) "
+      /*final String SQL_INSERT4 = "insert into testeeattribute (_fk_TestOpportunity, context, TDS_ID, attributeValue, _date) "
           + " values( ${_fk_TestOpportunity}, ${context}, ${tds_id}, ${attval}, ${_date})";
-
-      int insertedCnt = insertBatch (connection, SQL_INSERT4, resultSet1, null);
+      int insertedCnt = insertBatch (connection, SQL_INSERT4, resultSet1, null);*/
+      
+      final String SQL_INSERT4 = "insert into testeeattribute (_fk_TestOpportunity, context, TDS_ID, attributeValue, _date) "
+          + " values( ?, ?, ?, ?, ?)";
+      
+      List<Map<Integer,Object>> paramsList = new ArrayList<Map<Integer,Object>> ();
+      Map<Integer,Object> param = null;
+      Iterator<DbResultRecord> recordsInsert = resultSet1.getRecords ();
+      while (recordsInsert.hasNext ()) {
+        param = new HashMap<Integer,Object> ();
+        DbResultRecord rec = recordsInsert.next ();
+        param.put (1, rec.get ("_fk_testopportunity"));
+        param.put (2, rec.<String>get ("context"));
+        param.put (3, rec.<String>get ("tds_id"));
+        param.put (4, rec.<String>get ("attval"));
+        param.put (5, rec.get ("_date"));
+        paramsList.add (param);
+      }
+      executePreparedStatementBatch (connection, SQL_INSERT4, paramsList);
+      
+      
       sofar = "Fourth. ";
 
       if (DbComparator.isEqual (relsexist, true)) {
@@ -1268,7 +1287,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
           + " values ( ${_fk_TestOpportunity}, ${context}, ${relationtype}, ${tds_ID}, 0, ${attval}, ${_date} )";
       // select relationType, entityKey, attname as TDS_ID, attval
 
-      insertedCnt = insertBatch (connection, SQL_INSERT6, resultSet2, null);
+      int insertedCnt = insertBatch (connection, SQL_INSERT6, resultSet2, null);
       sofar = "Sixth. ";
 
       connection.commit ();

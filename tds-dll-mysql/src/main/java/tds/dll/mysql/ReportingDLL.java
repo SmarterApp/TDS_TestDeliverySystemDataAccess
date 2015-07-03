@@ -2248,7 +2248,8 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL
         DbResultRecord record = result.getCount () > 0 ? result.getRecords ().next () : null;
         if (record != null) {
           windowStart = record.<String> get("windowStart"); // 2014-12-07 22:17:13.387
-          effectiveDate = windowStart.substring(0, 10); 	// 2014-12-07
+          effectiveDate = (windowStart == null || windowStart.isEmpty())? 
+        		  EMPTY: windowStart.substring(0, Math.min(10, windowStart.length())); 	// 2014-12-07
         }
 
       } catch (Exception e)
@@ -2441,7 +2442,7 @@ public SingleDataResultSet readQaReportQueue (SQLConnection connection) throws R
   }
   
   public String formatNullableDateTime(String inDate) throws ReturnStatusException {
-	  return (inDate == null || inDate.isEmpty())? EMPTY : formatXSDateTime(inDate);
+	  return (inDate == null || inDate.isEmpty())? EMPTY: formatXSDateTime(inDate);
   }
 
 	public String formatXSDateTime(String inDate) throws ReturnStatusException {

@@ -113,6 +113,7 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
 
   @Override
   public void _ValidateInstitutionMatch_SP (SQLConnection connection, String clientName, Long testeeKey, Long proctorKey, _Ref<String> instKey) throws ReturnStatusException {
+    long start_Time = System.currentTimeMillis ();
     byte[] packageObject = getStudentPackageByKeyAndClientName (connection, testeeKey, clientName);
     instKey.set (null);
     String studentSchoolId = null;
@@ -133,12 +134,13 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
           if (userEmail == null) {
             return;
           }
-          
+
           // get proctor's institution ID
           String apiUrl = "users?email=" + userEmail;
           User[] users = null;
           try {
             users = _trClient.getForObject (apiUrl, User[].class);
+
           } catch (TrApiException e) {
             if (e.isErrorExempted ()) {
                instKey.set (studentSchoolId);
@@ -277,7 +279,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
   public void _GetRTSAttribute_SP (SQLConnection connection, String clientname, Long testee, String attname, _Ref<String> attValue, Boolean debug) throws ReturnStatusException {
     long startTime = System.currentTimeMillis ();
     byte[] pkg = getStudentPackageByKeyAndClientName (connection, testee, clientname);
-    _logger.info ("<<<<<<<<< _GetRTSAttribute_SP 1 : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
     String attribute = null;
     if (pkg != null) {
       IRtsPackageReader packageReader = new StudentPackageReader ();
@@ -292,7 +293,6 @@ public class RtsPackageDLL extends AbstractDLL implements IRtsDLL, IRtsReporting
         _logger.error (e.getMessage (), e);
       }
     }
-    _logger.info ("<<<<<<<<< _GetRTSAttribute_SP Total Execution Time : "+((System.currentTimeMillis ()-startTime)) + " ms & ThreadId : "+Thread.currentThread ().getId ());
   }
 
   /*

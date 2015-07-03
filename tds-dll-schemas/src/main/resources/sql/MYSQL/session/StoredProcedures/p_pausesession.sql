@@ -90,7 +90,7 @@ proc: begin
 
     while (exists (select * from tmp_tblopps)) do
 	begin
-        select v_oppkey = oppkey from tmp_tblopps limit 1;
+        select oppkey into  v_oppkey from tmp_tblopps limit 1;
         delete from tmp_tblopps where oppkey = v_oppkey;
         call setopportunitystatus(v_oppkey, 'paused', 1, v_sessionkey, null);
     end;

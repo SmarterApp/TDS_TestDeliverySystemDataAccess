@@ -98,8 +98,8 @@ proc: begin
 
 	-- ====================
 
-    insert into archive.opportunityaudit (_fk_testopportunity, _fk_session, accesstype, hostname, _fk_browser, actor, `comment`)
-    select v_oppkey, _fk_session, v_status, @@hostname, _fk_browser, v_requestor, v_comment
+    insert into archive.opportunityaudit (_fk_testopportunity, dateaccessed, _fk_session, accesstype, hostname, _fk_browser, actor, `comment`)
+    select v_oppkey, now(3), _fk_session, v_status, @@hostname, _fk_browser, v_requestor, v_comment
     from testopportunity 
 	where _key = v_oppkey;
 
