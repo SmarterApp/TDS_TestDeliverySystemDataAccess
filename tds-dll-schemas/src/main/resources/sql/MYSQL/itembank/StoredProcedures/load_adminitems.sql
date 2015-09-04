@@ -115,6 +115,12 @@ begin
 	
 	-- select * from tmp_adminitems	
 
+	-- delete obsolete items from the test
+	delete ai
+	  from tblsetofadminitems ai
+	  join tmp_adminitems tmp on ai._fk_adminsubject = tmp._fk_adminsubject
+	 where not exists (select * from loader_testitem ti where ti._fk_package = v_testpackagekey and ti.testitemid = ai._fk_item);
+
 	-- insert items that do not already exists
 	insert into tblsetofadminitems (_fk_item, _fk_adminsubject, loadconfig, _fk_strand, _fk_testadmin)
 	select _fk_item, _fk_adminsubject, version, _fk_strand, _fk_testadmin

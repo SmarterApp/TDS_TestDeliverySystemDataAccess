@@ -61,6 +61,13 @@ proc: begin
 	   and sp._fk_package = v_testpackagekey;
 
 
+	-- delete obsolete passages
+	delete st
+	  from tbladminstimulus st
+	  join tmp_tblstimulus tmp on tmp._fk_adminsubject = st._fk_adminsubject
+	 where not exists (select * from loader_testpassages tp where tp._fk_package = v_testpackagekey and tp.passageid = st._fk_stimulus);
+
+
 	insert into tbladminstimulus (_fk_stimulus, _fk_adminsubject, numitemsrequired, maxitems, loadconfig, groupid) 
 	select distinct *
 	  from tmp_tblstimulus tmp
@@ -68,6 +75,7 @@ proc: begin
 						from tbladminstimulus st
 					   where st._fk_stimulus = tmp._fk_stimulus
 						 and st._fk_adminsubject = tmp._fk_adminsubject);
+
 
 	update tbladminstimulus st
 	  join tmp_tblstimulus tmp on st._fk_stimulus = tmp._fk_stimulus

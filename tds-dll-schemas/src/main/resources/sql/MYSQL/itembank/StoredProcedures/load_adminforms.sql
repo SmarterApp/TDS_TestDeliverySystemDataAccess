@@ -37,6 +37,14 @@ begin
 	);
 
 
+	-- if form-id's do not exists in the current test package being loaded
+	-- delete such forms as they have become obsolete
+	delete tf
+	  from testform tf
+	  join tmp_testform tmp on tmp.adminsubject = tf._fk_adminsubject
+	 where not exists (select * from loader_testformpartition tfp where tfp._fk_package = v_testpackagekey and tfp.formpartitionid = tf._key);
+
+
 	-- update existing form information
 	update testform tf
 	  join tmp_testform tmp on tf._fk_adminsubject = tmp.adminsubject 

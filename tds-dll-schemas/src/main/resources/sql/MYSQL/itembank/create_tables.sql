@@ -788,7 +788,7 @@ create table loader_testpackage (
 	packagekey		varchar(350)
   ,	purpose			varchar(100)
   , publisher		varchar(255)
-  , publishdate		date
+  , publishdate		varchar(200)
   , packageversion	varchar(20)
   , testkey			varchar(250)
   , testname		varchar(200)

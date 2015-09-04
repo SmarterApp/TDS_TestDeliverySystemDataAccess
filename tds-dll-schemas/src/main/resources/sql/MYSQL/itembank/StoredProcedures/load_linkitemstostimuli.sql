@@ -42,7 +42,7 @@ begin
 	-- first delete all strand links for these items
 	delete s
 	  from tblsetofitemstimuli s 
-	  join tmp_segments seg on seg.testitemid = s._fk_item and seg.segments = s._fk_adminsubject;
+	  join tmp_segments seg on seg.segments = s._fk_adminsubject;
 
 	insert into tblsetofitemstimuli
 	select p.testitemid

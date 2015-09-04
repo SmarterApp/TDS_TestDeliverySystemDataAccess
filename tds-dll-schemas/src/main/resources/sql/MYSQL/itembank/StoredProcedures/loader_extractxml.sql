@@ -62,14 +62,13 @@ proc: begin
 			set message_text = 'A record with same packagekey value already exists in the loader_testpackage table.';
 		-- leave proc;
 	end if;
-
 	
 	-- ** extract testpackage configuration data ** --
 	insert into loader_testpackage(packagekey, purpose, publisher, publishdate, packageversion, testkey, testname, testlabel, testversion)
 	select v_testpackagekey
 		 , extractvalue(v_xml, concat(v_root, 'attribute::purpose'))
 		 , extractvalue(v_xml, concat(v_root, 'attribute::publisher'))
-		 , str_to_date(extractvalue(v_xml, concat(v_root, 'attribute::publishdate')), '%b %d %Y %h:%i %p')
+		 , extractvalue(v_xml, concat(v_root, 'attribute::publishdate'))
 		 , extractvalue(v_xml, concat(v_root, 'attribute::version'))
 		 , v_testkey
 		 , extractvalue(v_xml, concat(v_root, 'identifier/attribute::name'))
