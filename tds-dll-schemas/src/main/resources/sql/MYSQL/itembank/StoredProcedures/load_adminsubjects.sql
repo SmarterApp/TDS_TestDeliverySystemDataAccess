@@ -97,15 +97,16 @@ begin
 
 
 	-- first, figure out if the test is segmented or non-segmented
-	-- if the bpelementid for test and segment are the same, then the test is non-segmented	
-	set v_issegmented = (select case when cnt > 1 then 1 else 0 end
+	-- if the bpelementid for test and segment are the same, then the test is non-segmented
+	set v_issegmented = (select case when cnt = 0 then 1 else 0 end
 						 from (
 							select count(*) cnt
 							  from loader_testblueprint tbp1
 							  join loader_testblueprint tbp2 on tbp1.bpelementid = tbp2.bpelementid
 															and tbp1._fk_package = tbp2._fk_package
-							where tbp1.elementtype = 'segment'	
-								and tbp2._fk_package = v_testpackagekey
+							 where tbp1.elementtype = 'test'
+							   and tbp2.elementtype = 'segment'
+							   and tbp2._fk_package = v_testpackagekey
 							) t
 						);
 	
@@ -188,13 +189,13 @@ begin
 			 , max(if(sisp.propname = 'terminationtooclose', (case sisp.propvalue when 'true' then 1 else 0 end), null)) as terminationtooclose
 			 , max(if(sisp.propname = 'terminationflagsand', (case sisp.propvalue when 'true' then 1 else 0 end), null)) as terminationflagsand
 		  from tmp_tblsetofadminsubjects tmp
-		  join loader_segmentitemselectionproperties sisp on sisp.segmentid = tmp._key and tmp.testid = sisp.bpelementid
+		  join loader_segmentitemselectionproperties sisp on sisp.segmentid = tmp._key and tmp._key = sisp.bpelementid
 		 where sisp._fk_package = v_testpackagekey
 		group by sisp.bpelementid
 	);
 
 	update tmp_tblsetofadminsubjects tmp
-	  join tmp_testproperties tp on tp.bpelementid = tmp.testid
+	  join tmp_testproperties tp on tp.bpelementid = tmp._key
 	   set tmp.ftstartpos 	   				= tp.ftstartpos 
 		 , tmp.ftendpos 	   				= tp.ftendpos
 		 , tmp.blueprintweight 				= tp.bpweight
@@ -310,8 +311,6 @@ begin
 		 , sas.precisiontarget = tmp.precisiontarget
 		 , sas.adaptivecut = tmp.adaptivecut
 		 , sas.toocloseses = tmp.toocloseses
-		 , sas.slope = tmp.slope
-		 , sas.intercept = tmp.intercept
 		 , sas.abilityweight	= tmp.abilityweight
 		 , sas.computeabilityestimates = tmp.computeabilityestimates
 		 , sas.rcabilityweight = tmp.rcabilityweight				
