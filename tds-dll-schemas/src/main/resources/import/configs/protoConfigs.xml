@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="10495" ownerapp="Proctor" appkey="Label.Footer" message="&lt;span&gt;American Institutes for Research&lt;/span&gt; |  1000 Thomas Jefferson Street, NW Washington, DC 20007    " _key="3169" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="10496" ownerapp="Proctor" appkey="Label.ClientTitle" message="AIR Demo System" _key="3170" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="10497" ownerapp="Proctor" appkey="Label.Logo" message="&lt;h2&gt;Delaware Comprehensive Assessment System&lt;/h2&gt;" _key="3171" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="10535" ownerapp="Proctor" appkey="Label.Training" message="&lt;p&gt;This site is for authorized TAs only and cannot be used with the operational tests. It may be used for the following: 1) As a training tool to familiarize Test Administrators with the online testing system; 2) Administering Online Practice Tests. &lt;/p&gt;" _key="3207" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="10536" ownerapp="Proctor" appkey="Label.Instructions" message="The TA Interface provides Test Administrators with the tools needed to proctor online tests." _key="3208" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="10562" ownerapp="Proctor" appkey="UnableToProcessRequest" message="There was an error processing your request.  Please try again." _key="3234" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="10867" ownerapp="Proctor" appkey="Label.PopupInstructions" message="The pop-up blocker is turned on for this browser. In order to enter this site, the pop-up blocker needs to be disabled. Please disable it and click your browser&apos;s refresh button." _key="3242" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="11567" ownerapp="Proctor" appkey="UserCookieDataDamaged" message="Your browser&apos;s cookie for this site is damaged or missing. Please log out and then sign in to create a new test session." _key="3247" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="11695" ownerapp="Proctor" appkey="Label.SSID" message="SSID" _key="3285" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="11697" ownerapp="Proctor" appkey="Label.AppTitle" message="TA Interface" _key="3287" datealtered="2012-05-03 19:17:37.86"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="11745" ownerapp="Proctor" appkey="Button.Help" message="Help" _key="3460" fromclient="AIR" datealtered="2012-05-17 11:24:12.19"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11746" ownerapp="Proctor" appkey="Label.PleaseLogIn" message="Please Log In" _key="3461" fromclient="AIR" datealtered="2012-05-17 11:34:18.347"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11747" ownerapp="Proctor" appkey="Label.Username" message="Username:" _key="3462" fromclient="AIR" datealtered="2012-05-17 11:36:52.65"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11748" ownerapp="Proctor" appkey="Label.Password" message="Password:" _key="3463" fromclient="AIR" datealtered="2012-05-17 11:36:55.327"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11749" ownerapp="Proctor" appkey="Button.Refresh" message="Refresh" _key="3464" fromclient="AIR" datealtered="2012-05-17 11:46:41.807"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11750" ownerapp="Proctor" appkey="Button.SignIn" message="Sign In" _key="3465" fromclient="AIR" datealtered="2012-05-17 11:53:06.37"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11751" ownerapp="Proctor" appkey="User Name Required" message="User Name Required" _key="3466" fromclient="AIR" datealtered="2012-05-23 19:25:51.673"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11752" ownerapp="Proctor" appkey="Password Required" message="Password Required" _key="3467" fromclient="AIR" datealtered="2012-05-23 19:26:11.683"/>
+  <tds_coremessageobject context="Login.aspx" contexttype="ClientSide" messageid="11753" ownerapp="Proctor" appkey="Problem authenticating user." message="Problem authenticating user." _key="3468" fromclient="AIR" datealtered="2012-05-23 19:26:41.823"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="11755" ownerapp="Proctor" appkey="Button.Logout" message="Log Out" _key="3470" fromclient="AIR" datealtered="2012-05-24 09:34:38.32"/>
+  <tds_coremessageobject context="CommonPage" contexttype="ClientSide" messageid="11814" ownerapp="Proctor" appkey="Label.PleaseWait" message="Please Wait" _key="3528" fromclient="AIR" datealtered="2012-06-13 17:49:27.677"/>
+  <client_timelimits _key="V2X09d1sQiKGKwx6YalweA==" oppexpire="45" opprestart="20" oppdelay="1" interfacetimeout="20" clientname="Oregon" ispracticetest="false" refreshvalue="30" tainterfacetimeout="20" tacheckintime="20" datechanged="2010-07-07 15:39:31.433" sessionexpire="8" requestinterfacetimeout="120" refreshvaluemultiplier="2"/>
+  <client name="Oregon" internationalize="false" defaultlanguage="ENU"/>
+  <client_systemflags auditobject="MatchTesteeProctorSchool" ison="0" description="INSTITUTION" clientname="Oregon" ispracticetest="false" datechanged="2010-08-16 10:21:08.193"/>
+  <client_systemflags auditobject="ProctorTraining" ison="0" description="Allows proctor app to differentiate between operational system and training system" clientname="Oregon" ispracticetest="false" datechanged="2010-09-22 11:51:03.073"/>
+  <client_externs _key="Hl5MwIp+SOW5QUMU1hDxHQ==" testeedb="oregon_rts_2012" proctordb="oregon_rts_2012" testdb="${configs.client_externs.testdb}" scorerdb="" archivedb="" testeetype="RTS" proctortype="RTS" scorertype="" sessiondb="${configs.client_externs.sessiondb}" errorsserver="" errorsdb="" clientname="Oregon" bankadminkey="" clientstylepath="Oregon" environment="Development" ispracticetest="false" timezoneoffset="3" initialreportingid="1" initialsessionid="1" qabrokerguid=""/>
+  <client_messagetranslation _fk_coremessageobject="3169" client="Oregon" message="&lt;span&gt;Oregon Department of Education&lt;/span&gt;&lt;br /&gt;    255 Capitol Street NE&lt;br /&gt;    Salem, OR 97310-0203&lt;br /&gt;" language="ENU" grade="--ANY--" subject="--ANY--" _key="ec3RzHDkSyGoM8cW9jgnfw==" datealtered="2012-05-03 19:17:57.87"/>
+  <client_messagetranslation _fk_coremessageobject="3171" client="Oregon" message="&lt;h2&gt;Oregon Assessment of Knowledge and Skills&lt;/h2&gt;" language="ENU" grade="--ANY--" subject="--ANY--" _key="1fipCVorT9WNMmcrGeUEVg==" datealtered="2012-05-03 19:17:57.87"/>
+  <client_messagetranslation _fk_coremessageobject="3170" client="Oregon" message="Oregon Assessment of Knowledge and Skills" language="ENU" grade="--ANY--" subject="--ANY--" _key="3gn+AhYqQxu/R+0FaeYRtg==" datealtered="2012-05-03 19:17:57.87"/>
+  <tds_coremessageuser _fk_coremessageobject="3169" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3170" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3171" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3207" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3208" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3234" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3242" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3247" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3285" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3287" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3460" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3461" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3462" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3463" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3464" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3465" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3466" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3467" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3468" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3470" systemid="Proctor"/>
+  <tds_coremessageuser _fk_coremessageobject="3528" systemid="Proctor"/>
+  <geo_clientapplication/>
+</dataset>

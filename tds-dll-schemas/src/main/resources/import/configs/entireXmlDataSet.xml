@@ -1,0 +1,35 @@
+<dataset>
+     <client name="AIR" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Delaware" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Delaware_PT" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Hawaii" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Hawaii_PT" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Minnesota" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Minnesota_PT" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Ohio" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Ohio_PT" 
+     	internationalize="1"
+        defaultlanguage="ENU"/>
+     <client name="Oregon" 
+     	internationalize="0"
+        defaultlanguage="ENU"/>
+     <client name="Oregon_PT" 
+     	internationalize="0"
+        defaultlanguage="ENU"/>     
+</dataset>

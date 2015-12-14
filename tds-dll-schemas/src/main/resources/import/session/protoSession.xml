@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <_externs clientname="Oregon" environment="Development" shiftwindowstart="-10" shiftwindowend="300" shiftformstart="0" shiftformend="300" shiftftstart="-30" shiftftend="-30"/>
+  <_externs clientname="Minnesota_PT" environment="Development" shiftwindowstart="365" shiftwindowend="-30" shiftformstart="60" shiftformend="0" shiftftstart="0" shiftftend="0"/>
+  <_externs clientname="SBAC" environment="Development" shiftwindowstart="0" shiftwindowend="0" shiftformstart="0" shiftformend="0" shiftftstart="0" shiftftend="0"/>
+  <_externs clientname="SBAC_PT" environment="Development" shiftwindowstart="0" shiftwindowend="0" shiftformstart="0" shiftformend="0" shiftftstart="0" shiftftend="0"/>
+ 
+  <_synonyms dbname="${session._synonymns.dbname}" _date="2012-09-26 17:23:58.293" prefix="itembank_"/>
+  <client_os agentos="TestOS" os_id="Test_ID"/>
+ 
+</dataset>

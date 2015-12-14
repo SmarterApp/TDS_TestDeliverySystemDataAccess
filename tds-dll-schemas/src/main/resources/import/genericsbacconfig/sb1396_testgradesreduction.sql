@@ -1,0 +1,9 @@
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G3%' and grade <> 3;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G4%' and grade <> 4;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G5%' and grade <> 5;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G6%' and grade <> 6;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G7%' and grade <> 7;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G8%' and grade <> 8;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G9%' and grade <> 9;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G10%' and grade <> 10;
+delete from itembank.setoftestgrades where _fk_adminsubject like '%-G11%' and grade <> 11;

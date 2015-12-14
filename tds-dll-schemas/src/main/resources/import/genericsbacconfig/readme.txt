@@ -1,0 +1,10 @@
+LOAD DATA LOCAL INFILE '<file path>' INTO TABLE client_testtooltype FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '' LINES TERMINATED BY '\r\n' IGNORE 1 LINES
+(ClientName,ToolName,@AllowChange,@TIDESelectable,RTSFieldName,@IsRequired,@TIDESelectableBySubject,@IsSelectable,@IsVisible,@StudentControl,@ToolDescription,SortOrder,dateEntered,@origin,@source,ContextType,Context,@DependsOnToolType,@DisableOnGuestSession,@IsFunctional,TestMode) set AllowChange=cast(@AllowChange as signed), TIDESelectable = cast(@TIDESelectable as signed), IsRequired=cast(@IsRequired as signed), IsSelectable=cast(@IsSelectable as signed), IsVisible=cast(@IsVisible  as signed), StudentControl=cast(@StudentControl as signed), DisableOnGuestSession=cast(@DisableOnGuestSession  as signed),  IsFunctional=cast(@IsFunctional  as signed), tooldescription=if(@tooldescription = 'NULL', NULL, @tooldescription), dependsontooltype=if(@dependsontooltype = 'NULL', NULL, @dependsontooltype ),
+origin=if(@origin = 'NULL', NULL, @origin), source=if(@source  = 'NULL', NULL, @source);
+
+LOAD DATA LOCAL INFILE '<file path>' INTO TABLE client_testtool FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '' LINES TERMINATED BY '\r\n' IGNORE 1 LINES
+(ClientName,Type,Code,Value,@IsDefault,@AllowCombine,ValueDescription,Context,SortOrder,origin,source,ContextType,TestMode,EquivalentClientCode) set IsDefault=cast(@IsDefault as signed), AllowCombine = cast(@AllowCombine as signed),
+equivalentclientcode=if(@equivalentclientcode = 'NULL', NULL, @equivalentclientcode), origin=if(@origin = 'NULL', NULL, @origin), source=if(@source  = 'NULL', NULL, @source);
+
+LOAD DATA LOCAL INFILE '<file path>' INTO TABLE client_tooldependencies FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '' LINES TERMINATED BY '\r\n' IGNORE 1 LINES
+(Context,ContextType,IfType,IfValue,@IsDefault,ThenType,ThenValue,ClientName,@_key,TestMode) set IsDefault=cast(@IsDefault as signed), _key=unhex(REPLACE(@_key, '-', ''));
