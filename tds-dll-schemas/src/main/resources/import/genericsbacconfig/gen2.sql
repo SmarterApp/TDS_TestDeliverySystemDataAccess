@@ -2909,10 +2909,10 @@ UNLOCK TABLES;
 
 LOCK TABLES `client_testtooltype` WRITE;
 /*!40000 ALTER TABLE `client_testtooltype` DISABLE KEYS */;
-INSERT INTO `client_testtooltype` VALUES ('SBAC','Color Choices','','\0','TDSAcc-ColorChoices','\0','\0','','','',NULL,0,'2013-12-13 13:53:31.687','TDSCore_Staging_Configs_2013','TDSCore_Staging_Configs_2013','FAMILY','StudentGlobal',NULL,'\0','','ALL');
-INSERT INTO `client_testtooltype` VALUES ('SBAC_PT','Color Choices','\0','','TDSAcc-ColorChoices','\0','\0','','','',NULL,0,'2014-01-16 11:13:34.067','TDSCore_Staging_Configs_2013','TDSCore_Staging_Configs_2013','FAMILY','StudentGlobal','Language','\0','','ALL');
-INSERT INTO `client_testtooltype` VALUES ('SBAC_PT','Language','','\0','TDSAcc-Language','','\0','','','',NULL,-1,'2012-12-27 09:33:33.513','jf','jf','FAMILY','StudentGlobal',NULL,'\0','','ALL');
-INSERT INTO `client_testtooltype` VALUES ('SBAC_PT','Print Size','','\0','TDSAcc-PrintSize','','\0','','','\0',NULL,0,'2013-05-13 14:05:26.573','TDSCore_Staging_Configs_2012','TDSCore_Staging_Configs_2012','FAMILY','StudentGlobal','Language','\0','','ALL');
+INSERT INTO `client_testtooltype` VALUES ('SBAC','Color Choices','','\0','TDSAcc-ColorChoices','\0','\0','','','',NULL,0,'2013-12-13 13:53:31.687','TDSCore_Staging_Configs_2013','TDSCore_Staging_Configs_2013','FAMILY','StudentGlobal',NULL,'\0','','ALL', 1);
+INSERT INTO `client_testtooltype` VALUES ('SBAC_PT','Color Choices','\0','','TDSAcc-ColorChoices','\0','\0','','','',NULL,0,'2014-01-16 11:13:34.067','TDSCore_Staging_Configs_2013','TDSCore_Staging_Configs_2013','FAMILY','StudentGlobal','Language','\0','','ALL', 1);
+INSERT INTO `client_testtooltype` VALUES ('SBAC_PT','Language','','\0','TDSAcc-Language','','\0','','','',NULL,-1,'2012-12-27 09:33:33.513','jf','jf','FAMILY','StudentGlobal',NULL,'\0','','ALL', 1);
+INSERT INTO `client_testtooltype` VALUES ('SBAC_PT','Print Size','','\0','TDSAcc-PrintSize','','\0','','','\0',NULL,0,'2013-05-13 14:05:26.573','TDSCore_Staging_Configs_2012','TDSCore_Staging_Configs_2012','FAMILY','StudentGlobal','Language','\0','','ALL', 1);
 /*!40000 ALTER TABLE `client_testtooltype` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
