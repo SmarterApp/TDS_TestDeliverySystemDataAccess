@@ -21,6 +21,9 @@ bin/
 .settings/
 .cache/
 .springBeans
+.metadata/
+server/
+.externalToolBuilders/
 
 # Mac finder
 .DS_Store
@@ -32,9 +35,16 @@ CVS/
 # Ignore all log files
 logs/*
 
+lib/*.jar
+
 # Ignore backup files
 *~
 .*~
 
 # Ignore .orig files
 *.orig
+
+# IntelliJ project files
+.idea
+*.iml
+
