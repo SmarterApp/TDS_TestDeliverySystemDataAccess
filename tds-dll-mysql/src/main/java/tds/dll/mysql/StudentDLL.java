@@ -4058,13 +4058,23 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String query3 = fixDataBaseNames (SQL_INSERT3);
     executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
 
-    final String SQL_UPDATE4 = "update  ${formTblName} set formcnt = (select count(*)  from testopportunity, testopportunitysegment "
-        + " where clientname = ${clientname} and _fk_TestOpportunity = _Key and _efk_Segment = ${testkey} and FormKey = _formkey "
-        + "      and (${environment} <> 'SIMULATION' or _fk_Session = ${session}));";
-    Map<String, String> unquotedParms4 = unquotedParms3;
-    SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("clientname", clientname).put ("environment", environment).put ("session", session);
+    // there is no need to run this update if there is only a single form
+    //  so we will query the testform table to see if there is more than 1 that matches for this test key and language
+    final String SQL_FORMS_CHECK = "select count(*) from ${ItemBankDB}.testform where _fk_AdminSubject = ${testkey} and Language = ${lang} having count(*) > 1";
+    final String query_forms_check = fixDataBaseNames (SQL_FORMS_CHECK);
+    SqlParametersMaps parms_segment_check = (new SqlParametersMaps ()).put ("testkey", testkey).put ("lang", lang);
 
-    executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
+    boolean updateFormCount = exists (executeStatement (connection, query_forms_check, parms_segment_check, false));
+
+    if (updateFormCount) {
+      final String SQL_UPDATE4 = "update  ${formTblName} set formcnt = (select count(*)  from testopportunity, testopportunitysegment "
+              + " where clientname = ${clientname} and _fk_TestOpportunity = _Key and _efk_Segment = ${testkey} and FormKey = _formkey "
+              + "      and (${environment} <> 'SIMULATION' or _fk_Session = ${session}));";
+      Map<String, String> unquotedParms4 = unquotedParms3;
+      SqlParametersMaps parms4 = (new SqlParametersMaps()).put("testkey", testkey).put("clientname", clientname).put("environment", environment).put("session", session);
+
+      executeStatement(connection, fixDataBaseNames(SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount();
+    }
 
     final String SQL_QUERY5 = "select  ID as formId, itemcnt, _formkey as formkey from ${formTblName} F, ${assignedTblName} A "
         + " where F._formkey = A.frmkey order by A.cnt, formcnt, rand()  limit 1";
@@ -4163,13 +4173,24 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     final String query3 = fixDataBaseNames (SQL_INSERT3);
     executeStatement (connection, fixDataBaseNames (query3, unquotedParms3), parms3, false).getUpdateCount ();
 
-    final String SQL_UPDATE4 = "update  ${formTblName} set formcnt = (select count(*)  from testopportunity, testopportunitysegment "
-        + " where clientname = ${clientname} and _fk_TestOpportunity = _Key and _efk_Segment = ${testkey} and FormKey = _formkey "
-        + "      and (${environment} <> 'SIMULATION' or _fk_Session = ${session}));";
-    Map<String, String> unquotedParms4 = unquotedParms3;
-    SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("clientname", clientname).put ("environment", environment).put ("session", session);
+    // there is no need to run this update if there is only a single form
+    //  so we will query the testform table to see if there is more than 1 that matches for this test key and language
+    final String SQL_FORMS_CHECK = "select count(*) from ${ItemBankDB}.testform where _fk_AdminSubject = ${testkey} and Language = ${lang} having count(*) > 1";
+    final String query_forms_check = fixDataBaseNames (SQL_FORMS_CHECK);
+    SqlParametersMaps parms_segment_check = (new SqlParametersMaps ()).put ("testkey", testkey).put ("lang", lang);
 
-    executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
+    boolean updateFormCount = exists (executeStatement (connection, query_forms_check, parms_segment_check, false));
+
+    if (updateFormCount) {
+      final String SQL_UPDATE4 = "update  ${formTblName} set formcnt = (select count(*)  from testopportunity, testopportunitysegment "
+              + " where clientname = ${clientname} and _fk_TestOpportunity = _Key and _efk_Segment = ${testkey} and FormKey = _formkey "
+              + "      and (${environment} <> 'SIMULATION' or _fk_Session = ${session}));";
+      Map<String, String> unquotedParms4 = unquotedParms3;
+      SqlParametersMaps parms4 = (new SqlParametersMaps ()).put ("testkey", testkey).put ("clientname", clientname).put ("environment", environment).put ("session", session);
+
+      executeStatement (connection, fixDataBaseNames (SQL_UPDATE4, unquotedParms4), parms4, true).getUpdateCount ();
+    }
+
 
     final String SQL_QUERY5 = "select  ID as formId, itemcnt, _formkey as formkey from ${formTblName} F, ${assignedTblName} A "
         + " where F._formkey = A.frmkey order by A.cnt, formcnt, rand()  limit 1";
