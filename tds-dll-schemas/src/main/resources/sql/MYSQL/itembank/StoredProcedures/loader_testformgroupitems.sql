@@ -16,6 +16,7 @@ VERSION 	DATE 			AUTHOR 			COMMENTS
   , v_path 		 	  varchar(300)
   , v_testformid 	  varchar(200)
   , v_formitemgroupid varchar(200)
+  , INOUT v_sequentiallyformposition int
 )
 begin
     
@@ -31,7 +32,8 @@ begin
 			 , v_testformid
 			 , v_formitemgroupid
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::itemid'))
-			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::formposition'))
+			 -- , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::formposition'))
+			 , v_sequentiallyformposition -- this is the order of the groupitem in whole formpartition == sequentially numbering
 			 , extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::groupposition'))
 			 , case extractvalue(v_xml, concat(v_path, '[', v_counter, ']/attribute::adminrequired'))
 					when 'true' then 1
@@ -54,6 +56,8 @@ begin
 
 		-- increment counter
 		set v_counter = v_counter + 1;
+
+		set v_sequentiallyformposition = v_sequentiallyformposition + 1;
 
 	end while;
 

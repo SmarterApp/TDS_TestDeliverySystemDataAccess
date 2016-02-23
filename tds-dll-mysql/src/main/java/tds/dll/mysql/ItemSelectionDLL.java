@@ -59,7 +59,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 	final static String ADAPTIVE = "adaptive";
 	final static String FIELDTEST = "fieldtest";
 	final static String EMPTY = "";
-	final static String LIKESTRING1 = "I-";
+	final static String LIKESTRING_I = "I-";
+	final static String LIKESTRING_G = "G-";
 	final static String LIKESTRING2 = "\'(Delaware)%Read%\'";
 	final static String LANGUAGE = "Language";
 
@@ -972,14 +973,10 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			// segmentID = record.<String> get ("segmentID");
 		}
 		SingleDataResultSet res1 = null;
-		String likeRecord = LIKESTRING1;
 		// -- send the next itemgroup together with items
-		if (groupID != null && groupID.startsWith(likeRecord)) { // -- let the
-																	// item's
-																	// required
-																	// flag
-																	// determine
-																	// numRequired
+		if (groupID != null && (groupID.startsWith(LIKESTRING_I)
+								|| groupID.startsWith(LIKESTRING_G))) { 
+			// -- let the item's required flag determine numRequired
 
 			List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
 			CaseInsensitiveMap<Object> rcrd = new CaseInsensitiveMap<Object>();

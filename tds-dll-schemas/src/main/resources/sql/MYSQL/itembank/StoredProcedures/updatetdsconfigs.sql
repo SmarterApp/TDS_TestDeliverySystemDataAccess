@@ -268,10 +268,10 @@ begin
      where not exists (select * from configs.client_testformproperties p 
 					    where p.clientname = `client` and p._efk_testform = f._key and p.testkey = t.segkey);
 
-    insert into configs.client_testwindow (clientname, testid, windowid, numopps, startdate, enddate, _key)
+    insert into configs.client_testwindow (clientname, testid, windowid, numopps, startdate, enddate, _key, origin, source)
     select `client`, test, 'ANNUAL', 3, now()
 		 , date_add(now(), interval 1 year)
-		 , unhex(replace(uuid(), '-', ''))
+		 , unhex(replace(uuid(), '-', '')), null, null
       from tmp_tests 
 	 where not exists (select * from configs.client_testwindow 
 						where clientname = `client` and testid = test);
@@ -438,8 +438,8 @@ begin
 					    where tt.clientname = c.clientname and tt.contexttype = 'TEST' and tt.`context` = c.testid and tt.`type` = c.tooltype and tt.`code` = c.toolvalue);
 
 	--  insert the default test (testid = '*') for every required testtooltype for every new client and add all values for every required tool except language  
-    insert into configs.client_testtooltype (clientname, `context`, contexttype, toolname, allowchange, rtsfieldname, isrequired, tideselectable, tideselectablebysubject)
-    select v_client, '*' , 'TEST', toolname, allowchange, rtsfieldname, isrequired, tideselectable, tideselectablebysubject
+    insert into configs.client_testtooltype (clientname, dateentered, `context`, contexttype, toolname, allowchange, rtsfieldname, isrequired, tideselectable, tideselectablebysubject)
+    select v_client, now(3), '*' , 'TEST', toolname, allowchange, rtsfieldname, isrequired, tideselectable, tideselectablebysubject
     from configs.tds_testtooltype t
     where t.isrequired = 1 
 	  and t.toolname not in  ('language', 'TDSPoolFilter')
@@ -467,9 +467,10 @@ begin
 	   and exists (select * from tmp_langs where `client` = clientname and testname = `context` and contexttype = 'TEST')
 	   and not exists (select * from tmp_langs2 where `client` = clientname and testname = `context` and contexttype = 'TEST' and `code` = lang);
 
-    insert into configs.client_testtooltype (clientname, `context`, contexttype, toolname, allowchange, isrequired, rtsfieldname
+    insert into configs.client_testtooltype (clientname, dateentered, `context`, contexttype, toolname, allowchange, isrequired, rtsfieldname
         , isselectable, isvisible, tideselectable, tideselectablebysubject, studentcontrol)
     select distinct `client`
+    	 , now(3)
 		 , testname, 'TEST', toolname
 		 , allowchange, isrequired, rtsfieldname
          , isselectable(testkey) as isselectable
