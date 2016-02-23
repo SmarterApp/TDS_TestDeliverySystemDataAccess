@@ -42,16 +42,14 @@ begin
 
     -- first, figure out if the test is segmented or non-segmented
     -- if the bpelementid for test and segment are the same, then the test is non-segmented
-    set v_issegmented = (select case when cnt = 0 then 1 else 0 end
-                         from (
-                            select count(*) cnt
-                              from loader_testblueprint tbp1
-                              join loader_testblueprint tbp2 on tbp1.bpelementid = tbp2.bpelementid
-                                                            and tbp1._fk_package = tbp2._fk_package
-                             where tbp1.elementtype = 'test'
-                               and tbp2.elementtype = 'segment'
-                               and tbp2._fk_package = v_testpackagekey
-                            ) t
+    set v_issegmented = (select case when cnt > 1 then 1 else 0 end
+						 from (
+							select count(*) cnt
+							  from loader_testblueprint
+
+							where elementtype = 'segment'	
+								and _fk_package = v_testpackagekey
+							) t
                         );
 
 	-- load "test" data for non-segmented tests
@@ -129,11 +127,6 @@ begin
 		   and sisp._fk_package = v_testpackagekey
 		group by tmp._key
 	);
-
-/*
-  select * from tmp_tblcontentproperties;
-  select * from tmp_tblstrandproperties;
-  select * from tmp_tbladminstrand;  */
 
 	-- update strand level records
 	update tmp_tbladminstrand tmp

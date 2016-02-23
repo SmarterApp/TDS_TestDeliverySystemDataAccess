@@ -25,6 +25,7 @@ begin
 	declare v_loop 	  int;
 	declare v_counter int default 1;
 	declare v_formitemgroupid varchar(200);
+	declare v_sequentiallyformposition int default 1;
 
 	-- example: v_path = 'testspecification/complete/testform[$i]/formpartition[$j]/itemgroup'
 	set v_loop =  extractvalue(v_xml, concat('count(', v_path, ')') );
@@ -47,7 +48,7 @@ begin
 
 		-- extract <groupitem> thru this call
 		-- possibility of <groupitem> being more that one, so implementing as a seperate procedure call
-		call loader_testformgroupitems(v_testpackagekey, v_xml, concat(v_path, '[', v_counter, ']/groupitem'), v_testformid, v_formitemgroupid);
+		call loader_testformgroupitems(v_testpackagekey, v_xml, concat(v_path, '[', v_counter, ']/groupitem'), v_testformid, v_formitemgroupid, v_sequentiallyformposition);
 
 		-- increment counter
 		set v_counter = v_counter + 1;
