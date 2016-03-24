@@ -60,8 +60,6 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 	final static String FIELDTEST = "fieldtest";
 	final static String EMPTY = "";
 	final static String LIKESTRING_I = "I-";
-	final static String LIKESTRING_G = "G-";
-	final static String LIKESTRING2 = "\'(Delaware)%Read%\'";
 	final static String LANGUAGE = "Language";
 
 	/**
@@ -974,8 +972,8 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		}
 		SingleDataResultSet res1 = null;
 		// -- send the next itemgroup together with items
-		if (groupID != null && (groupID.startsWith(LIKESTRING_I)
-								|| groupID.startsWith(LIKESTRING_G))) { 
+		if (groupID != null && groupID.startsWith(LIKESTRING_I)) {
+			// -- then this is a singleton item with no stimulus
 			// -- let the item's required flag determine numRequired
 
 			List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
