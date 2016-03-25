@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="StudentPackage">
+	<xs:complexType>
+  	<xs:sequence>
+    	<xs:element name="Student">
+      	<xs:complexType>
+        	<xs:sequence>
+			<xs:element name="ClientId">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="20"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="ClientName">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="100"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="GroupOfStatesIdentifier">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="30"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="StateAbbreviation">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:length value="2"/>
+               	<xs:pattern value="[a-zA-Z]{2}" />
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="StateName">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="20"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="GroupOfDistrictsIdentifier">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="20"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="GroupOfDistrictsName">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="100"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="ResponsibleDistrictIdentifier">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+                <xs:maxLength value="30"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="OrganizationName">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="60"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="GroupOfInstitutionsIdentifier">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="20"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="GroupOfInstitutionsName">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="50"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="ResponsibleInstitutionlIdentifier">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+                <xs:maxLength value="30"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="NameOfInstitution">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="60"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="LastOrSurname">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="35"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="FirstName">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:maxLength value="35"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="MiddleName" minOccurs="0">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="35"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="Birthdate">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="10"/>
+                <xs:pattern value="(19|[2-9][0-9])[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="StudentIdentifier">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+                <xs:maxLength value="30"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="AlternateSSID">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+                <xs:maxLength value="50"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="GradeLevelWhenAssessed">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:minLength value="2"/>
+               	<xs:maxLength value="2"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="Sex">
+            	<xs:simpleType>
+              	<xs:restriction base="xs:string">
+               	<xs:enumeration value="Male"/>
+               	<xs:enumeration value="Female"/>
+               	<xs:minLength value="1"/>
+              	</xs:restriction>
+            	</xs:simpleType>
+          	</xs:element>
+          	<xs:element name="HispanicOrLatinoEthnicity">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AmericanIndianOrAlaskaNative">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Asian">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="BlackOrAfricanAmerican">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="White">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="NativeHawaiianOrOtherPacificIslander">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="DemographicRaceTwoOrMoreRaces">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="IDEAIndicator">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="LEPStatus">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Section504Status">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Yes"/>
+                    <xs:enumeration value="No"/>
+                    <xs:enumeration value="Unknown/Cannot Provide"/>
+                    <xs:minLength value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+             <xs:element name="EconomicDisadvantageStatus">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:enumeration value="Yes"/>
+                   <xs:enumeration value="No"/>
+                   <xs:minLength value="1"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="LanguageCode" minOccurs="0">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:maxLength value="11"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="EnglishLanguageProficiencyLevel" minOccurs="0">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:maxLength value="20"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="MigrantStatus" minOccurs="0">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:enumeration value="Yes"/>
+                   <xs:enumeration value="No"/>
+                   <xs:enumeration value=""/>
+                   <xs:minLength value="0"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="FirstEntryDateIntoUSSchool" minOccurs="0">
+                <xs:simpleType>
+                 <xs:restriction base="xs:date">
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="LimitedEnglishProficiencyEntryDate" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:date">
+                  </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="LEPExitDate" minOccurs="0">
+               <xs:simpleType>
+                 <xs:restriction base="xs:date">
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="TitleIIILanguageInstructionProgramType" minOccurs="0">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:enumeration value=" DualLanguage "/>
+                   <xs:enumeration value="TwoWayImmersion"/>
+                   <xs:enumeration value="TransitionalBilingual"/>
+                   <xs:enumeration value="DevelopmentalBilingual"/>
+                   <xs:enumeration value="HeritageLanguage"/>
+                   <xs:enumeration value="ShelteredEnglishInstruction"/>
+                   <xs:enumeration value="StructuredEnglishImmersion"/>
+                   <xs:enumeration value="SDAIE"/>
+                   <xs:enumeration value="ContentBasedESL"/>
+                   <xs:enumeration value="PullOutESL"/>
+                   <xs:enumeration value="Other"/>
+                   <xs:minLength value="0"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+             <xs:element name="PrimaryDisabilityType" minOccurs="0">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:enumeration value="AUT"/>
+                   <xs:enumeration value="DB"/>
+                   <xs:enumeration value="DD"/>
+                   <xs:enumeration value="EMN"/>
+                   <xs:enumeration value="HI"/>
+                   <xs:enumeration value="ID"/>
+                   <xs:enumeration value="MD"/>
+                   <xs:enumeration value="OI"/>
+                   <xs:enumeration value="OHI"/>
+                   <xs:enumeration value="SLD"/>
+                   <xs:enumeration value="SLI"/>
+                   <xs:enumeration value="TBI"/>
+                   <xs:enumeration value="VI"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>
+         	<xs:element name="ShareIdentityData">
+               <xs:simpleType>
+                 <xs:restriction base="xs:string">
+                   <xs:enumeration value="Yes"/>
+                   <xs:enumeration value="No"/>
+                 </xs:restriction>
+               </xs:simpleType>
+             </xs:element>         	
+              <xs:element name="Tests">
+            	<xs:complexType>
+              	<xs:sequence>
+                	<xs:element maxOccurs="unbounded" name="Test">
+                  	<xs:complexType>
+                    	<xs:sequence>
+                      	<xs:element name="SubjectCode">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="3"/>
+                            	<xs:pattern value="[a-zA-Z]*" />
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+						<xs:element name="TestId">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="32"/>
+                            	<xs:pattern value="[a-fA-F0-9]+"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="TestName">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="200"/>
+                            	<xs:pattern value="[a-zA-Z0-9-]+"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="TestForm" minOccurs="0">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="50"/>
+                            	<xs:pattern value="[a-zA-Z0-9:-]*"/>
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                    	</xs:sequence>
+                  	</xs:complexType>
+                	</xs:element>
+              	</xs:sequence>
+            	</xs:complexType>
+          	</xs:element>
+          	<xs:element name="Accommodations">
+            	<xs:complexType>
+              	<xs:sequence>
+                	<xs:element maxOccurs="unbounded" name="Accommodation">
+                  	<xs:complexType>
+                    	<xs:sequence>
+                      	<xs:element name="SubjectCode">
+                        	<xs:simpleType>
+                          	<xs:restriction base="xs:string">
+                            	<xs:maxLength value="3"/>
+                            	<xs:pattern value="[a-zA-Z]*" />
+                          	</xs:restriction>
+                        	</xs:simpleType>
+                      	</xs:element>
+                      	<xs:element name="AmericanSignLanguage" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_ASL0"/>
+                               <xs:enumeration value="TDS_ASL1"/>
+                               <xs:maxLength value="10"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="ColorContrast" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_CC0"/>
+                               <xs:enumeration value="TDS_CCInvert "/>
+                               <xs:enumeration value="TDS_CCMagenta "/>
+                               <xs:enumeration value="TDS_CCMedGrayLtGray"/>
+                               <xs:enumeration value="TDS_CCYellowB "/>
+                               <xs:maxLength value="40"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="ClosedCaptioning" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_ClosedCap0"/>
+                               <xs:enumeration value="TDS_ClosedCap1"/>
+                               <xs:maxLength value="20"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="Language" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:maxLength value="20"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="Masking" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_Masking0"/>
+                               <xs:enumeration value="TDS_Masking1"/>
+                               <xs:maxLength value="15"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="PermissiveMode" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_PM0"/>
+                               <xs:enumeration value="TDS_PM1"/>
+                               <xs:maxLength value="10"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="PrintOnDemand" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_PoD0"/>
+                               <xs:enumeration value="TDS_PoD_Stim"/>
+                               <xs:maxLength value="40"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="PrintSize" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_PS_L0"/>
+                               <xs:enumeration value="TDS_PS_L1"/>
+                               <xs:enumeration value="TDS_PS_L2"/>
+                               <xs:enumeration value="TDS_PS_L3"/>
+                               <xs:enumeration value="TDS_PS_L4"/>
+                               <xs:maxLength value="10"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="StreamlinedInterface" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_TS_Modern"/>
+                               <xs:enumeration value="TDS_TS_Accessibility"/>
+                               <xs:maxLength value="20"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="TexttoSpeech" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:enumeration value="TDS_TTS_Stim&amp;TDS_TTS_Item"/>
+                               <xs:enumeration value="TDS_TTS_Item"/>
+                               <xs:enumeration value="TDS_TTS_Stim"/>
+                               <xs:enumeration value="TDS_TTS0"/>
+                               <xs:maxLength value="40"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="Translation" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:maxLength value="40"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="NonEmbeddedDesignatedSupports" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:maxLength value="40"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="NonEmbeddedAccommodations" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:maxLength value="20"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                         <xs:element name="Other" minOccurs="0">
+                           <xs:simpleType>
+                             <xs:restriction base="xs:string">
+                               <xs:maxLength value="300"/>
+                             </xs:restriction>
+                           </xs:simpleType>
+                         </xs:element>
+                       </xs:sequence>
+                     </xs:complexType>
+                   </xs:element>
+                 </xs:sequence>
+               </xs:complexType>
+             </xs:element>
+          	<xs:element name="Groups">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="2" name="StudentGroupName">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:maxLength value="50"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+        	</xs:sequence>
+      	</xs:complexType>
+       </xs:element>
+  	  </xs:sequence>
+     <xs:attribute name="version" type="xs:string" use="required" fixed="1.0"/>
+	</xs:complexType>
+  </xs:element>
+</xs:schema>

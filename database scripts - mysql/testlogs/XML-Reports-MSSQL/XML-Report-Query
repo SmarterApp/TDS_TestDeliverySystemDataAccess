@@ -1,0 +1,9 @@
+You can use this query to get xml report from MS SQL Server
+You can change first parameter - UUID
+Whole set these parameters corresponds to xml files in this folder
+See also TestReportingDLL.test_XML_GetOppXML_Results () test function 
+
+declare  @result nvarchar(max);
+declare @debug bit;
+exec XML_GetOppXML '2071C3A4-5C2B-4F72-8B06-B4975AF42503', @result output, @debug; 
+select @result;

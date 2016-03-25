@@ -1,0 +1,1 @@
+ alter table loader_testpackage modify column publishdate varchar(200) null;

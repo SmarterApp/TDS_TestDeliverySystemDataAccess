@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd
+	                    http://www.springframework.org/schema/context 
+	                    http://www.springframework.org/schema/context/spring-context.xsd
+	                    http://www.springframework.org/schema/util 
+	                    http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- Root Context: defines shared resources visible to all other web components -->
+	<context:component-scan base-package="tds.student.dll.test, tds.dll.mysql"/>
+	<context:property-placeholder
+		location="opentestsystem.dll.test.default-properties.xml"
+		order="900"
+		ignore-unresolvable="true"
+	/>
+	
+	<import resource="classpath:opentestsystem.shared.test-db-context-module.xml"/>
+	<import resource="classpath:modules/test-context-schema-deployer.xml" />
+	<import resource="classpath:modules/test-context-scripts.xml" />
+	
+	<import resource="classpath:opentestsystem.shared.tr-api-context-module.xml" />
+
+	
+	<!-- TDSSettings bean. This gives access to clientname and any other info such as session type etc. -->
+	<bean id="tdsSettings" class="TDS.Shared.Configuration.TDSSettingsNoWeb" scope="prototype"/>	
+	
+	<!--  DLLs -->
+	  
+	<bean id="iCommonDLL" class="tds.dll.mysql.CommonDLL" />
+	<bean id="iStudentDLL" class="tds.dll.mysql.StudentDLL" />
+	<bean id="iProctorDLL" class="tds.dll.mysql.ProctorDLL" />
+	<bean id="iRtsDLL" class="tds.dll.mysql.RtsDLL" primary="true" />
+	<bean id="rtsPackageDLL" class="tds.dll.mysql.RtsPackageDLL" />
+	<bean id="itemSelDLL" class="tds.dll.mysql.ItemSelectionDLL" />
+	<bean id="iUnitTestFlag" class="tds.dll.mysql.UnitTestFlag" />
+	<bean id="irepDLL" class="tds.dll.mysql.ReportingDLL" />
+	<bean id="iSimDLL" class="tds.dll.mysql.SimDLL" />
+	
+	
+	<!-- Current timestamp source -->
+	<bean id="abstractDateUtilDll" class="tds.dll.mysql.DateUtilDLL" />
+	
+	<!-- Configure database access -->
+	<alias alias="applicationDataSource" name="sessionSchema" /> 
+ 	
+	<bean id="abstractConnectionManager" class="AIR.Common.DB.AbstractConnectionManager">
+		<property name="databaseDialect" value="${DBDialect}"/>
+		<property name="dataSource" ref="applicationDataSource"/>
+	</bean>
+
+</beans>
