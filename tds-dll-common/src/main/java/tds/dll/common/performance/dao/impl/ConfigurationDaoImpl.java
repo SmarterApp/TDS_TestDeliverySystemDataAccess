@@ -41,11 +41,11 @@ import java.util.Map;
  */
 @Repository
 public class ConfigurationDaoImpl implements ConfigurationDao {
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurationDaoImpl.class);
+    protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    protected static final Logger logger = LoggerFactory.getLogger(ConfigurationDaoImpl.class);
 
     @Autowired
-    private LegacyDbNameUtility dbNameUtility;
+    protected LegacyDbNameUtility dbNameUtility;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -140,53 +140,6 @@ public class ConfigurationDaoImpl implements ConfigurationDao {
         }
     }
 
-    /**
-     * Get the {@code ClientTestProperty} record from {@code configs.client_testproperties} for the specified client name
-     * and test id.
-     *
-     * @param clientName The client name for which the {@code ClientTestProperty} records should be fetched.
-     * @param testId The ID (which is the name) of the test for which the {@code ClientTestProperty} records should be fetched.
-     * @return A {@code ClientTestProperty} for the specified client name and test id.
-     */
-
-
-    /**
-     * Determine if a {@code TestConfig} should have its {@code scoreByTds} property set.
-     * <p>
-     *     This method emulates the logic contained within {@code CommonDLL.ScoreByTDS_FN}.  The
-     *     {@code CommonDLL.ScoreByTDS_FN} is called within {@code StudentDLL.T_StartTestOpportunity_SP} and ultimately
-     *     passed onto the {@code TestConfig}.
-     * </p>
-     *
-     * @param clientName The client name.
-     * @param testId The test ID (i.e. the name of the test).
-     * @return {@code true} if the {@code scoreByTDS} should be set; otherwise {@code false}.
-     */
-    @Override
-    @Cacheable(CacheType.LongTerm)
-    public Boolean isSetForScoreByTDS(String clientName, String testId) {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("clientName", clientName);
-        parameters.put("testId", testId);
-
-        final String SQL =
-                "SELECT\n" +
-                    "COUNT(clientname)\n" +
-                "FROM\n" +
-                    "${configdb}.client_testscorefeatures\n" +
-                "WHERE\n" +
-                    "clientname = :clientName\n" +
-                    "AND TestID = :testId\n" +
-                    "AND (ReportToStudent = 1\n" +
-                        "OR ReportToProctor = 1\n" +
-                        "OR ReportToParticipation = 1\n" +
-                        "OR UseForAbility = 1)\n" +
-                "LIMIT 1";
-
-        Integer recordCount = namedParameterJdbcTemplate.queryForInt(dbNameUtility.setDatabaseNames(SQL), parameters);
-
-        return recordCount > 0;
-    }
 
     @Override
     @Cacheable(CacheType.LongTerm)
