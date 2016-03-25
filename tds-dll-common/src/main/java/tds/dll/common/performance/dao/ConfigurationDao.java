@@ -23,9 +23,5 @@ public interface ConfigurationDao {
     // these proctor methods are needed because the queries for checking the system values in Proctor doesn't join on the externs view
     //  and it does on the student side
     List<ClientSystemFlag> getProctorSystemFlags(String clientName);
-//    ClientTestProperty getClientTestProperty(String clientName, String testId);
-//    List<StudentLoginField> getStudentLoginFields(String clientName);
-//    ConfigTestToolType getTestToolType(String clientName, String toolName, String contextType, String context);
-    Boolean isSetForScoreByTDS(String clientName, String testId);
     Externs getExterns(String clientName);
 }

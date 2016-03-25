@@ -38,11 +38,11 @@ import java.util.UUID;
  */
 @Repository
 public class DbLatencyDaoImpl implements DbLatencyDao {
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(DbLatencyDaoImpl.class);
+    protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    protected static final Logger logger = LoggerFactory.getLogger(DbLatencyDaoImpl.class);
 
     @Autowired
-    private LegacyDbNameUtility dbNameUtility;
+    protected LegacyDbNameUtility dbNameUtility;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
