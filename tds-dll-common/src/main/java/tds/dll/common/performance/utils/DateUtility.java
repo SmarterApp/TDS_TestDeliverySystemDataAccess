@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 
 @Component
@@ -45,5 +46,15 @@ public class DateUtility {
         if (from == null || to == null)
             return null;
         return (to.getTime () - from.getTime ()) / 1000 / 60;
+    }
+
+    public Date addHours(Date theDate, Integer increment) {
+        if (theDate == null || increment == null)
+            return null;
+
+        Calendar c = Calendar.getInstance ();
+        c.setTime (theDate);
+        c.add (Calendar.HOUR, increment);
+        return c.getTime ();
     }
 }
