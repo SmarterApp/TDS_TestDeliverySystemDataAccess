@@ -14,6 +14,10 @@
 	<name>TDS Data Logic Layer Common</name>
 	<packaging>jar</packaging>
 
+	<properties>
+		<progman-client.version>0.0.4-SNAPSHOT</progman-client.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.opentestsystem.shared</groupId>
@@ -33,6 +37,24 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>${org.springframework-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>15.0</version>
+		</dependency>
+		<!-- Start: Program management integration dependency -->
+		<dependency>
+			<groupId>org.opentestsystem.shared</groupId>
+			<artifactId>prog-mgmnt-client</artifactId>
+			<version>${progman-client.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opentestsystem.shared</groupId>
+			<artifactId>prog-mgmnt-client-null-impl</artifactId>
+			<version>${progman-client.version}</version>
+		</dependency>
+		<!-- End: Program management integration dependency -->
 	</dependencies>
 	
 </project>
