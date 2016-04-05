@@ -33,8 +33,11 @@ public class DiagnosticSystemServiceImpl implements DiagnosticSystemService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagnosticSystemServiceImpl.class);
 
-    @Value("${diagnostic.volume.minimumPercentFree:10}")
+    @Value("${diagnostic.volume.minimumPercentFree:5}")
     private Integer minimumPercentFree;
+
+    @Value("${diagnostic.volume.warningPercentFree:15}")
+    private Integer warningPercentFree;
 
     public LocalSystem getSystem() {
 
@@ -76,8 +79,12 @@ public class DiagnosticSystemServiceImpl implements DiagnosticSystemService {
                     percentFree);
 
             if (percentFree * 100 < minimumPercentFree) {
+                volume.setRating(Rating.FAILED);
+                volume.setError("Current free space is below the minimum percent free of " + minimumPercentFree + "%");
+            }
+            else if (percentFree * 100 < warningPercentFree) {
                 volume.setRating(Rating.WARNING);
-                volume.setWarning("Current free space is below the minimum percent free of " + minimumPercentFree + "%");
+                volume.setWarning("Current free space is below the warning percent free of " + warningPercentFree + "%");
             }
             volumes.add(volume);
         }
