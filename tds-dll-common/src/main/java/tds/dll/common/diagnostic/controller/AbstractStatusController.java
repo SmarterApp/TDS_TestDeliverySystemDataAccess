@@ -1,7 +1,9 @@
 package tds.dll.common.diagnostic.controller;
 
 
+import org.opentestsystem.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import tds.dll.common.diagnostic.domain.Level;
@@ -30,6 +32,9 @@ public abstract class AbstractStatusController {
     @Autowired
     DiagnosticDependencyService diagnosticDependencyService;
 
+    @Value("${diagnostic.enabled:true}")
+    private Boolean isEnabled;
+
     protected String unitName;
     protected List<String> configPropertyWhiteList;
 
@@ -49,6 +54,10 @@ public abstract class AbstractStatusController {
     public Status getStatus(@RequestParam(value = "level", required = false, defaultValue = "0") Integer level,
                             @RequestParam(value = "single", required = false, defaultValue = "0") Boolean single) {
 
+        if (!isEnabled) {
+            throw new ResourceNotFoundException("Diagnostic API disabled");
+        }
+
         return processLevel(level, single);
     }
 
@@ -57,6 +66,10 @@ public abstract class AbstractStatusController {
     @ResponseBody
     public Summary getSummary(@RequestParam(value = "level", required = false, defaultValue = "0") Integer level,
                               @RequestParam(value = "single", required = false, defaultValue = "0") Boolean single) {
+
+        if (!isEnabled) {
+            throw new ResourceNotFoundException("Diagnostic API disabled");
+        }
 
         return new Summary(processLevel(level, single));
     }
