@@ -80,7 +80,7 @@ public class DiagnosticConfigurationServiceImpl implements DiagnosticConfigurati
                 Collections.sort(properties, new Comparator<Setting>() {
                     @Override
                     public int compare(Setting s1, Setting s2) {
-                        return s1.getName().compareTo(s2.getName());
+                        return s1.getName().toLowerCase().compareTo(s2.getName().toLowerCase());
                     }
                 });
 
