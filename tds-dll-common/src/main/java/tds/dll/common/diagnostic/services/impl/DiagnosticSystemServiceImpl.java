@@ -69,7 +69,7 @@ public class DiagnosticSystemServiceImpl implements DiagnosticSystemService {
         for (File root : roots) {
             double doubleFree = root.getFreeSpace();
             double doubleTotal = root.getTotalSpace();
-            double percentFree = doubleFree / doubleTotal;
+            double percentFree = doubleFree / doubleTotal * 100;
 
             Volume volume = new Volume(
                     root.getAbsolutePath(),
@@ -78,11 +78,11 @@ public class DiagnosticSystemServiceImpl implements DiagnosticSystemService {
                     root.getUsableSpace(),
                     percentFree);
 
-            if (percentFree * 100 < minimumPercentFree) {
+            if (percentFree < minimumPercentFree) {
                 volume.setRating(Rating.FAILED);
                 volume.setError("Current free space is below the minimum percent free of " + minimumPercentFree + "%");
             }
-            else if (percentFree * 100 < warningPercentFree) {
+            else if (percentFree < warningPercentFree) {
                 volume.setRating(Rating.WARNING);
                 volume.setWarning("Current free space is below the warning percent free of " + warningPercentFree + "%");
             }
