@@ -12,17 +12,10 @@
  ******************************************************************************/
 package tds.dll.common.performance.dao;
 
-import tds.dll.common.performance.domain.ClientSystemFlag;
-import tds.dll.common.performance.domain.Externs;
+import tds.dll.common.performance.domain.SetOfAdminSubject;
 
-import java.util.List;
-
-public interface ConfigurationDao {
-    List<ClientSystemFlag> getSystemFlags(String clientName);
-
-    void updateClientTestPropertyMaxOpportunities(String clientName, String testId, Integer maxOpportunities);
-    // these proctor methods are needed because the queries for checking the system values in Proctor doesn't join on the externs view
-    //  and it does on the student side
-    List<ClientSystemFlag> getProctorSystemFlags(String clientName);
-    Externs getExterns(String clientName);
+public interface ItemBankDao {
+    SetOfAdminSubject get(String adminSubject);
+    String getTestSubject(String testKey);
+    String getTestFormCohort(String testKey, String formKey);
 }

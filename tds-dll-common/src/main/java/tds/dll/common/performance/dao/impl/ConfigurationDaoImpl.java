@@ -140,6 +140,21 @@ public class ConfigurationDaoImpl implements ConfigurationDao {
         }
     }
 
+    @Override
+    public void updateClientTestPropertyMaxOpportunities(String clientName, String testId, Integer maxOpportunities) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("maxOpportunities", maxOpportunities);
+        parameters.put("testId", testId);
+        parameters.put("clientName", clientName);
+
+        final String SQL =
+                "UPDATE ${configdb}.client_testproperties\n" +
+                        "SET maxopportunities = :maxOpportunities\n" +
+                        "WHERE testid = :testId\n" +
+                        "AND clientName = :clientName";
+
+        namedParameterJdbcTemplate.update(dbNameUtility.setDatabaseNames(SQL), parameters);
+    }
 
     @Override
     @Cacheable(CacheType.LongTerm)
