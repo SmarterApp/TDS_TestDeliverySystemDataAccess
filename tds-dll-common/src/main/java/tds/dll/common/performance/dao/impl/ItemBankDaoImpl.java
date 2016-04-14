@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 import tds.dll.common.performance.caching.CacheType;
 import tds.dll.common.performance.dao.ItemBankDao;
 import tds.dll.common.performance.dao.mappers.SetOfAdminSubjectMapper;
@@ -27,9 +26,7 @@ import tds.dll.common.performance.domain.SetOfAdminSubject;
 import tds.dll.common.performance.utils.LegacyDbNameUtility;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,11 +38,11 @@ import java.util.Map;
  * </p>
  */
 public class ItemBankDaoImpl extends AbstractDLL implements ItemBankDao {
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurationDaoImpl.class);
+    protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    protected static final Logger logger = LoggerFactory.getLogger(ConfigurationDaoImpl.class);
 
     @Autowired
-    private LegacyDbNameUtility dbNameUtility;
+    protected LegacyDbNameUtility dbNameUtility;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
