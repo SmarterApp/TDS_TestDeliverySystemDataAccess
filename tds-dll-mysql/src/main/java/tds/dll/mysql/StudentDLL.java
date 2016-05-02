@@ -1902,13 +1902,13 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
   // T_UpdateScoredResponse2
   // is an additional scoreDimensions parameter in the latter one.
   public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
-      Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
+      Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale, Float pageDuration) throws ReturnStatusException {
 
 	String scoreDimentions = buildScoreInfoNode(score, "overall", scoreStatus);
 	  
     return T_UpdateScoredResponse_common (connection, oppKey, session, browserId, itemId,
         page, position, dateCreated, responseSequence, score, response, isSelected,
-        isValid, scoreLatency, scoreStatus, scoreRationale, scoreDimentions, 1);
+        isValid, scoreLatency, scoreStatus, scoreRationale, scoreDimentions, 1, pageDuration);
   }
   
   
@@ -1984,7 +1984,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       throws ReturnStatusException {
     return T_UpdateScoredResponse_common (connection, oppKey, session, browserId, itemId,
         page, position, dateCreated, responseSequence, score, response, isSelected,
-        isValid, scoreLatency, scoreStatus, scoreRationale, scoreDimensions, 2);
+        isValid, scoreLatency, scoreStatus, scoreRationale, scoreDimensions, 2, 0F);
   }
 
   private SingleDataResultSet T_UpdateScoredResponse_common (SQLConnection connection, UUID oppKey, UUID session,
@@ -1992,7 +1992,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       Integer page, Integer position, String dateCreated,
       Integer responseSequence, Integer score, String response, Boolean isSelected,
       Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale,
-      String scoreDimensions, int methodVersion)
+      String scoreDimensions, int methodVersion, Float pageDuration)
       throws ReturnStatusException {
 
     Date now = _dateUtil.getDateWRetStatus (connection);
@@ -2148,10 +2148,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
 //      else
         tmp = "Update testeeresponse set IsSelected = ${isSelected}, IsValid = ${isValid}, _fk_ResponseSession = ${session}, _fk_Browser = ${browserID}, " +
             " scoreMark = ${scoremark}, NumUpdates =  NumUpdates + 1, DateSubmitted = ${now}, Response = ${response}, responseSequence = ${responseSequence}, responseLength = length(${response})," +
-            " Score = ${thescore}, DateFirstResponse = COALESCE(DateFirstResponse, ${now}), ScoreLatency = ScoreLatency + ${scoreLatency}, scorestatus = ${scorestatus}, scoringDate = ${scoringDate},"
-            +
-            " scoreRationale = ${scoreRationale}, scoredDate = ${scoredDate}, scoreDimensions = ${scoreDimensions} "
-            + " where _fk_TestOpportunity = ${oppkey} and position = ${position} and responseSequence <= ${responseSequence};";
+            " Score = ${thescore}, DateFirstResponse = COALESCE(DateFirstResponse, ${now}), ScoreLatency = ScoreLatency + ${scoreLatency}, scorestatus = ${scorestatus}, scoringDate = ${scoringDate}," +
+            " scoreRationale = ${scoreRationale}, scoredDate = ${scoredDate}, scoreDimensions = ${scoreDimensions}, responseDurationInSecs = COALESCE(responseDurationInSecs, 0) + " +
+            " (SELECT (${pageDuration} / (SELECT COUNT(*) FROM (SELECT * FROM testeeresponse WHERE _fk_testopportunity = ${oppkey} AND page = ${page}) as tr))) " +
+            " where _fk_TestOpportunity = ${oppkey} and position = ${position} and responseSequence <= ${responseSequence};";
 
       final String SQL_UPDATE1 = tmp;
       SqlParametersMaps parms6 = new SqlParametersMaps ();
@@ -2170,6 +2170,8 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       parms6.put ("scoreRationale", scoreRationale);
       parms6.put ("scoredDate", scoredDate);
       parms6.put ("oppkey", oppKey);
+      parms6.put ("pageDuration", pageDuration);
+      parms6.put ("page", page);
       parms6.put ("position", position).put ("scoreDimensions", scoreDimensions);
       executeStatement (connection, SQL_UPDATE1, parms6, false).getUpdateCount ();
 

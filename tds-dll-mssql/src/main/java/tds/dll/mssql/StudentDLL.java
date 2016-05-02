@@ -7415,7 +7415,7 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
    * @throws ReturnStatusException
    */
   public SingleDataResultSet T_UpdateScoredResponse_SP (SQLConnection connection, UUID oppKey, UUID session, UUID browserId, String itemId, Integer page, Integer position, String dateCreated,
-      Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale) throws ReturnStatusException {
+      Integer responseSequence, Integer score, String response, Boolean isSelected, Boolean isValid, Integer scoreLatency, String scoreStatus, String scoreRationale, Float itemDuration) throws ReturnStatusException {
 
     Date now = _dateUtil.getDateWRetStatus (connection);
     Integer opprestart = null;
