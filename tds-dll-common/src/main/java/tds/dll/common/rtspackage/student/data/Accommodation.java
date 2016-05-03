@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlType;
     "printOnDemand",
     "printSize",
     "streamlinedInterface",
+    "illustrationGlossary",
     "nonEmbeddedDesignatedSupports",
     "nonEmbeddedAccommodations",
     "other"
@@ -63,6 +64,8 @@ public class Accommodation implements Serializable
   protected String          printSize;
   @XmlElement (name = "StreamlinedInterface")
   protected String          streamlinedInterface;
+  @XmlElement (name = "IllustrationGlossary")
+  protected String          illustrationGlossary;
   @XmlElement (name = "NonEmbeddedDesignatedSupports")
   protected List<String>   nonEmbeddedDesignatedSupports;
   @XmlElement (name = "NonEmbeddedAccommodations")
@@ -320,6 +323,27 @@ public class Accommodation implements Serializable
    */
   public void setStreamlinedInterface (String value) {
     this.streamlinedInterface = value;
+  }
+
+  /**
+   * Gets the value of the illustrationGlossary property.
+   *
+   * @return possible object is {@link String }
+   *
+   */
+  public String getIllustrationGlossary () {
+    return illustrationGlossary;
+  }
+
+  /**
+   * Sets the value of the illustrationGlossary property.
+   *
+   * @param value
+   *          allowed object is {@link String }
+   *
+   */
+  public void setIllustrationGlossary (String value) {
+    this.illustrationGlossary = value;
   }
 
   /**
