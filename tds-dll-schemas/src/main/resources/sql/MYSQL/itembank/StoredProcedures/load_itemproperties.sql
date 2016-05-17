@@ -58,8 +58,8 @@ begin
 	 where _fk_package = v_testpackagekey;
 
 
-	insert into tblitemprops
-	select distinct tmp.*
+    insert into tblitemprops(_fk_item, propname, propvalue, _fk_adminsubject, isactive)
+	select distinct tmp._fk_item, tmp.propname, tmp.propvalue, tmp._fk_adminsubject
 		 , 1 as isactive
 	from tmp_itemprops tmp
 	where not exists ( select 1
@@ -69,7 +69,13 @@ begin
 						  and ip.propvalue = tmp.propvalue
 						  and ip._fk_adminsubject = tmp._fk_adminsubject
 					);
-
+    update tblitemprops ip, tmp_itemprops tmp 
+    set ip.propdescription = tmp.propdescription
+     where ip._fk_item = tmp._fk_item
+      and ip.propname = tmp.propname
+      and ip.propvalue = tmp.propvalue
+      and ip._fk_adminsubject = tmp._fk_adminsubject;
+      
 	-- activate/inactivate any item properties that have been removed/re-added for this item and this test
 	update tblitemprops ip
 	  left join tmp_itemprops tmp on ip._fk_Item = tmp._fk_Item
