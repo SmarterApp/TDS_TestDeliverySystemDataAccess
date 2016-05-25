@@ -47,7 +47,7 @@ proc: begin
 					 then 'this action can not be performed because the test already completed.'
 					 when v_deleted is not null
 					 then 'this action can not be performed because the test was deleted'
-					 when v_selectedsitting < 0 and v_selectedsitting > v_restart
+					 when v_selectedsitting < 0 or v_selectedsitting > v_restart
 					 then 'invalid sitting selection'
 				end;
 
@@ -72,16 +72,17 @@ proc: begin
 		commit;
 	end if;
 	
-	select testeeid, testeename, _efk_testee as testeekey, _efk_testid as testid, opportunity, restart, reportingid 
+/*	select testeeid, testeename, _efk_testee as testeekey, _efk_testid as testid, opportunity, restart, reportingid 
 	from testopportunity
 	where _efk_testee = v_testee and _efk_adminsubject = v_testkey and datedeleted is null
 	order by opportunity;
 
 	select  _efk_itsitem, _efk_itsbank, opportunityrestart, `page`, position, `format`, datesubmitted, datefirstresponse 
 	from testeeresponse
-	where _fk_testopportunity = v_oppkey;
+	where _fk_testopportunity = v_oppkey; */
 
-	select 'success' as status, null as reason;
+
+	select 'success' as status, cast(null as char) as reason;
 		
 end $$
 

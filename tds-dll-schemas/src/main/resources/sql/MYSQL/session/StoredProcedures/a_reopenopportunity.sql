@@ -94,7 +94,7 @@ proc: begin
 			select v_oppkey, now(3), 'paused', @@hostname, concat('opportunity changed by admin proc: ', v_procname, '. Reason: ', v_reason);
 		end if;
 
-		select 'success' as status, null as newid, null as reason;
+		select 'success' as status, cast(null as char) as newid, cast(null as char) as reason;
 
 	commit;
 
