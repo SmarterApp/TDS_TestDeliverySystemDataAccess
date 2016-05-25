@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.opentestsystem.delivery</groupId>
     <artifactId>tds-dll-master</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
   <groupId>org.opentestsystem.delivery</groupId>
   <artifactId>tds-dll-schemas</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>tds-dll-schemas</name>
   <url>http://maven.apache.org</url>
   <properties>
