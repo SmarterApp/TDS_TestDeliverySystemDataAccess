@@ -65,7 +65,7 @@ proc: begin
         select v_oppkey, now(3), 'reopen segment', v_requestor, concat('altering behaviour of test segment by admin proc: ', v_procname, '. segment id:', v_segmentid, '. Reason: ', v_reason);
 	commit;
 
-    select 'success' as status, null as reason;
+    select 'success' as status, cast(null as char) as reason;
 
 end $$
 
