@@ -246,10 +246,11 @@ begin
 						 from configs.client_segmentproperties s 
 						where s.clientname = t.`client` and s.segmentid = t.segment  and s.parenttest = t.virtualtest);
 
-    update configs.client_segmentproperties 
-	  join tmp_segments on clientname = `client` and segmentid = segment
-	   set segmentposition = pos
-		 , modekey = vtestkey;
+    update configs.client_segmentproperties s
+      join tmp_segments t on 
+      s.clientname = t.`client` and s.segmentid = t.segment and s.parenttest = t.virtualtest
+      set s.segmentposition = t.pos
+        , s.modekey = t.vtestkey;	 
 
 	-- test form properties: 
 	-- allow test forms to be assigned to more than one test.
