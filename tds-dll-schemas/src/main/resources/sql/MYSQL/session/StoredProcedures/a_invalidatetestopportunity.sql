@@ -45,6 +45,8 @@ proc: begin
     select _key, now(3), _fk_session, 'invalidated', @@hostname, _fk_browser, v_requestor, concat('opportunity changed by admin proc: ', v_procname, '. Reason: ', v_reason)
     from testopportunity 
 	where _key = v_oppkey;
+	
+	select "success" as status, cast(null as char) as reason;
     
 end $$
 

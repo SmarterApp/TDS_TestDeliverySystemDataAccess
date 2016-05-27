@@ -1503,7 +1503,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       final String SQL_INSERT3 = "insert into ${ArchiveDB}.opportunityaudit (_fk_TestOpportunity, AccessType, _fk_Session, _fk_Browser, dateaccessed, hostname, dbname) "
           + " select ${oppkey}, 'Restore segment permeability', _fk_Session, _fk_Browser, now(3), ${localhost}, ${dbname} "
           + " from testopportunity where _Key = ${oppkey}";
-      SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("hostname", getLocalhostName ()).put ("dbname", sessionDB);
+      SqlParametersMaps parms3 = (new SqlParametersMaps ()).put ("oppkey", oppkey).put ("localhost", getLocalhostName ()).put ("dbname", sessionDB);
       int insertCnt = executeStatement (connection, fixDataBaseNames (SQL_INSERT3), parms3, false).getUpdateCount ();
     }
   }

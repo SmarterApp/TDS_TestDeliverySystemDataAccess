@@ -34,12 +34,12 @@ proc: begin
     end if;
 
     if (exists (select * from testopportunity where clientname = v_clientname and _efk_testee = v_testee and _efk_testid = v_test and opportunity = v_opp and datedeleted is null)) then
-         call _returnerror(v_clientname, v_procname, 'another record exists in this slot. use _movetestopp to replace the existing opportunity', null, v_oppkey, null, 'failed');
+         call _returnerror(v_clientname, v_procname, 'This is not the latest opportunity for this student / test combination', null, v_oppkey, null, 'failed');
         leave proc;
     end if;
     
     if (exists (select * from testopportunity where clientname = v_clientname and _efk_testee = v_testee and _efk_testid = v_test and opportunity > v_opp and datedeleted is null)) then
-         call _returnerror(v_clientname, v_procname, 'a higher-numbered opportunity exists. use _movetestopp to replace the existing opportunity', null, v_oppkey, null, 'failed');
+         call _returnerror(v_clientname, v_procname, 'This is not the latest opportunity for this student / test combination', null, v_oppkey, null, 'failed');
         leave proc;
     end if;
 	-- check the failure conditions within this transaction, preventing it if someone else got there first
@@ -53,7 +53,7 @@ proc: begin
 
 
     if (not exists (select * from testopportunity where _key = v_oppkey and datedeleted is null)) then
-         call _returnerror(v_clientname, v_procname, 'the same or higher-numbered opportunity exists. use _movetestopp to replace the existing opportunity.', null, v_oppkey, null, 'failed');
+         call _returnerror(v_clientname, v_procname, 'This is not the latest opportunity for this student / test combination', null, v_oppkey, null, 'failed');
         leave proc;
     end if;
 
@@ -76,7 +76,7 @@ proc: begin
     from testopportunity 
 	where _key = v_oppkey;
         
-    select 'success' as status, null as reason;
+    select 'success' as status, cast(null as char) as reason;
 
 end $$
 
