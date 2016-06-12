@@ -8,9 +8,9 @@
   <name>TDS Data Logic Layer Master</name>
   
   <scm>
-        <connection>scm:hg:https://bitbucket.org/sbacoss/tdsdll_release</connection>
-        <developerConnection>scm:hg:https://bitbucket.org/sbacoss/tdsdll_release</developerConnection>
-        <url>https://bitbucket.org/sbacoss/tdsdll_release</url>
+        <connection>scm:git:https://github.com/SmarterApp/TestDeliverySystemDataAccess</connection>
+        <developerConnection>scm:git:https://github.com/SmarterApp/TestDeliverySystemDataAccess</developerConnection>
+        <url>https://github.com/SmarterApp/TestDeliverySystemDataAccess</url>
    </scm>
   
   <modules>
