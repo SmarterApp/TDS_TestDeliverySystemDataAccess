@@ -80,6 +80,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
   @Value ("${opportunity.isScoredByTDS:false}")
   private boolean isScoredByTDS;
 
+  @Value("${performance.logLatency.enabled:false}")
+  private Boolean logLatencyEnabled;
+
   /**
    * @param connection
    * @param testKey
@@ -2288,6 +2291,9 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
    */
   public void _LogDBLatency_SP (SQLConnection connection, String procname, Date starttime, Long userkey, boolean checkaudit, Integer N, UUID testoppkey, UUID sessionkey, String clientname,
       String comment) throws ReturnStatusException {
+
+    if (!logLatencyEnabled) return;
+
     // if(procname ==null)
     // procname = new Object(){}.getClass().getEnclosingMethod().getName();
 
