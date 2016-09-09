@@ -590,7 +590,7 @@ public class ReportingDLL extends AbstractDLL implements IReportingDLL {
                     + " END as \"@administrationCondition\", "
                     + " ${effectiveDate} as \"@effectiveDate\" "
                     + " from testopportunity O, session S, tbluser U, archive.opportunityclient OC where O._Key = ${oppkey}"
-                    + " and O._fk_Session = S._Key and  S.proctorid = U.userid and OC._fk_testopportunity = ${oppkey}";
+                    + " and O._fk_Session = S._Key and  S.proctorid = U.userid and OC._fk_testopportunity = ${oppkey} and OC.restart = 0";
 
             parameters.put("itemcount", itemcount).put("ftcount", ftcount).put("reportingID", newReportingIdRef.get())
                     .put("winopp", winopp).put("dbName", dbName).put("effectiveDate", effectiveDate);
