@@ -56,12 +56,12 @@ begin
 	 where s.virtualtest is null
 	   and packagekey = v_testpackagekey;
 
-	 update tmp_tests 
-	 	set msb = cast_to_bit(
-	 			CONVERT(IFNULL((
-	 				select tpp.propvalue 
-	 				from loader_testpackageproperties tpp 
-	 				where tpp.propname = 'msb'), '0'), unsigned));
+	if ifnull((
+		select tpp.propvalue 
+		from loader_testpackageproperties tpp 
+		where tpp.propname = 'msb'), '0') = '1' then   
+			update tmp_tests SET msb = 1;
+	end if;
 
 	insert into tmp_segments (`client`, segment, segkey, pos, virtualtest, vtestkey)       -- get the segments
     select distinct tp.publisher
