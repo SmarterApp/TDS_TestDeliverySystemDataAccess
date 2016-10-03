@@ -29,6 +29,7 @@ begin
 	  , selectionalgorithm varchar(50)
 	  , instrument  varchar(100)
 	  , done 		bit default 0
+	  , msb         bit default 0
 	);
     
 	drop temporary table if exists tmp_segments;
@@ -54,6 +55,13 @@ begin
 	  join loader_testpackage tp on tp.testkey = s._key
 	 where s.virtualtest is null
 	   and packagekey = v_testpackagekey;
+
+	if ifnull((
+		select tpp.propvalue 
+		from loader_testpackageproperties tpp 
+		where tpp.propname = 'msb'), '0') = '1' then   
+			update configs.client_testproperties ctp set msb = 1 where ctp.testid = v_testname;
+	end if;
 
 	insert into tmp_segments (`client`, segment, segkey, pos, virtualtest, vtestkey)       -- get the segments
     select distinct tp.publisher
@@ -198,7 +206,7 @@ begin
 
 	-- add any missing tests to client_testproperties
     insert into tdscore_configs_testpackage.client_testproperties 
-        (clientname, testid, isselectable, label, subjectname, maxopportunities, scorebytds, accommodationfamily,  reportinginstrument, tide_id, gradetext)
+        (clientname, testid, isselectable, label, subjectname, maxopportunities, scorebytds, accommodationfamily,  reportinginstrument, tide_id, gradetext, msb)
     select distinct `client`
 		 , test
 		 , isselectable(testkey)
@@ -210,6 +218,7 @@ begin
          , instrument
 		 , case when instrument is not null then concat(instrument, '-', `subject`) else null end
          , _maketestgradelabel(testkey)
+         , msb
       from tmp_tests t
      where not exists (select * from tdscore_configs_testpackage.client_testproperties 
 						where clientname = `client` and testid = test);

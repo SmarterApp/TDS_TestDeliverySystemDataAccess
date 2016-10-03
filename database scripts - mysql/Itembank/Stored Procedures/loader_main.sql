@@ -2,27 +2,16 @@ DELIMITER $$
 
 drop procedure if exists `loader_main` $$
 
-create procedure `loader_main` (
-/*
-Description: Entry point for loading itembank tables from the testpackage file in xml format.
+create procedure `loader_main`(
 
-VERSION 	DATE 			AUTHOR 			COMMENTS
-001			3/23/2014		Sai V. 			--
-*/
 	v_xml  longtext
 )
 begin
-
-	-- declare variables
+	
 	declare v_testpackagekey varchar(350);
 
-/*** STEP 1: extract data from xml and load it into loader_* tables ***/
-	call loader_extractxml(v_xml, v_testpackagekey /*output*/);
-	select v_testpackagekey;
-
-
-/*** STEP 2: Prep the loader_* tables with missing/computed column data ***/	
-	-- look into this, see if this needs to be called: Load_MeasurementParameters
+	call loader_extractxml(v_xml, v_testpackagekey  );
+	
 	call load_measurementparameters(NULL);
 
 	update loader_testpackage
@@ -52,11 +41,11 @@ begin
 	 where _fk_package = v_testpackagekey;
 
 	update loader_testpassages
-	   set filepath = concat(substring_index(filename, '.', 1), '\\')
+	   set filepath = concat(substring_index(filename, '.', 1), '/')
 	 where _fk_package = v_testpackagekey;
 
 	update loader_testitem
-	   set filepath = concat(substring_index(filename, '.', 1), '\\')
+	   set filepath = concat(substring_index(filename, '.', 1), '/')
 	 where _fk_package = v_testpackagekey;
 
 	update loader_testitemrefs tir
@@ -73,68 +62,43 @@ begin
 	update loader_itemscoredimension dim
 	  join measurementparameter mp on mp._fk_measurementmodel = dim.measuremodelkey and mp.parmname = dim.measurementparam
 	   set dim.measurementparamnum = mp.parmnum
-	 where _fk_package = v_testpackagekey;
+	 where _fk_package = v_testpackagekey;			
 
+	call load_subject(v_testpackagekey);
+    
+	call load_strands(v_testpackagekey);
+	
+	call load_stimuli(v_testpackagekey);
+    
+	call load_items(v_testpackagekey);
 
-/*** STEP 3: Validate data in loader_* tables ***/	
--- 	call loader_validate(v_testpackagekey);
+	call load_linkitemstostrands(v_testpackagekey);
+    
+	call load_linkitemstostimuli(v_testpackagekey);
+    
+	call load_itemproperties(v_testpackagekey);
+    
+	call load_testadmin(v_testpackagekey);
+    
+	call load_adminsubjects(v_testpackagekey);
+    
+	call load_adminstrands(v_testpackagekey);
+    
+	call load_adminitems(v_testpackagekey);
 
-
-/*** STEP 4: Process and load data into actual itembank tables ***/	
-
-				/* ?? do we need this logic
-					select @clientkey = _key, @oldpath = homepath from tblclient 
-					where [name] = (select ClientName from Loader_Itembank);
-
-					if (@filepath is null and @oldpath is null) begin
-						select 'Missing filepath for itembank content';
-						return 0;
-					end
-
-					if (@filepath is null) set @filepath = @oldpath;
-					if (charindex('\', @filepath) > 0) set @pathdelim = '\';
-					else set @pathdelim = '/';
-					
-					set @lastchar = substring(@filepath, len(@filepath), 1);
-					if (@lastchar <> @pathdelim)
-						set @filepath = @filepath + @pathdelim;
-				*/
-
-	-- ?? Do we need to create itembank ??
-	-- tblItembank
-
--- 	call load_subject(v_testpackagekey);
--- 	call load_strands(v_testpackagekey);
--- 	
--- 	call load_stimuli(v_testpackagekey);
--- 	call load_items(v_testpackagekey);
--- 
--- 	call load_linkitemstostrands(v_testpackagekey);
--- 	call load_linkitemstostimuli(v_testpackagekey);
--- 	call load_itemproperties(v_testpackagekey);
--- 
--- 	-- start loading test administration
--- 	call load_testadmin(v_testpackagekey);
--- 	call load_adminsubjects(v_testpackagekey);
--- 	call load_adminstrands(v_testpackagekey);
--- 	call load_adminitems(v_testpackagekey);
--- 
--- 	call load_adminitemmeasurementparms(v_testpackagekey);
--- 	call load_adminStimuli(v_testpackagekey);
--- 	call load_adminforms(v_testpackagekey);
--- 	call load_adminformitems(v_testpackagekey);
--- 	call load_affinitygroups(v_testpackagekey);
--- 
--- 	-- ?? do we need this ?? call load_testgrades();
--- 	-- ?? not needed ??    exec Load_AdminPerformanceLevels;
--- 	
--- 	/*** STEP 5: Populate client_* tables in configs db ***/
---  	call updatetdsconfigs(v_testpackagekey);
-
-
-	/*** STEP 6: Clear loader_* tables ***/
-	-- call loader_clear(v_testpackagekey);
-
+	call load_adminitemmeasurementparms(v_testpackagekey);
+    
+	call load_adminStimuli(v_testpackagekey);
+    
+	call load_adminforms(v_testpackagekey);
+    
+	call load_adminformitems(v_testpackagekey);
+    
+	call load_affinitygroups(v_testpackagekey);
+	
+ 	call updatetdsconfigs(v_testpackagekey);
+	
+	call loader_clear(v_testpackagekey);
 
 end $$
 
