@@ -60,7 +60,13 @@ begin
 		select tpp.propvalue 
 		from loader_testpackageproperties tpp 
 		where tpp.propname = 'msb'), '0') = '1' then   
-			update configs.client_testproperties ctp set msb = 1 where ctp.testid = v_testname;
+			update configs.client_testproperties ctp set msb = 1 
+				where ctp.testid = v_testname 
+				and ctp.clientname = v_client;
+			update configs.client_segmentproperties csp set exitapproval = 1 
+				where csp.parenttest = v_testname 
+				and csp.segmentposition = 1
+				and csp.clientname = v_client;
 	end if;
 
 	insert into tmp_segments (`client`, segment, segkey, pos, virtualtest, vtestkey)       -- get the segments
