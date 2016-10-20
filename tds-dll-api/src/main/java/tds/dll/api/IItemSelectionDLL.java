@@ -50,6 +50,7 @@ public interface IItemSelectionDLL
   public static String ISSIMULATION = "issim";
   public static String SESSIONKEY = "sessionKey";
   public static String SESSION = "session";
+  public static String ISMSB = "isMsb";
 
   /**
    * 
