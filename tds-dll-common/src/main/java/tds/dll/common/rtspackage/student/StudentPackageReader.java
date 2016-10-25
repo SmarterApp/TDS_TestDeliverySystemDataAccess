@@ -231,6 +231,7 @@ public class StudentPackageReader implements IRtsPackageReader
       appendAccommodation (sb, subject, ac.getPermissiveMode ());
       appendAccommodation (sb, subject, ac.getStreamlinedInterface ());
       appendAccommodation (sb, subject, ac.getIllustrationGlossary ());
+      appendAccommodation (sb, subject, ac.getBrailleTranscript ());
       appendAccommodation (sb, subject, AccommodationOther.getFormattedValue (ac));
       if ( ac.getNonEmbeddedAccommodations () != null ) {
         for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations () ) {

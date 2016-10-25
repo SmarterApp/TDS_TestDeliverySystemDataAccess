@@ -8,6 +8,8 @@
  ******************************************************************************/
 package tds.dll.common.rtspackage.student.data;
 
+//import com.sun.org.apache.xpath.internal.operations.String;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -31,6 +33,7 @@ import javax.xml.bind.annotation.XmlType;
     "printSize",
     "streamlinedInterface",
     "illustrationGlossary",
+    "brailleTranscript",
     "nonEmbeddedDesignatedSupports",
     "nonEmbeddedAccommodations",
     "other"
@@ -113,6 +116,22 @@ public class Accommodation implements Serializable
    */
   public void setAmericanSignLanguage (String value) {
     this.americanSignLanguage = value;
+  }
+
+  /**
+   * Calculates the braille transcript value based on the Braille setting and the Closed Captioning setting.
+   *
+   * @return possible object is {@link String }
+   *
+   */
+  @XmlElement (name = "BrailleTranscript")
+  public String getBrailleTranscript () {
+    return "TDS_BrailleTrans1";
+
+//    return closedCaptioning.equals("TDS_ClosedCap1")
+//              && language.startsWith("TDS_BT") && !language.equals("TDS_BT0")
+//            ? "TDS_BrailleTrans1"
+//            : "TDS_BrailleTrans0"; // should this be "" instead
   }
 
   /**
