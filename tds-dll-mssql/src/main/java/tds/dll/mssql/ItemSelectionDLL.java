@@ -77,7 +77,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL
    */
   // This stored procedure uses update query
   // From TDSCore_Dev_Session2012_Sandbox
-  public SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey
+  public SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey, boolean isMsb
       ) throws ReturnStatusException
   {
     Date starttime = dateUtil.getDateWRetStatus (connection);

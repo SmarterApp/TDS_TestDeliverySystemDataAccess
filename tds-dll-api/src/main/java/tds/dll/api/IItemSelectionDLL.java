@@ -59,7 +59,7 @@ public interface IItemSelectionDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey) 
+  public SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey, boolean isMsb)
       throws ReturnStatusException;
  
   /**

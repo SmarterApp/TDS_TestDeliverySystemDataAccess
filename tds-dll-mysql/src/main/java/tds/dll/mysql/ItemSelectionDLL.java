@@ -79,7 +79,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 	// This stored procedure uses update query
 	// From TDSCore_Dev_Session2012_Sandbox
 	public SingleDataResultSet AA_GetNextItemCandidates_SP(
-			SQLConnection connection, UUID oppkey) throws ReturnStatusException {
+			SQLConnection connection, UUID oppkey, boolean isMsb) throws ReturnStatusException {
 		Date starttime = _dateUtil.getDateWRetStatus(connection);
 
 		String algorithm = null;
@@ -120,26 +120,35 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		while (true) // while not found
 		{
-			final String SQL_QUERY3 = "select  SegmentPosition, _efk_Segment, segmentID, algorithm, ftItemCnt "
+			String testOpportunitySegmentsQuery = "select  SegmentPosition, _efk_Segment, segmentID, algorithm, ftItemCnt "
 					+ " from testopportunitysegment "
 					+ " where _fk_TestOpportunity = ${oppkey} and IsSatisfied = ${isSatisfied} "
-					+ " order by SegmentPosition limit 1";
+					+ " order by SegmentPosition ";
+			final String SQL_QUERY3 = isMsb ? testOpportunitySegmentsQuery :
+					String.format("{0}{1}", testOpportunitySegmentsQuery, "limit 1");
 			SqlParametersMaps parameters3 = new SqlParametersMaps().put(
 					"oppkey", oppkey).put("isSatisfied", false);
 			result = executeStatement(connection, SQL_QUERY3, parameters3,
 					false).getResultSets().next();
-			record = result.getCount() > 0 ? result.getRecords().next() : null;
-			if (record != null) {
-				segment = record.<Integer> get("SegmentPosition");
-				segmentKey = record.<String> get("_efk_Segment");
-				segmentID = record.<String> get("segmentID");
-				algorithm = record.<String> get("algorithm");
-				ftcnt = record.<Integer> get("ftItemCnt");
-			}
 
-			if (segment == null) // loop terminating conditions, No segment
-									// lacks
-									// fulfillment
+			SingleDataResultSet validSegments = new SingleDataResultSet();
+			validSegments.addColumn ("oppkey", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
+			validSegments.addColumn ("segment", SQL_TYPE_To_JAVA_TYPE.INT);
+			validSegments.addColumn ("segmentKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+			validSegments.addColumn ("segmentID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+			validSegments.addColumn ("algorithm", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+			validSegments.addColumn ("groupID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+			validSegments.addColumn ("blockID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
+			validSegments.addColumn ("isSim", SQL_TYPE_To_JAVA_TYPE.BIT);
+			validSegments.addColumn ("session", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
+
+			Iterator<DbResultRecord> currentRecord = result.getRecords().hasNext() ?
+					result.getRecords() :
+					null;
+
+			if (currentRecord == null) // loop terminating conditions, No segment
+			// lacks
+			// fulfillment
 			{
 				List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
 				CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object>();
@@ -154,92 +163,101 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 				result.addRecords(resultList);
 				return result;
 			}
-			// found the segment to work on
-			// go to next
-			else if (!_AA_IsSegmentSatisfied_FN(connection, oppkey, segment)) {
-				// TODO: check, what value returns this function, after
-				// isSegmentSatisfied (oppkey, segment) will be implemented
-				break;
-			} else {// segment is satisfied, mark and continue loop, NOTE:
+
+			while(currentRecord != null && currentRecord.hasNext()) {
+				record = currentRecord.next();
+
+				if (record != null) {
+					segment = record.<Integer> get("SegmentPosition");
+					segmentKey = record.<String> get("_efk_Segment");
+					segmentID = record.<String> get("segmentID");
+					algorithm = record.<String> get("algorithm");
+					ftcnt = record.<Integer> get("ftItemCnt");
+				}
+				// found the segment to work on
+				// go to next
+				if (!_AA_IsSegmentSatisfied_FN(connection, oppkey, segment)) {
+					// TODO: check, what value returns this function, after
+					// isSegmentSatisfied (oppkey, segment) will be implemented
+					validSegments.addRecords(
+							ValidateAndReturnSegmentData(algorithm, isSim, connection, oppkey, language
+									, segment, segmentKey, segmentID, ftcnt, starttime, session));
+				} else {// segment is satisfied, mark and continue loop, NOTE:
 					// T_InsertItems
 					// modified to do this update, so this should never be
 					// necessary
 
-				final String SQL_QUERY4 = "update testopportunitysegment set IsSatisfied = 1 where _fk_TestOpportunity = ${oppkey} and SegmentPosition = ${SegmentPosition}";
-				SqlParametersMaps parameters4 = new SqlParametersMaps().put(
-						"oppkey", oppkey).put("SegmentPosition", segment);
-				int updateCnt = executeStatement(connection, SQL_QUERY4,
-						parameters4, false).getUpdateCount();
+					final String SQL_QUERY4 = "update testopportunitysegment set IsSatisfied = 1 where _fk_TestOpportunity = ${oppkey} and SegmentPosition = ${SegmentPosition}";
+					SqlParametersMaps parameters4 = new SqlParametersMaps().put(
+							"oppkey", oppkey).put("SegmentPosition", segment);
+					int updateCnt = executeStatement(connection, SQL_QUERY4,
+							parameters4, false).getUpdateCount();
 
-				_logger.debug("Update count after Insert query in AA_GetNextItemCandidates_SP is "
-						+ updateCnt);
+					_logger.debug("Update count after Insert query in AA_GetNextItemCandidates_SP is "
+							+ updateCnt);
+				}
 			}
+			return validSegments;
 		}
-
-		_Ref<String> groupIDValue = new _Ref<String>();
-		_Ref<String> blockIDValue = new _Ref<String>();
-
-		if (DbComparator.isEqual(algorithm, FIXEDFORM)) {
-			_AA_NextFixedformGroup_SP(connection, oppkey, segmentKey, language,
-					groupIDValue, blockIDValue);
-		}
-		if (DbComparator.containsIgnoreCase(algorithm, ADAPTIVE)
-				&& DbComparator.greaterThan(ftcnt, 0))
-		// the groupkey includes the blockID. We need this to ensure that we
-		// get the items from the desired block
-		{
-			_AA_NextFieldtestGroup_SP(connection, oppkey, segment, segmentKey,
-					segmentID, language, groupIDValue, blockIDValue, true);
-
-			if (groupIDValue.get() != null) {
-				algorithm = FIELDTEST;
-			}
-		}
-		if (DbComparator.containsIgnoreCase(algorithm, ADAPTIVE))
-		// -- The C# adaptive algorithm will control when to access items,
-		// blueprint, etc. from AA_MakeCset1, AA_GetResponseSet,
-		// AA_UpdateAbilityEstimates, AA_GetGroupContentLevels
-		{
-			groupIDValue.set(EMPTY);
-			blockIDValue.set(EMPTY);
-		}
-
-		/**
-		 * Comments from DB: -- 9/2012: Added isSimulation and sessionKey to
-		 * returned record, and itempool string for adaptive tests select @oppkey
-		 * as oppkey, @segment as segmentPosition, @segmentKey as segmentkey, @segmentID
-		 * as segmentID, @algorithm as algorithm , @groupID as groupID, @blockID
-		 * as blockID, @isSim as isSimulation, @session as sessionKey;
-		 */
-		List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
-		CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object>();
-		rcd.put("oppkey", oppkey);
-		rcd.put("segment", segment);
-		rcd.put("segmentKey", segmentKey);
-		rcd.put("segmentID", segmentID);
-		rcd.put("algorithm", algorithm);
-		rcd.put("groupID", groupIDValue.get());
-		rcd.put("blockID", blockIDValue.get());
-		rcd.put("isSim", isSim);
-		rcd.put("session", session);
-		resultList.add(rcd);
-		result = new SingleDataResultSet();
-		result.addColumn("oppkey", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
-		result.addColumn("segment", SQL_TYPE_To_JAVA_TYPE.INT);
-		result.addColumn("segmentKey", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
-		result.addColumn("segmentID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
-		result.addColumn("algorithm", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
-		result.addColumn("groupID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
-		result.addColumn("blockID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
-		result.addColumn("isSim", SQL_TYPE_To_JAVA_TYPE.BIT);
-		result.addColumn("session", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
-		result.addRecords(resultList);
-
-		_commonDll._LogDBLatency_SP(connection, "AA_GetNextItemCandidates",
-				starttime, null, true, null, oppkey);
-
-		return result;
 	}
+
+		private List<CaseInsensitiveMap<Object>> ValidateAndReturnSegmentData(String algorithm, boolean isSim,
+			  		SQLConnection connection, UUID oppkey, String language, Integer segment, String segmentKey,
+					String segmentID, int ftcnt, Date starttime, UUID session)
+                                                              throws ReturnStatusException {
+			_Ref<String> groupIDValue = new _Ref<>();
+			_Ref<String> blockIDValue = new _Ref<>();
+
+			if (DbComparator.isEqual(algorithm, FIXEDFORM)) {
+				_AA_NextFixedformGroup_SP(connection, oppkey, segmentKey, language,
+						groupIDValue, blockIDValue);
+			}
+			if (DbComparator.containsIgnoreCase(algorithm, ADAPTIVE)
+					&& DbComparator.greaterThan(ftcnt, 0))
+			// the groupkey includes the blockID. We need this to ensure that we
+			// get the items from the desired block
+			{
+				_AA_NextFieldtestGroup_SP(connection, oppkey, segment, segmentKey,
+						segmentID, language, groupIDValue, blockIDValue, true);
+
+				if (groupIDValue.get() != null) {
+					algorithm = FIELDTEST;
+				}
+			}
+			if (DbComparator.containsIgnoreCase(algorithm, ADAPTIVE))
+			// -- The C# adaptive algorithm will control when to access items,
+			// blueprint, etc. from AA_MakeCset1, AA_GetResponseSet,
+			// AA_UpdateAbilityEstimates, AA_GetGroupContentLevels
+			{
+				groupIDValue.set(EMPTY);
+				blockIDValue.set(EMPTY);
+			}
+
+			/**
+			 * Comments from DB: -- 9/2012: Added isSimulation and sessionKey to
+			 * returned record, and itempool string for adaptive tests select @oppkey
+			 * as oppkey, @segment as segmentPosition, @segmentKey as segmentkey, @segmentID
+			 * as segmentID, @algorithm as algorithm , @groupID as groupID, @blockID
+			 * as blockID, @isSim as isSimulation, @session as sessionKey;
+			 */
+			List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
+			CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object>();
+			rcd.put("oppkey", oppkey);
+			rcd.put("segment", segment);
+			rcd.put("segmentKey", segmentKey);
+			rcd.put("segmentID", segmentID);
+			rcd.put("algorithm", algorithm);
+			rcd.put("groupID", groupIDValue.get());
+			rcd.put("blockID", blockIDValue.get());
+			rcd.put("isSim", isSim);
+			rcd.put("session", session);
+			resultList.add(rcd);
+
+			_commonDll._LogDBLatency_SP(connection, "AA_GetNextItemCandidates",
+					starttime, null, true, null, oppkey);
+
+			return resultList;
+		}
 
 	// From TDSCore_Dev_Session2012_Sandbox
 	public Boolean IsSimulation_FN(SQLConnection connection, UUID oppkey)
