@@ -125,7 +125,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 					+ " where _fk_TestOpportunity = ${oppkey} and IsSatisfied = ${isSatisfied} "
 					+ " order by SegmentPosition ";
 			final String SQL_QUERY3 = isMsb ? testOpportunitySegmentsQuery :
-					String.format("{0}{1}", testOpportunitySegmentsQuery, "limit 1");
+					testOpportunitySegmentsQuery + "limit 1";
 			SqlParametersMaps parameters3 = new SqlParametersMaps().put(
 					"oppkey", oppkey).put("isSatisfied", false);
 			result = executeStatement(connection, SQL_QUERY3, parameters3,
