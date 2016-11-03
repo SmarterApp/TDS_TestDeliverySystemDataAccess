@@ -2099,5 +2099,10 @@ public SingleDataResultSet AA_AddOffgradeItems_SP(SQLConnection connection,
 	// TODO Auto-generated method stub
 	return null;
 }
+
+  @Override
+  public void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) {
+
+  }
 }
 

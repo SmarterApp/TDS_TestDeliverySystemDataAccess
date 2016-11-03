@@ -3778,4 +3778,9 @@ final String SQL_QUERY5 =  "select "
 		return outRes;
 	}
 
+	@Override
+	public void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) {
+
+	}
+
 }

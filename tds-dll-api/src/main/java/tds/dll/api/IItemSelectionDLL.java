@@ -59,7 +59,7 @@ public interface IItemSelectionDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey, boolean isMsb)
+  SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey, boolean isMsb)
       throws ReturnStatusException;
  
   /**
@@ -335,5 +335,13 @@ public interface IItemSelectionDLL
    */
   public SingleDataResultSet AA_AddOffgradeItems_SP(SQLConnection connection, UUID oppkey,
 		  String poolfilterProperty, String segmentkey) throws ReturnStatusException;
+
+  /**
+   *
+   * @param connection
+   * @param selectedSegmentPosition
+   * @param opportunityKey
+   */
+  void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey);
   
 }
