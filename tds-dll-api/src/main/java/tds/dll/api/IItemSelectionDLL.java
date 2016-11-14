@@ -343,6 +343,6 @@ public interface IItemSelectionDLL
    * @param selectedSegmentPosition
    * @param opportunityKey
    */
-  void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey);
+  void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) throws ReturnStatusException;
   
 }

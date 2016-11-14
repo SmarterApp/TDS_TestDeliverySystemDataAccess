@@ -3785,8 +3785,15 @@ final String SQL_QUERY5 =  "select "
 	}
 
 	@Override
-	public void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) {
-		String adjustRemainingSegmentsQuery = String.format("UPDATE testopportunitysegment SET ");
+	public void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) throws ReturnStatusException {
+		String adjustRemainingSegmentsQuery = String.format("UPDATE " + getTdsSettings ().getTDSSessionDBName () + ".testopportunitysegment " +
+				"SET issatisfied = 1 " +
+				"WHERE _fk_testopportunity = ${opportunitykey} " +
+				"AND segmentposition != ${segmentposition}");
+		SqlParametersMaps parameters = new SqlParametersMaps()
+				.put("opportunitykey", opportunityKey)
+				.put("segmentposition", selectedSegmentPosition);
+		executeStatement(connection, adjustRemainingSegmentsQuery, parameters, true);
 	}
 
 }
