@@ -51,6 +51,7 @@ public interface IItemSelectionDLL
   public static String SESSIONKEY = "sessionKey";
   public static String SESSION = "session";
   public static String ISMSB = "isMsb";
+  public static String ISACTIVE = "isactive";
 
   /**
    * 

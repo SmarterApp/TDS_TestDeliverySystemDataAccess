@@ -90,6 +90,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 		Integer ftcnt = 0;
 		UUID session = null;
 		boolean isSim;
+		boolean isActive = false;
 
 		SingleDataResultSet result;
 		DbResultRecord record;
@@ -120,10 +121,15 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		while (true) // while not found
 		{
-			String testOpportunitySegmentsQuery = "select  SegmentPosition, _efk_Segment, segmentID, algorithm, ftItemCnt "
+			String testOpportunitySegmentsQuery = isMsb ?
+					"select  SegmentPosition, _efk_Segment, segmentID, algorithm, ftItemCnt, issatisfied "
 					+ " from testopportunitysegment "
-					+ " where _fk_TestOpportunity = ${oppkey} and IsSatisfied = ${isSatisfied} "
-					+ " order by SegmentPosition ";
+					+ " where _fk_TestOpportunity = ${oppkey} "
+					+ " order by SegmentPosition " :
+					"select  SegmentPosition, _efk_Segment, segmentID, algorithm, ftItemCnt, issatisfied "
+							+ " from testopportunitysegment "
+							+ " where _fk_TestOpportunity = ${oppkey} and IsSatisfied = ${isSatisfied} "
+							+ " order by SegmentPosition ";
 			final String SQL_QUERY3 = isMsb ? testOpportunitySegmentsQuery :
 					testOpportunitySegmentsQuery + "limit 1";
 			SqlParametersMaps parameters3 = new SqlParametersMaps().put(
@@ -141,15 +147,13 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			validSegments.addColumn ("blockID", SQL_TYPE_To_JAVA_TYPE.VARCHAR);
 			validSegments.addColumn ("isSim", SQL_TYPE_To_JAVA_TYPE.BIT);
 			validSegments.addColumn ("session", SQL_TYPE_To_JAVA_TYPE.UNIQUEIDENTIFIER);
+			validSegments.addColumn ("isActive", SQL_TYPE_To_JAVA_TYPE.BIT);
 
 			Iterator<DbResultRecord> currentRecord = result.getRecords().hasNext() ?
 					result.getRecords() :
 					null;
 
-			if (currentRecord == null) // loop terminating conditions, No segment
-			// lacks
-			// fulfillment
-			{
+			if (currentRecord == null) { // loop terminating conditions, No segment lacks fulfillment
 				List<CaseInsensitiveMap<Object>> resultList = new ArrayList<CaseInsensitiveMap<Object>>();
 				CaseInsensitiveMap<Object> rcd = new CaseInsensitiveMap<Object>();
 				rcd.put("segment", null);
@@ -173,6 +177,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 					segmentID = record.<String> get("segmentID");
 					algorithm = record.<String> get("algorithm");
 					ftcnt = record.<Integer> get("ftItemCnt");
+					isActive = !record.<Boolean>get("issatisfied");
 				}
 				// found the segment to work on
 				// go to next
@@ -181,7 +186,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 					// isSegmentSatisfied (oppkey, segment) will be implemented
 					validSegments.addRecords(
 							ValidateAndReturnSegmentData(algorithm, isSim, connection, oppkey, language
-									, segment, segmentKey, segmentID, ftcnt, starttime, session));
+									, segment, segmentKey, segmentID, ftcnt, starttime, session, isActive));
 				} else {// segment is satisfied, mark and continue loop, NOTE:
 					// T_InsertItems
 					// modified to do this update, so this should never be
@@ -203,7 +208,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 
 		private List<CaseInsensitiveMap<Object>> ValidateAndReturnSegmentData(String algorithm, boolean isSim,
 			  		SQLConnection connection, UUID oppkey, String language, Integer segment, String segmentKey,
-					String segmentID, int ftcnt, Date starttime, UUID session)
+					String segmentID, int ftcnt, Date starttime, UUID session, boolean isActive)
                                                               throws ReturnStatusException {
 			_Ref<String> groupIDValue = new _Ref<>();
 			_Ref<String> blockIDValue = new _Ref<>();
@@ -213,10 +218,10 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 						groupIDValue, blockIDValue);
 			}
 			if (DbComparator.containsIgnoreCase(algorithm, ADAPTIVE)
-					&& DbComparator.greaterThan(ftcnt, 0))
+					&& DbComparator.greaterThan(ftcnt, 0)) {
 			// the groupkey includes the blockID. We need this to ensure that we
 			// get the items from the desired block
-			{
+
 				_AA_NextFieldtestGroup_SP(connection, oppkey, segment, segmentKey,
 						segmentID, language, groupIDValue, blockIDValue, true);
 
@@ -251,6 +256,7 @@ public class ItemSelectionDLL extends AbstractDLL implements IItemSelectionDLL {
 			rcd.put("blockID", blockIDValue.get());
 			rcd.put("isSim", isSim);
 			rcd.put("session", session);
+			rcd.put("isActive", isActive);
 			resultList.add(rcd);
 
 			_commonDll._LogDBLatency_SP(connection, "AA_GetNextItemCandidates",
@@ -3780,7 +3786,7 @@ final String SQL_QUERY5 =  "select "
 
 	@Override
 	public void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) {
-
+		String adjustRemainingSegmentsQuery = String.format("UPDATE testopportunitysegment SET ");
 	}
 
 }
