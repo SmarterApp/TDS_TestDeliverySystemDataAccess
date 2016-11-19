@@ -8,8 +8,6 @@
  ******************************************************************************/
 package tds.dll.common.rtspackage.student.data;
 
-//import com.sun.org.apache.xpath.internal.operations.String;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -76,9 +74,9 @@ public class Accommodation implements Serializable
   @XmlElement (name = "BrailleType")
   protected String          brailleType;
   @XmlElement (name = "NonEmbeddedDesignatedSupports")
-  protected List<String>   nonEmbeddedDesignatedSupports;
+  protected List<String>    nonEmbeddedDesignatedSupports;
   @XmlElement (name = "NonEmbeddedAccommodations")
-  protected List<String>  nonEmbeddedAccommodations;
+  protected List<String>    nonEmbeddedAccommodations;
   @XmlElement (name = "Other")
   protected String          other;
 
@@ -159,7 +157,7 @@ public class Accommodation implements Serializable
   }
 
   /**
-   * Gets the value of the braillType property.
+   * Gets the value of the brailleType property.
    *
    * @return possible object is {@link String }
    *
@@ -169,7 +167,7 @@ public class Accommodation implements Serializable
   }
 
   /**
-   * Sets the value of the braillType property.
+   * Sets the value of the brailleType property.
    *
    * @param value
    *          allowed object is {@link String }
@@ -190,7 +188,7 @@ public class Accommodation implements Serializable
   }
 
   /**
-   * Sets the value of the braillType property.
+   * Sets the value of the embossRequestType property.
    *
    * @param value
    *          allowed object is {@link String }
