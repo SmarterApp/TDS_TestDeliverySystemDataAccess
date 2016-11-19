@@ -31,6 +31,9 @@ import javax.xml.bind.annotation.XmlType;
     "printSize",
     "streamlinedInterface",
     "illustrationGlossary",
+    "brailleTranscript",
+    "brailleType",
+    "embossRequestType",
     "nonEmbeddedDesignatedSupports",
     "nonEmbeddedAccommodations",
     "other"
@@ -66,10 +69,14 @@ public class Accommodation implements Serializable
   protected String          streamlinedInterface;
   @XmlElement (name = "IllustrationGlossary")
   protected String          illustrationGlossary;
+  @XmlElement (name = "EmbossRequestType")
+  protected String          embossRequestType;
+  @XmlElement (name = "BrailleType")
+  protected String          brailleType;
   @XmlElement (name = "NonEmbeddedDesignatedSupports")
-  protected List<String>   nonEmbeddedDesignatedSupports;
+  protected List<String>    nonEmbeddedDesignatedSupports;
   @XmlElement (name = "NonEmbeddedAccommodations")
-  protected List<String>  nonEmbeddedAccommodations;
+  protected List<String>    nonEmbeddedAccommodations;
   @XmlElement (name = "Other")
   protected String          other;
 
@@ -116,6 +123,19 @@ public class Accommodation implements Serializable
   }
 
   /**
+   * Calculates the braille transcript value based on the Braille setting and the Closed Captioning setting.
+   *
+   * @return possible object is {@link String }
+   *
+   */
+  @XmlElement (name = "BrailleTranscript")
+  public String getBrailleTranscript () {
+    return closedCaptioning.equals("TDS_ClosedCap1") && language.endsWith("-Braille")
+            ? "TDS_BrailleTrans1"
+            : "TDS_BrailleTrans0"; // should this be "" instead?
+  }
+
+  /**
    * Gets the value of the closedCaptioning property.
    *
    * @return possible object is {@link String }
@@ -134,6 +154,48 @@ public class Accommodation implements Serializable
    */
   public void setClosedCaptioning (String value) {
     this.closedCaptioning = value;
+  }
+
+  /**
+   * Gets the value of the brailleType property.
+   *
+   * @return possible object is {@link String }
+   *
+   */
+  public String getBrailleType () {
+    return brailleType;
+  }
+
+  /**
+   * Sets the value of the brailleType property.
+   *
+   * @param value
+   *          allowed object is {@link String }
+   *
+   */
+  public void setBrailleType (String value) {
+    this.brailleType = value;
+  }
+
+  /**
+   * Gets the value of the embossRequestType property.
+   *
+   * @return possible object is {@link String }
+   *
+   */
+  public String getEmbossRequestType () {
+    return embossRequestType;
+  }
+
+  /**
+   * Sets the value of the embossRequestType property.
+   *
+   * @param value
+   *          allowed object is {@link String }
+   *
+   */
+  public void setEmbossRequestType (String value) {
+    this.embossRequestType = value;
   }
 
   /**
