@@ -232,6 +232,8 @@ public class StudentPackageReader implements IRtsPackageReader
       appendAccommodation (sb, subject, ac.getStreamlinedInterface ());
       appendAccommodation (sb, subject, ac.getIllustrationGlossary ());
       appendAccommodation (sb, subject, ac.getBrailleTranscript ());
+      appendAccommodation (sb, subject, ac.getEmbossRequestType ());
+      appendAccommodation (sb, subject, ac.getBrailleType ());
       appendAccommodation (sb, subject, AccommodationOther.getFormattedValue (ac));
       if ( ac.getNonEmbeddedAccommodations () != null ) {
         for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations () ) {
@@ -268,6 +270,9 @@ public class StudentPackageReader implements IRtsPackageReader
       addAccommodation (accommodationList, subjectCode, ac.getPermissiveMode ());
       addAccommodation (accommodationList, subjectCode, ac.getStreamlinedInterface ());
       addAccommodation (accommodationList, subjectCode, ac.getIllustrationGlossary ());
+      addAccommodation (accommodationList, subjectCode, ac.getBrailleTranscript ());
+      addAccommodation (accommodationList, subjectCode, ac.getEmbossRequestType ());
+      addAccommodation (accommodationList, subjectCode, ac.getBrailleType ());
       addAccommodation (accommodationList, subjectCode, AccommodationOther.getFormattedValue (ac));
       if ( ac.getNonEmbeddedAccommodations () != null ) {
         for (String nonEmbeddedAccommodation : ac.getNonEmbeddedAccommodations () ) {
