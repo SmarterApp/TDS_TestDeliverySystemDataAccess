@@ -50,6 +50,8 @@ public interface IItemSelectionDLL
   public static String ISSIMULATION = "issim";
   public static String SESSIONKEY = "sessionKey";
   public static String SESSION = "session";
+  public static String ISMSB = "isMsb";
+  public static String ISACTIVE = "isactive";
 
   /**
    * 
@@ -58,7 +60,7 @@ public interface IItemSelectionDLL
    * @return
    * @throws ReturnStatusException
    */
-  public SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey) 
+  SingleDataResultSet AA_GetNextItemCandidates_SP (SQLConnection connection, UUID oppkey, boolean isMsb)
       throws ReturnStatusException;
  
   /**
@@ -334,5 +336,13 @@ public interface IItemSelectionDLL
    */
   public SingleDataResultSet AA_AddOffgradeItems_SP(SQLConnection connection, UUID oppkey,
 		  String poolfilterProperty, String segmentkey) throws ReturnStatusException;
+
+  /**
+   *
+   * @param connection
+   * @param selectedSegmentPosition
+   * @param opportunityKey
+   */
+  void cleanupDismissedMsbItemCandidates(SQLConnection connection, Long selectedSegmentPosition, UUID opportunityKey) throws ReturnStatusException;
   
 }
