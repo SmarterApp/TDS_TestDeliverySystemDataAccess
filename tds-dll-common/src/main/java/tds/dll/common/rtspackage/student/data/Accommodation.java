@@ -130,7 +130,11 @@ public class Accommodation implements Serializable
    */
   @XmlElement (name = "BrailleTranscript")
   public String getBrailleTranscript () {
-    return closedCaptioning.equals("TDS_ClosedCap1") && language.endsWith("-Braille")
+    return closedCaptioning.equals("TDS_ClosedCap1")
+            && (
+              (language != null && language.endsWith("-Braille"))
+              || (brailleType != null && !brailleType.equals("TDS_BT0"))
+            )
             ? "TDS_BrailleTrans1"
             : "TDS_BrailleTrans0"; // should this be "" instead?
   }
