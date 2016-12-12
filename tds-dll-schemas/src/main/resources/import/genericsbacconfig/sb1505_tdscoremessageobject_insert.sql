@@ -445,6 +445,13 @@ INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, l
 INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
 ('4042', 'SBAC', 'Next Step:', 'ENU', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
 
+INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered)
+values ('2662', 'SBAC', 'Imprimir item', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')), now());
+
+INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered)
+values ('2663', 'SBAC', 'Tutoría', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')), now());
+
+
 /** Below Delete is to delete cache table and its context, once user login it will populate the cache table from tds_coremessageobject,tds_coremessageuser,client_messagetranslation table **/
 DELETE FROM __appmessages;
 DELETE FROM __appmessagecontexts;
