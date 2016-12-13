@@ -460,6 +460,15 @@ INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, l
 INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
 ('4044', 'SBAC', 'Notepad', 'ENU', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
 
+INSERT INTO tds_coremessageobject(context, contexttype, messageid, ownerapp, appkey, message, paralabels, _key, fromclient, datealtered, nodes, ismessageshowtouser) VALUES
+('tds_content_events.js', 'ClientSide', '12380', 'Student', 'TestShell.Comments.Notepad', 'Notepad', NULL, '4045', NULL, NOW(), NULL, NULL);
+INSERT INTO tds_coremessageuser(_fk_coremessageobject, systemid) values ('4045', 'Student');
+INSERT INTO tds_coremessageuser(_fk_coremessageobject, systemid) values ('4045', 'ResponseEntry');
+INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
+('4045', 'SBAC', 'bloc de notas', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
+INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
+('4045', 'SBAC', 'Notepad', 'ENU', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
+
 /** Below Delete is to delete cache table and its context, once user login it will populate the cache table from tds_coremessageobject,tds_coremessageuser,client_messagetranslation table **/
 DELETE FROM __appmessages;
 DELETE FROM __appmessagecontexts;
