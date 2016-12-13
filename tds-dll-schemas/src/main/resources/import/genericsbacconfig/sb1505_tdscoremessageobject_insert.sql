@@ -456,7 +456,7 @@ INSERT INTO tds_coremessageobject(context, contexttype, messageid, ownerapp, app
 INSERT INTO tds_coremessageuser(_fk_coremessageobject, systemid) values ('4044', 'Student');
 INSERT INTO tds_coremessageuser(_fk_coremessageobject, systemid) values ('4044', 'ResponseEntry');
 INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
-('4044', 'SBAC', 'bloc de notas', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
+('4044', 'SBAC', 'Bloc de notas', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
 INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
 ('4044', 'SBAC', 'Notepad', 'ENU', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
 
@@ -465,7 +465,7 @@ INSERT INTO tds_coremessageobject(context, contexttype, messageid, ownerapp, app
 INSERT INTO tds_coremessageuser(_fk_coremessageobject, systemid) values ('4045', 'Student');
 INSERT INTO tds_coremessageuser(_fk_coremessageobject, systemid) values ('4045', 'ResponseEntry');
 INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
-('4045', 'SBAC', 'bloc de notas', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
+('4045', 'SBAC', 'Bloc de notas', 'ESN', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
 INSERT INTO  client_messagetranslation(_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered) values
 ('4045', 'SBAC', 'Notepad', 'ENU', '--ANY--', '--ANY--', unhex(REPLACE(UUID(), '-', '')) , NOW());
 
