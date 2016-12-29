@@ -547,6 +547,7 @@ public class CommonDLL extends AbstractDLL implements ICommonDLL
       case "invalidated":
       case "forceCompleted":
       case "segmentEntry":
+      case "segmentExit":
         ok = true;
         break;
       default:
