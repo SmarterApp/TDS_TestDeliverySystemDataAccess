@@ -142,8 +142,7 @@ public class WriteTestDaoImpl implements WriteTestDao {
     private void writeDatabase(String insert, String query, Map<String, Object> parameters) throws DiagnosticException {
         Boolean readVerify = false;
 
-        try {
-            Connection connection = dataSource.getConnection();
+        try (Connection connection = dataSource.getConnection()) {
             boolean originalAutoCommitMode = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
