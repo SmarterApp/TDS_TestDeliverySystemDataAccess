@@ -11,7 +11,7 @@ INSERT INTO configs.__appmessages select @fkmsgcontext:=_fk_appmessagecontext, 4
   FROM  configs.__appmessages WHERE appkey = 'Global.Path.Help' AND language = 'ENU'
   AND NOT EXISTS (SELECT 1 FROM  configs.__appmessages where appkey = 'Global.Path.Help.Streamlined' AND language = 'ENU' AND _fk_appmessagecontext = @fkmsgcontext);
 
-INSERT INTO configs.tds_coremessageobject (context, contexttype, messageid, ownerapp, appkey, message, paralabels, _key, fromclient, datealtered, nodes, ismessageshowtouser) VALUES ('Global', 'ClientSide', 12339, 'Student', 'Global.Path.Help.Streamlined', '../Projects/AIR/Help/help_streamlined.html', NULL, 4003, NULL, '2012-05-03 19:17:36.590', NULL, NULL);
+INSERT INTO configs.tds_coremessageobject (context, contexttype, messageid, ownerapp, appkey, message, paralabels, _key, fromclient, datealtered, nodes, ismessageshowtouser) VALUES ('Global', 'ClientSide', 12339, 'Student', 'Global.Path.Help.Streamlined', '../Projects/SBAC/Help/help_streamlined.html', NULL, 4003, NULL, '2012-05-03 19:17:36.590', NULL, NULL);
 
 INSERT INTO configs.tds_coremessageuser (_fk_coremessageobject, systemid) VALUES (4003, 'Student');
 
