@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.opentestsystem.delivery</groupId>
 		<artifactId>tds-dll-master</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 	</parent>
 	
 	<artifactId>tds-dll-common</artifactId>
@@ -15,7 +15,7 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<progman-client.version>0.0.4-SNAPSHOT</progman-client.version>
+		<progman-client.version>0.0.4</progman-client.version>
 	</properties>
 
 	<dependencies>
