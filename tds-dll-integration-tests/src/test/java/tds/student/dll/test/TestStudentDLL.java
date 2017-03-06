@@ -4647,6 +4647,7 @@ public class TestStudentDLL
       Long diff = 0L;
       Date starttime = null;
       Date now = null;
+      float itemDuration = 1.23f;
       // execute this statement to prepare for successful test
       final String cmd = "update testopportunity set status = 'started', prevstatus = 'approved' "
           + "  where _fk_session = ${session} and _fk_browser = ${browserId}";
@@ -4654,9 +4655,11 @@ public class TestStudentDLL
       _myDllHelper.executeStatement (connection, cmd, parms, false);
 
       starttime = new Date ();
-      SingleDataResultSet result = _dll.T_UpdateScoredResponse_SP (connection, oppKey, session, browserId, itemId, page, position, dateCreated, responseSequence, score, response, isSelected,
+      SingleDataResultSet result = _dll.T_UpdateScoredResponse_SP (connection,
+          oppKey, session, browserId,
+          itemId, page, position, dateCreated, responseSequence, score, response, isSelected,
           isValid,
-          scoreLatency, scoreStatus, scoreRationale);
+          scoreLatency, scoreStatus, scoreRationale, itemDuration);
       now = new Date ();
       diff = now.getTime () - starttime.getTime ();
       System.out.println (String.format ("T_UpdateScoredResponse latency: %d millisec", (long) diff));
@@ -4701,11 +4704,12 @@ public class TestStudentDLL
       Long diff = 0L;
       Date starttime = null;
       Date now = null;
+      float itemDuration = 1.23f;
 
       starttime = new Date ();
       SingleDataResultSet result = _dll.T_UpdateScoredResponse_SP (connection, oppKey, session, browserId, itemId, page, position, dateCreated, responseSequence, score, response, isSelected,
           isValid,
-          scoreLatency, scoreStatus, scoreRationale);
+          scoreLatency, scoreStatus, scoreRationale, itemDuration);
       now = new Date ();
       diff = now.getTime () - starttime.getTime ();
       System.out.println (String.format ("T_UpdateScoredResponse latency: %d millisec", (long) diff));
@@ -4746,9 +4750,11 @@ public class TestStudentDLL
       int scoreLatency = 0;
       String scoreStatus = "WaitingForMachineScore";
       String scoreRationale = null;
+      float itemDuration = 1.23f;
+
       SingleDataResultSet result = _dll.T_UpdateScoredResponse_SP (connection, oppKey, session, browserId, itemId, page, position, dateCreated, responseSequence, score, response, isSelected,
           isValid,
-          scoreLatency, scoreStatus, scoreRationale);
+          scoreLatency, scoreStatus, scoreRationale, itemDuration);
       DbResultRecord record = result.getRecords ().next ();
       assertTrue (record != null);
       String status = record.<String> get ("status");

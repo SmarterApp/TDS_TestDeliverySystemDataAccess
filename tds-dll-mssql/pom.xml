@@ -3,14 +3,15 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.opentestsystem.delivery</groupId>
-		<artifactId>tds-dll-master</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
 	<artifactId>tds-dll-mssql</artifactId>
 	<name>TDS Data Logic Layer MS SQL Impl</name>
 	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.opentestsystem.delivery</groupId>
+		<artifactId>tds-dll-master</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+	</parent>
 
 	<licenses>
 		<license>
@@ -20,34 +21,8 @@
 			<comments>Educational Online Test Delivery System Copyright (c) 2013 American Institutes for Research</comments>
 		</license>
 	</licenses>
-	<properties>
-		<java-version>1.7</java-version>
-		<org.springframework-version>3.1.1.RELEASE</org.springframework-version>
-		<org.springframework-webflow-version>2.3.2.RELEASE</org.springframework-webflow-version>
-		<org.aspectj-version>1.6.10</org.aspectj-version>
-		<org.slf4j-version>1.7.5</org.slf4j-version>
-		<org.log4j-version>1.2.17</org.log4j-version>
-		<jackson.mapper.asl-version>1.9.12</jackson.mapper.asl-version>
-		<commons-lang-version>2.6</commons-lang-version>
-		<commons-configuration-version>1.6</commons-configuration-version>
-		<javax.faces-version>2.2.0</javax.faces-version>
-		<myfaces-version>2.1.12</myfaces-version>
-		<javax.el-version>3.0-b07</javax.el-version>
-		<jsp-api-version>2.1</jsp-api-version>
-		<jstl-version>1.2</jstl-version>
-		<junit-version>4.11</junit-version>
-		<maven-eclipse-plugin-version>2.9</maven-eclipse-plugin-version>
-		<maven-jxr-plugin-version>2.3</maven-jxr-plugin-version>
-		<maven-compiler-plugin-version>2.5.1</maven-compiler-plugin-version>
-		<exec-maven-plugin-version>1.2.1</exec-maven-plugin-version>
-		<maven-javadoc-plugin-version>2.9</maven-javadoc-plugin-version>
-		<maven-project-info-plugin-version>2.7</maven-project-info-plugin-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<file.encoding>UTF-8</file.encoding>
-	</properties>
-	<dependencies>
 
+	<dependencies>
 		<!-- Internal dependencies -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -64,6 +39,7 @@
 			<artifactId>shared-db</artifactId>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -84,7 +60,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin-version}</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>

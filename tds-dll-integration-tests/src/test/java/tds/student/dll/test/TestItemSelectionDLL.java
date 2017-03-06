@@ -224,7 +224,7 @@ public class TestItemSelectionDLL
         }
       }
 
-      SingleDataResultSet sdrSet = _itemSelDLL.AA_GetNextItemCandidates_SP (_connection, oppkey);
+      SingleDataResultSet sdrSet = _itemSelDLL.AA_GetNextItemCandidates_SP (_connection, oppkey, true);
 
       Iterator<DbResultRecord> recItr = sdrSet.getRecords ();
       int resultRecordNumber = 0;
@@ -768,7 +768,7 @@ itemkey	_fk_Item	groupKey	groupID	blockID	strand	bVector	IRT_model	IRT_a	IRT_b	I
 
     try
     {
-      SingleDataResultSet sdrSet = _itemSelDLL.AA_GetNextItemCandidates_SP (_connection, oppkey);
+      SingleDataResultSet sdrSet = _itemSelDLL.AA_GetNextItemCandidates_SP (_connection, oppkey, true);
 
       Iterator<DbResultRecord> recItr = sdrSet.getRecords ();
       int resultRecordNumber = 0;
@@ -870,7 +870,7 @@ itemkey	_fk_Item	groupKey	groupID	blockID	strand	bVector	IRT_model	IRT_a	IRT_b	I
         }
       }
 
-      SingleDataResultSet sdrSet = _itemSelDLL.AA_GetNextItemCandidates_SP (_connection, oppkey);
+      SingleDataResultSet sdrSet = _itemSelDLL.AA_GetNextItemCandidates_SP (_connection, oppkey, true);
 
       Iterator<DbResultRecord> recItr = sdrSet.getRecords ();
       int resultRecordNumber = 0;
