@@ -25,7 +25,7 @@
   
   <properties>
 		<java-version>1.7</java-version>
-	  	<shared-master.version>3.0.1</shared-master.version>
+	  	<shared-master.version>3.0.3</shared-master.version>
 	  <!-- Note: this should be in-sync with the version in sharedmultijar_release/pom.xml that is used for student and proctor -->
 		<org.springframework-version>3.2.1.RELEASE</org.springframework-version>
 		<org.springframework-webflow-version>2.3.2.RELEASE</org.springframework-webflow-version>
@@ -50,6 +50,7 @@
 		<maven-javadoc-plugin-version>2.9</maven-javadoc-plugin-version>
 		<maven-project-info-plugin-version>2.7</maven-project-info-plugin-version>
 	  	<maven-release-plugin.version>2.4</maven-release-plugin.version>
+	  	<maven-source-plugin.version>2.2.1</maven-source-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<file.encoding>UTF-8</file.encoding>
@@ -119,7 +120,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>${maven.source.plugin.version}</version>
+					<version>${maven-source-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
