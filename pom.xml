@@ -29,6 +29,8 @@
 	  <!-- Note: this should be in-sync with the version in sharedmultijar_release/pom.xml that is used for student and proctor -->
 		<org.springframework-version>3.2.1.RELEASE</org.springframework-version>
 		<org.springframework-webflow-version>2.3.2.RELEASE</org.springframework-webflow-version>
+	  	<spring-data-redis.version>1.2.1.RELEASE</spring-data-redis.version>
+	    <jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
 		<org.log4j-version>1.2.17</org.log4j-version>
@@ -41,7 +43,9 @@
 		<javax.el-version>3.0-b07</javax.el-version>
 		<jsp-api-version>2.1</jsp-api-version>
 		<jstl-version>1.2</jstl-version>
+	  	<assertj-version>2.5.0</assertj-version>
 		<junit-version>4.11</junit-version>
+	  	<mockito-version>1.10.19</mockito-version>
 		<maven-eclipse-plugin-version>2.9</maven-eclipse-plugin-version>
 	  	<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 		<maven-jxr-plugin-version>2.3</maven-jxr-plugin-version>
