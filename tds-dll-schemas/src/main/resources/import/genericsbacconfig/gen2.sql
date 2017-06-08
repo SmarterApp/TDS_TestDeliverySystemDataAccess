@@ -1231,7 +1231,7 @@ insert into client_messagetranslation values (3239,'AIR','Na kuhikuhi no ka ho?i
 insert into client_messagetranslation values (3413,'AIR','Inicie sesión.','ESN','--ANY--','--ANY--',UNHEX(REPLACE('9E5F9D0A-3BFC-4643-B324-64696024FCC6','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2721,'AIR','Gris claro','ESN','--ANY--','--ANY--',UNHEX(REPLACE('32699DB9-4458-4FB4-B702-646E308CBD51','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2392,'AIR','Ka Helu Haumana:','HAW','--ANY--','--ANY--',UNHEX(REPLACE('F6BA81C8-04D4-46EE-93D9-649D3FFCE3E8','-','')),'2013-08-01 11:02:31.780');
-insert into client_messagetranslation values (2358,'AIR','../Projects/Hawaii/Help/help_hi.html','HAW','--ANY--','--ANY--',UNHEX(REPLACE('C978C15D-11D3-4FDC-996D-649D7C241293','-','')),'2013-08-01 11:02:31.780');
+insert into client_messagetranslation values (2358,'AIR','../Projects/SBAC/Help/help_hi.html','HAW','--ANY--','--ANY--',UNHEX(REPLACE('C978C15D-11D3-4FDC-996D-649D7C241293','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3221,'AIR','Koho i ke kula','HAW','--ANY--','--ANY--',UNHEX(REPLACE('3E90F462-FFA8-4C68-9282-60EBDF69D364','-','')),'2013-12-18 14:09:07.017');
 insert into client_messagetranslation values (3072,'AIR','El artículo no existe en esta oportunidad de prueba','ESN','--ANY--','--ANY--',UNHEX(REPLACE('26988722-7DBD-4E39-9D67-60EF75CD082A','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2831,'AIR','Someter un comentario para este ítem.','ESN','--ANY--','--ANY--',UNHEX(REPLACE('A35A71DA-B593-4773-8E3E-6123C4465F3D','-','')),'2014-03-22 20:34:06.387');
@@ -1306,7 +1306,7 @@ insert into client_messagetranslation values (2649,'AIR','Pilikia ka TTS. E ha�
 insert into client_messagetranslation values (3662,'AIR','Versión JRE:','ESN','--ANY--','--ANY--',UNHEX(REPLACE('642C5E5D-3508-47D9-A561-6C33671E1EE8','-','')),'2014-03-22 20:36:39.793');
 insert into client_messagetranslation values (2520,'AIR','Prueba realizada el:','ESN','--ANY--','--ANY--',UNHEX(REPLACE('778A7791-72C3-472D-BC7E-6C447A4C7284','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3085,'AIR','No podemos iniciar su sesión. Por favor verifique su información y vuelva a intentarlo.','ESN','--ANY--','--ANY--',UNHEX(REPLACE('2E02D4E2-A1A9-47F8-BEDB-6C4629E00197','-','')),'2014-03-22 20:35:32.337');
-insert into client_messagetranslation values (2358,'AIR','../Projects/AIR/Help/help.html','ENU','--ANY--','--ANY--',UNHEX(REPLACE('ED110866-97D0-476C-8B7A-6C625B68AC1F','-','')),'2013-08-01 14:17:09.583');
+insert into client_messagetranslation values (2358,'AIR','../Projects/SBAC/Help/help.html','ENU','--ANY--','--ANY--',UNHEX(REPLACE('ED110866-97D0-476C-8B7A-6C625B68AC1F','-','')),'2013-08-01 14:17:09.583');
 insert into client_messagetranslation values (3650,'AIR','Navegador seguro:','ESN','--ANY--','--ANY--',UNHEX(REPLACE('D8AEB324-B5F6-4B75-B050-6C7ECEE75518','-','')),'2014-03-22 20:36:39.697');
 insert into client_messagetranslation values (2415,'AIR','Nui A''e','HAW','--ANY--','--ANY--',UNHEX(REPLACE('7708E2DC-2BA1-4091-91B5-6C8906C8F85F','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3130,'AIR','Ua pa?a keia wa ho?ohana.','HAW','--ANY--','--ANY--',UNHEX(REPLACE('367BF360-D287-41DA-8388-6CA021FB4B3D','-','')),'2013-12-18 14:09:06.953');
@@ -1323,7 +1323,7 @@ insert into client_messagetranslation values (2795,'AIR','Ho?opane?e i na mana?o
 insert into client_messagetranslation values (3028,'AIR','Aia he pilikia me ka ‘ōnaehana. E ‘olu’olu e hā’awi i kēia helu iā Kumu','HAW','--ANY--','--ANY--',UNHEX(REPLACE('2A3B21A3-807C-466D-BB61-6EB42AB17AF1','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3664,'AIR','Ejecutar diagnósticos de red ','ESN','--ANY--','--ANY--',UNHEX(REPLACE('9B4C13ED-8205-493A-BA0E-6ED0B39E0918','-','')),'2014-03-22 20:36:39.810');
 insert into client_messagetranslation values (2823,'AIR','E pani i ka mana?o','HAW','--ANY--','--ANY--',UNHEX(REPLACE('2FDB643A-D514-4D63-9A02-6EDD2F11FAC0','-','')),'2013-12-18 14:09:06.697');
-insert into client_messagetranslation values (3732,'AIR','../Projects/Delaware/Help/help_esn.html','ESN','--ANY--','--ANY--',UNHEX(REPLACE('4EA55FE3-2C9D-4D12-A608-6EE0AF57B4F2','-','')),'2013-09-18 13:21:37.113');
+insert into client_messagetranslation values (3732,'AIR','../Projects/SBAC/Help/help_esn.html','ESN','--ANY--','--ANY--',UNHEX(REPLACE('4EA55FE3-2C9D-4D12-A608-6EE0AF57B4F2','-','')),'2013-09-18 13:21:37.113');
 insert into client_messagetranslation values (2721,'AIR','ʻĀhinahina','HAW','--ANY--','--ANY--',UNHEX(REPLACE('6CB3FE6B-99BD-463D-BCF1-6F0021A98861','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2470,'AIR','E kaomi i [?]','HAW','--ANY--','--ANY--',UNHEX(REPLACE('5B76BC1E-6DE5-4EF7-9520-6F054CD17AAF','-','')),'2013-08-08 16:27:15.117');
 insert into client_messagetranslation values (3717,'AIR','Kahiāuli','HAW','--ANY--','--ANY--',UNHEX(REPLACE('880AE471-A7F1-4AAD-8EC4-6F082AF4D873','-','')),'2013-08-13 12:45:03.753');
@@ -1607,7 +1607,7 @@ insert into client_messagetranslation values (2557,'AIR','Ka Pakuhi Kumumea','HA
 insert into client_messagetranslation values (2915,'AIR','La solicitud de contenido requiere la autenticación del usuario. Vuelva a conectarse e intente nuevamente.','ESN','--ANY--','--ANY--',UNHEX(REPLACE('56ED97B6-8C54-41F3-A573-9204C025E94A','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2985,'AIR','{silence}Koho C.{silence}','HAW','--ANY--','--ANY--',UNHEX(REPLACE('EAFB1872-CB4B-493B-B978-926B83659D1D','-','')),'2013-12-18 14:09:06.817');
 insert into client_messagetranslation values (2494,'AIR','Tachado','ESN','--ANY--','--ANY--',UNHEX(REPLACE('66AC1B9D-F6AF-4B11-AA18-9280E5764F9A','-','')),'2013-08-01 11:02:31.780');
-insert into client_messagetranslation values (3405,'AIR','../Projects/Delaware/Help/help_esn.html','ESN','--ANY--','--ANY--',UNHEX(REPLACE('E4AAE345-D24B-4668-8E96-928A498E4DF2','-','')),'2013-08-01 11:02:31.780');
+insert into client_messagetranslation values (3405,'AIR','../Projects/SBAC/Help/help_esn.html','ESN','--ANY--','--ANY--',UNHEX(REPLACE('E4AAE345-D24B-4668-8E96-928A498E4DF2','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2576,'AIR','Atención','ESN','--ANY--','--ANY--',UNHEX(REPLACE('F0DFF58C-96EA-4C32-A683-9298ABA454D3','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3414,'AIR','Usuario invitado','ESN','--ANY--','--ANY--',UNHEX(REPLACE('BBC0B9FA-2D12-469F-8722-92E4D84B9D28','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3092,'AIR','La sesión de prueba no se encuentra en un estado válido. Consulte al administrador de la prueba.','ESN','--ANY--','--ANY--',UNHEX(REPLACE('66AFD406-1EFF-432C-B601-9307B88A06E5','-','')),'2013-08-01 11:02:31.780');
@@ -2155,7 +2155,7 @@ insert into client_messagetranslation values (3686,'AIR','No se permite el ingre
 insert into client_messagetranslation values (3062,'AIR','La versión respaldada o bien no existe o fue restaurada con anterioridad.','ESN','--ANY--','--ANY--',UNHEX(REPLACE('1C46BB24-7080-4B74-8987-D5CE3CF4FD53','-','')),'2014-03-22 20:35:32.330');
 insert into client_messagetranslation values (2887,'AIR','E Ho''opio I Ka Mea Hana Kikokikona ','HAW','--ANY--','--ANY--',UNHEX(REPLACE('BA10DC6E-0DC1-47C4-9A60-D5EFAA522C71','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3556,'AIR','Kuhikuhi ma?a mau','HAW','--ANY--','--ANY--',UNHEX(REPLACE('B8A40E73-855D-4A72-BEE2-D6085CC443C2','-','')),'2013-12-18 14:09:07.423');
-insert into client_messagetranslation values (2358,'AIR','../Projects/Delaware/Help/help_esn.html','ESN','--ANY--','--ANY--',UNHEX(REPLACE('A147BD90-3B0C-4BEC-BECA-D61BCAC7430A','-','')),'2013-08-01 11:02:31.780');
+insert into client_messagetranslation values (2358,'AIR','../Projects/SBAC/Help/help_esn.html','ESN','--ANY--','--ANY--',UNHEX(REPLACE('A147BD90-3B0C-4BEC-BECA-D61BCAC7430A','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2405,'AIR','SSID:','ESN','--ANY--','--ANY--',UNHEX(REPLACE('842B83A4-B769-41F3-8B03-D6274A9B9DF0','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3093,'AIR','?A?ohe wa ho?ohana e like me keia: {OPENBRACE}0{CLOSEBRACE}','HAW','--ANY--','--ANY--',UNHEX(REPLACE('68CF4E1C-FC17-474C-B82A-D63585EE9944','-','')),'2013-12-18 14:09:06.907');
 insert into client_messagetranslation values (2919,'AIR','E Waiho','HAW','--ANY--','--ANY--',UNHEX(REPLACE('EA4EA80A-9A58-4B00-A3B8-D64A1258BDDC','-','')),'2013-08-01 11:02:31.780');

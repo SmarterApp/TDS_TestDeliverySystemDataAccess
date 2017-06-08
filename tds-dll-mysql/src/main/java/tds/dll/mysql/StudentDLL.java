@@ -2028,7 +2028,10 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
       status = record.<String> get ("status");
       clientName = record.<String> get ("clientname");
     }
-    if (DbComparator.notEqual (status, "started") && DbComparator.notEqual (status, "review")) {
+
+    // Included the segmentEntry and segmentExit statuses here to account for irregular async call timing
+    if (DbComparator.notEqual (status, "started") && DbComparator.notEqual (status, "review")
+            && DbComparator.notEqual(status, "segmentEntry") && DbComparator.notEqual(status, "segmentExit")) {
       return _commonDll._ReturnError_SP (connection, clientName, "T_UpdateScoredResponse",
           "Your test opportunity has been interrupted. Please check with your Test Administrator to resume your test.",
           null, oppKey, "T_UpdateScoredResponse", "denied");
