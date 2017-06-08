@@ -3,15 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opentestsystem.delivery</groupId>
   <artifactId>tds-dll-master</artifactId>
-  <version>0.0.1</version>
+  <version>3.1.0.RELEASE</version>
   <packaging>pom</packaging>
   <name>TDS Data Logic Layer Master</name>
-  
-  <scm>
-        <connection>scm:git:https://github.com/SmarterApp/TestDeliverySystemDataAccess</connection>
-        <developerConnection>scm:git:https://github.com/SmarterApp/TestDeliverySystemDataAccess</developerConnection>
-        <url>https://github.com/SmarterApp/TestDeliverySystemDataAccess</url>
-   </scm>
+
+    <scm>
+        <connection>scm:git:https://github.com/SmarterApp/TDS_TestDeliverySystemDataAccess.git</connection>
+        <developerConnection>scm:git:https://github.com/SmarterApp/TDS_TestDeliverySystemDataAccess.git</developerConnection>
+        <url>https://github.com/SmarterApp/TDS_TestDeliverySystemDataAccess</url>
+        <tag>3.1.0.RELEASE</tag>
+    </scm>
   
   <modules>
   	<module>tds-dll-api</module>
@@ -19,13 +20,17 @@
   	<module>tds-dll-mysql</module>
 	<module>tds-dll-common</module>
     <module>tds-dll-schemas</module>
+	<module>tds-dll-integration-tests</module>
   </modules>
   
   <properties>
 		<java-version>1.7</java-version>
+	  	<shared-master.version>3.1.0.RELEASE</shared-master.version>
 	  <!-- Note: this should be in-sync with the version in sharedmultijar_release/pom.xml that is used for student and proctor -->
 		<org.springframework-version>3.2.1.RELEASE</org.springframework-version>
 		<org.springframework-webflow-version>2.3.2.RELEASE</org.springframework-webflow-version>
+		<spring-data-redis.version>1.2.1.RELEASE</spring-data-redis.version>
+		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
 		<org.log4j-version>1.2.17</org.log4j-version>
@@ -38,13 +43,18 @@
 		<javax.el-version>3.0-b07</javax.el-version>
 		<jsp-api-version>2.1</jsp-api-version>
 		<jstl-version>1.2</jstl-version>
+		<assertj-version>2.5.0</assertj-version>
 		<junit-version>4.11</junit-version>
+		<mockito-version>1.10.19</mockito-version>
 		<maven-eclipse-plugin-version>2.9</maven-eclipse-plugin-version>
+	  	<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 		<maven-jxr-plugin-version>2.3</maven-jxr-plugin-version>
-		<maven-compiler-plugin-version>2.5.1</maven-compiler-plugin-version>
+		<maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
 		<exec-maven-plugin-version>1.2.1</exec-maven-plugin-version>
 		<maven-javadoc-plugin-version>2.9</maven-javadoc-plugin-version>
 		<maven-project-info-plugin-version>2.7</maven-project-info-plugin-version>
+	  	<maven-release-plugin.version>2.4</maven-release-plugin.version>
+	  	<maven-source-plugin.version>2.2.1</maven-source-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<file.encoding>UTF-8</file.encoding>
@@ -64,17 +74,80 @@
 		<dependency>
 			<groupId>org.opentestsystem.shared</groupId>
 			<artifactId>shared-db</artifactId>
-			<version>1.0.1</version>
+			<version>${shared-master.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opentestsystem.shared</groupId>
 			<artifactId>shared-tr-api</artifactId>
-			<version>1.0.1</version>
+			<version>${shared-master.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opentestsystem.shared</groupId>
+			<artifactId>shared-db-test</artifactId>
+			<version>${shared-master.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
   </dependencyManagement>
   
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
+						<source>${java-version}</source>
+						<target>${java-version}</target>
+						<compilerArgument>-Xlint:all</compilerArgument>
+						<showWarnings>true</showWarnings>
+						<showDeprecation>true</showDeprecation>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${maven-jar-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>${maven-release-plugin.version}</version>
+					<configuration>
+						<tagNameFormat>@{project.version}</tagNameFormat>
+						<useReleaseProfile>false</useReleaseProfile>
+						<releaseProfiles>release</releaseProfiles>
+						<autoVersionSubmodules>true</autoVersionSubmodules>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>${maven.toolchains.plugin.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>toolchain</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<toolchains>
+							<jdk>
+								<version>${java-version}</version>
+							</jdk>
+						</toolchains>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -94,15 +167,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin-version}</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-					<compilerArgument>-Xlint:all</compilerArgument>
-					<showWarnings>true</showWarnings>
-					<showDeprecation>true</showDeprecation>
-					<skipTests>true</skipTests>
-				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -151,5 +219,13 @@
 			</plugin>
 		</plugins>
 	</reporting>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>airdev-releases</name>
+            <url>https://airdev.jfrog.io/airdev/libs-releases-local</url>
+        </repository>
+    </distributionManagement>
 
 </project>

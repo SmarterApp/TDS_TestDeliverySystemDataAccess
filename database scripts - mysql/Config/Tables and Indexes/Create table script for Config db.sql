@@ -464,6 +464,7 @@ create table `client_testproperties`  (
 	`abilityintercept`       	float not null default 0,
 	`validatecompleteness`   	bit not null default 0,
 	`gradetext`              	varchar(50) null,
+	'msb'                       bit not null default 0,
 	constraint `pk_client_testproperties` primary key clustered(`clientname`,`testid`)
 ) default charset = UTF8;
 
