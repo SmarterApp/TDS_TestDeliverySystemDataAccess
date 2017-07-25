@@ -7,7 +7,13 @@
   <packaging>pom</packaging>
   <name>TDS Data Logic Layer Master</name>
 
-    <scm>
+	<parent>
+		<groupId>org.opentestsystem.shared</groupId>
+		<artifactId>shared-build-parent</artifactId>
+		<version>3.1.1-SNAPSHOT</version>
+	</parent>
+
+	<scm>
         <connection>scm:git:https://github.com/SmarterApp/TDS_TestDeliverySystemDataAccess.git</connection>
         <developerConnection>scm:git:https://github.com/SmarterApp/TDS_TestDeliverySystemDataAccess.git</developerConnection>
         <url>https://github.com/SmarterApp/TDS_TestDeliverySystemDataAccess</url>
@@ -27,9 +33,6 @@
 		<java-version>1.7</java-version>
 	  	<shared-master.version>3.1.0.RELEASE</shared-master.version>
 	  <!-- Note: this should be in-sync with the version in sharedmultijar_release/pom.xml that is used for student and proctor -->
-		<org.springframework-version>3.2.1.RELEASE</org.springframework-version>
-		<org.springframework-webflow-version>2.3.2.RELEASE</org.springframework-webflow-version>
-		<spring-data-redis.version>1.2.1.RELEASE</spring-data-redis.version>
 		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
@@ -161,7 +164,6 @@
 					</additionalBuildcommands>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
-					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
 			<plugin>

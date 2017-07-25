@@ -5235,7 +5235,8 @@ public class TestStudentDLL
         if (count == 0) {
           header.append ("\t").append (record.getIndexToColumn (index + 1));
         }
-        rowOutput.append ("\t").append (record.get (index + 1));
+        Object obj = record.get(index + 1);
+        rowOutput.append ("\t").append (obj);
       }
       if (count == 0) {
         output.append (header).append ("\n");
