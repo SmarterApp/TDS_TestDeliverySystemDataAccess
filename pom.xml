@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.opentestsystem.shared</groupId>
 		<artifactId>shared-build-parent</artifactId>
-		<version>3.1.1-SNAPSHOT</version>
+		<version>4.0.0.RELEASE</version>
 	</parent>
 
 	<scm>
@@ -31,7 +31,7 @@
   
   <properties>
 		<java-version>1.8</java-version>
-	  	<shared-master.version>3.1.3-SNAPSHOT</shared-master.version>
+		<shared-master.version>4.0.0.RELEASE</shared-master.version>
 	  <!-- Note: this should be in-sync with the version in sharedmultijar_release/pom.xml that is used for student and proctor -->
 		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
