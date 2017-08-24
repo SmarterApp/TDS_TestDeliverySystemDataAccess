@@ -133,7 +133,7 @@ INSERT INTO configs.tds_coremessageobject(
 SELECT
     'testshell.aspx', -- context
     'ClientSide', -- contexttype
-    MAX(messageid) + 1, -- messageid
+    IFNULL(MAX(messageid), 0) + 1, -- messageid
     'Student', -- ownerapp
     'TDS.WordList.illustration', -- appkey
     'Illustration', -- message
