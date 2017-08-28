@@ -7,6 +7,8 @@
 --  * configs.tds_coremessageobject
 --  * configs.tds_coremessageuser
 --
+--  NOTE:  The Illustration Glossary does not have any entries in the configs.client_tooldependencies table.
+--
 -- Records will be deleted from the following tables, which is required to ensure the updated messages are displayed on
 -- the client:
 --
@@ -19,12 +21,17 @@
 --
 -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --
--- Usage: Update the placeholder values in the script below then execute the script
+-- Usage: Update the placeholder values in the script below then execute the script:
+--
+-- PLACEHOLDERS
+-- ------------
+-- * [SBAC for production assessments, SBAC_PT for practice assessments]
+-- * [the value of the testid column from configs.tblsetofadminsubjects for the assessment]
 -- ---------------------------------------------------------------------------------------------------------------------
 USE configs;
 
 START TRANSACTION;
-INSERT INTO configs.client_testtooltype(
+INSERT INTO client_testtooltype(
     clientname,
     toolname,
     allowchange,
@@ -73,7 +80,7 @@ VALUES (
 COMMIT;
 
 START TRANSACTION;
-INSERT INTO configs.client_testtool(
+INSERT INTO client_testtool(
     clientname,
     type,
     code,
@@ -102,7 +109,7 @@ VALUES (
     'configs_insert_ig_accommodation.sql', -- source
     'TEST', -- contexttype
     'ALL', -- testmode
-    null), -- equivalentclientcode
+    NULL), -- equivalentclientcode
 (
     '[SBAC for production assessments, SBAC_PT for practice assessments]', -- clientname
     'Illustration Glossary', -- type
@@ -117,11 +124,11 @@ VALUES (
     'configs_insert_ig_accommodation.sql', -- source
     'TEST', -- contexttype
     'ALL', -- testmode
-    null); -- equivalentclientcode
+    NULL); -- equivalentclientcode
 COMMIT;
 
 START TRANSACTION;
-INSERT INTO configs.tds_coremessageobject(
+INSERT INTO tds_coremessageobject(
     context,
     contexttype,
     messageid,
@@ -139,22 +146,22 @@ SELECT
     'Illustration', -- message
     'AIR' -- fromclient
 FROM
-    configs.tds_coremessageobject;
+    tds_coremessageobject;
 COMMIT;
 
 START TRANSACTION;
-INSERT INTO configs.tds_coremessageuser(
+INSERT INTO tds_coremessageuser(
     _fk_coremessageobject,
     systemid)
 SELECT
     MAX(_key),
     'Student'
 FROM
-    configs.tds_coremessageobject;
+    tds_coremessageobject;
 COMMIT;
 
 -- needed in order to reset/recalc all the messages
 START TRANSACTION;
-DELETE FROM configs.__appmessages;
-DELETE FROM configs.__appmessagecontexts;
+DELETE FROM __appmessages;
+DELETE FROM __appmessagecontexts;
 COMMIT;
