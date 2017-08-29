@@ -32,7 +32,6 @@
   <properties>
 		<java-version>1.8</java-version>
 		<shared-master.version>4.0.4</shared-master.version>
-	  <!-- Note: this should be in-sync with the version in sharedmultijar_release/pom.xml that is used for student and proctor -->
 		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
