@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.opentestsystem.shared</groupId>
 		<artifactId>shared-build-parent</artifactId>
-		<version>4.0.6</version>
+		<version>4.0.7</version>
 	</parent>
 
 	<scm>
@@ -31,7 +31,7 @@
   
   <properties>
 		<java-version>1.8</java-version>
-		<shared-master.version>4.0.4</shared-master.version>
+		<shared-master.version>4.0.5</shared-master.version>
 		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>

@@ -12,7 +12,7 @@
 	</parent>
 
 	<properties>
-		<progman-client.version>4.0.0.RELEASE</progman-client.version>
+		<progman-client.version>4.0.4</progman-client.version>
 	</properties>
 
 	<dependencies>
