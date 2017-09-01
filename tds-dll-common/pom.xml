@@ -8,11 +8,11 @@
 	<parent>
 		<groupId>org.opentestsystem.delivery</groupId>
 		<artifactId>tds-dll-master</artifactId>
-		<version>4.0.1-SNAPSHOT</version>
+		<version>4.0.3-SNAPSHOT</version>
 	</parent>
 
 	<properties>
-		<progman-client.version>4.0.0.RELEASE</progman-client.version>
+		<progman-client.version>4.0.4</progman-client.version>
 	</properties>
 
 	<dependencies>
@@ -48,7 +48,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>4.3.10.RELEASE</version>
 		</dependency>
 
 		<dependency>
