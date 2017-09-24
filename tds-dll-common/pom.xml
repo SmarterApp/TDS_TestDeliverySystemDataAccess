@@ -8,25 +8,19 @@
 	<parent>
 		<groupId>org.opentestsystem.delivery</groupId>
 		<artifactId>tds-dll-master</artifactId>
-		<version>3.1.1.RELEASE</version>
+		<version>4.0.3.RELEASE</version>
 	</parent>
-
-	<properties>
-		<progman-client.version>3.1.0.RELEASE</progman-client.version>
-	</properties>
 
 	<dependencies>
 		<!-- Start: Program management integration dependency -->
 		<dependency>
 			<groupId>org.opentestsystem.shared</groupId>
 			<artifactId>prog-mgmnt-client</artifactId>
-			<version>${progman-client.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.opentestsystem.shared</groupId>
 			<artifactId>prog-mgmnt-client-null-impl</artifactId>
-			<version>${progman-client.version}</version>
 		</dependency>
 		<!-- End: Program management integration dependency -->
 
@@ -43,19 +37,22 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			<version>${org.springframework-version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>${org.springframework-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson-annotations.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-redis</artifactId>
-			<version>${spring-data-redis.version}</version>
 		</dependency>
 
 		<dependency>

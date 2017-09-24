@@ -12034,7 +12034,7 @@ public SingleDataResultSet T_GetEligibleTests_SP_Old (SQLConnection connection, 
         while (iter2.hasNext ()) {
           String columnName = iter2.next ();
           b.append (columnName).append (':')
-              .append (rec.get (columnName))
+              .append ((String)rec.get (columnName))
               .append ("); (");
         }
         b.append (")");
