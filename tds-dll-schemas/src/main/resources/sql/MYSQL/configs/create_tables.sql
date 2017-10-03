@@ -435,6 +435,7 @@ create table `client_testproperties`  (
 	`initialabilitytestid`      varchar(100) DEFAULT NULL,
 	`proctoreligibility`        int not null default 0,
 	`category`                  varchar(50) null,
+    `msb`                       bit not null default 0,
 	constraint `pk_client_testproperties` primary key clustered(`clientname`,`testid`)
 ) default charset = UTF8;
 
