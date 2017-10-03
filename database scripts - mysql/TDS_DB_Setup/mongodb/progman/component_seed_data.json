@@ -1,0 +1,13 @@
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Permissions" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Assessment and Registration Tools" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Test Authoring" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "TestSpecBank" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Test Item Bank" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Program Management" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Proctor" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Student" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Portal" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Monitoring and Alerting" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Core Standards" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Teacher Hand Scoring System" }
+{ "_class" : "org.opentestsystem.shared.progman.domain.Component", "name" : "Digital Library" }
