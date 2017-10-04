@@ -330,7 +330,7 @@ create table `client_tds_rtsattribute`  (
 	`type`           	varchar(25) not null default 'attribute',
 	`entitytype`     	varchar(100) null,
 	constraint `pk_rts_attribute` primary key clustered(`clientname`,`fieldname`,`_efk_entitytype`,`type`)
-) default charset = latin1;
+);
 
 create table `client_tds_rtsattributevalues`  ( 
 	`clientname`     	varchar(100) not null,
@@ -341,7 +341,7 @@ create table `client_tds_rtsattributevalues`  (
 	`type`           	varchar(25) not null default 'attribute',
 	constraint `pk_rts_attributevalues` primary key clustered(`clientname` (50),`fieldname`,`value` (100),`_efk_entitytype`,`type`)
 	
-) default charset = latin1; 
+);
 
 create table `client_testeligibility`  ( 
 	`_key`           	varbinary(16) not null, -- default (newid()),
@@ -355,7 +355,7 @@ create table `client_testeligibility`  (
 	`eligibilitytype`	varchar(50) null,
 	`matchtype`      	int not null default 0,
 	constraint `pk_client_testeligibility` primary key clustered(`_key`)
-) default charset = latin1;
+);
 
 create table `client_testgrades`  ( 
 	`clientname`       	varchar(100) not null,
@@ -712,11 +712,11 @@ create table `system_applicationsettings`  (
 	`type`                       	varchar(100) not null,
 	`value`                      	varchar(100) not null,
 	`_fk_tds_applicationsettings`	varbinary(16) not null,
-	`servername`	                varchar(256) not null default '*',
-	`siteid`                        varchar(256) not null default '*',
+	`servername`	                varchar(100) not null default '*',
+	`siteid`                        varchar(100) not null default '*',
 
 	constraint `pk_systemapplicationsetting` primary key clustered(`clientname`, `servername`, `siteid`,`_fk_tds_applicationsettings`)
-) default charset = latin1; -- UTF8;
+); -- UTF8;
 
 create table `system_browserwhitelist`  ( 
 	`clientname`              	varchar(100) not null,

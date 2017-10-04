@@ -908,7 +908,7 @@ create table `testeeattribute`  (
 	`attributevalue`     	varchar(400) null,
 	`context`            	varchar(50) not null,
 	`_date`              	datetime(3) not null -- constraint `df__testeeatt___date__7b113988`  default (now()) 
-	) default charset = latin1;
+	);
 
 create table `testeecomment`  ( 
 	`clientname`         	varchar(100) not null,

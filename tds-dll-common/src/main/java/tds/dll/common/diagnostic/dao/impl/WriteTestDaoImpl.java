@@ -152,7 +152,7 @@ public class WriteTestDaoImpl implements WriteTestDao {
 
                 singleNamedTemplate.update(dbNameUtility.setDatabaseNames(insert), parameters);
 
-                Integer found = singleNamedTemplate.queryForInt(dbNameUtility.setDatabaseNames(query), parameters);
+                Integer found = singleNamedTemplate.queryForObject(dbNameUtility.setDatabaseNames(query), parameters, Integer.class);
                 logger.debug("Found count: {} for query {}", found, query);
                 if (found == 1) {
                     readVerify = true;
