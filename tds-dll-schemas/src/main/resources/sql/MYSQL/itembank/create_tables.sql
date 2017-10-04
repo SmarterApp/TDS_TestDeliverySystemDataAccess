@@ -3,7 +3,7 @@ create table `aa_itemcl`  (
 	`_fk_item`        	varchar(25) not null,
 	`contentlevel`    	varchar(100) not null,
 	constraint `pk_itemcl` primary key clustered(`_fk_adminsubject`,`_fk_item`,`contentlevel`)
-) default charset = UTF8;
+);
 
 create table `affinitygroup`  ( 
 	`_fk_adminsubject` 	varchar(250) not null,
@@ -23,19 +23,19 @@ create table `affinitygroup`  (
     `precisiontargetmetweight`    float DEFAULT NULL,
     `precisiontargetnotmetweight` float DEFAULT NULL,
 	constraint `pk_affinitygroup` primary key clustered(`_fk_adminsubject`,`groupid`)
-) default charset = UTF8;
+);
 
 create table `affinitygroupitem`  ( 
 	`_fk_adminsubject`	varchar(250) not null,
 	`groupid`         	varchar(100) not null,
 	`_fk_item`        	varchar(100) not null,
 	constraint `pk_affinityitem` primary key clustered(`_fk_adminsubject`,`groupid`,`_fk_item`)
-) default charset = UTF8;
+);
 
 create table `alloweditemprops`  ( 
 	`propertyname`	varchar(50) not null,
 	constraint `pk_allowedprops` primary key clustered(`propertyname`)
-) default charset = UTF8;
+);
 
 create table `configsloaded`  ( 
 	`configid`          	int not null,
@@ -47,7 +47,7 @@ create table `configsloaded`  (
 	`tdsconfigs_updated`	datetime(3) null,
 	`_key`              	varbinary(16) not null, -- constraint `df__configsloa___key__302f0d3d`  default (newid(,
 	constraint `pk_configsloaded` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `importitemcohorts`  ( 
 	`bankkey`      	varchar(150) null,
@@ -55,21 +55,21 @@ create table `importitemcohorts`  (
 	`testname`     	varchar(150) null,
 	`itemid`       	varchar(150) null,
 	`cohort number`	varchar(150) null 
-) default charset = UTF8;
+);
 
 create table `importtestcohorts`  ( 
 	`blueprint key`	varchar(150) null,
 	`testname`     	varchar(150) null,
 	`cohort number`	varchar(150) null,
 	`cohort ratio` 	varchar(150) null 
-) default charset = UTF8;
+);
 
 create table `itemmeasurementparameter`  ( 
 	`_fk_itemscoredimension`  	varbinary(16) not null,
 	`_fk_measurementparameter`	int not null,
 	`parmvalue`               	float null,
 	constraint `pk_itemmeasureparm` primary key clustered(`_fk_itemscoredimension`,`_fk_measurementparameter`)
-) default charset = UTF8;
+);
 
 create table `itemscoredimension`  ( 
 	`dimension`           	varchar(255) not null default '',
@@ -84,7 +84,7 @@ create table `itemscoredimension`  (
 	`_fk_item`            	varchar(150) not null,
 	`_fk_measurementmodel`	int not null,
 	constraint `pk_itemscoredim` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblitemselectionparm`  ( 
 	`_fk_adminsubject` varchar(250) not null,
@@ -94,20 +94,20 @@ create table `tblitemselectionparm`  (
 	`label`            varchar(200) default null,
 	`_key`             varbinary(16) not null,
  	constraint `pk_tblitemselectionparm` primary key clustered(`_key`) 
-) default charset = UTF8;
+);
 
 create table `tbltestpackage` (
 	`_key`             varbinary(16) not null,
 	`testpackage`      longtext,
 	constraint `pk_tbltestpackage` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tbladminsubjecttestpackage` (
 	`_fk_adminsubject` varchar(250) not null,
 	`_fk_testpackage`  varbinary(16) not null,
 	`dateloaded`	   datetime(3) not null,
 	constraint `pk_tbladminsubjecttestpackage` primary key clustered(`_fk_testpackage`, `_fk_adminsubject`)
-) default charset = UTF8;
+);
 
 /*
 create table `loader_accommodations`  ( 
@@ -120,7 +120,7 @@ create table `loader_accommodations`  (
 	`valuedescription`	varchar(255) null,
 	`owner`           	varchar(50) not null,
 	constraint `pk_loaderaccommodations` primary key clustered(`code`,`owner`)
-) default charset = UTF8;
+);
 
 create table `loader_affinitygroups`  ( 
 	`testname`   	varchar(100) not null,
@@ -133,7 +133,7 @@ create table `loader_affinitygroups`  (
 	`weight`     	float not null default 1.0,
 	`isfieldtest`	bit not null default 0,
 	constraint `pk_loaderaffinitygroups` primary key clustered(`testname`,`groupid`)
-) default charset = UTF8;
+);
 
 create table `loader_affinityitems`  ( 
 	`testname`	varchar(100) not null,
@@ -142,7 +142,7 @@ create table `loader_affinityitems`  (
 	`itemid`  	varchar(25) not null,
 	`_itemkey`	varchar(100) null,
 	constraint `pk_loaderaffinityitems` primary key clustered(`testname`,`groupid`,`itemid`)
-) default charset = UTF8;
+);
 
 create table `loader_contentlevels`  ( 
 	`adminclkey`    	varchar(255) null,
@@ -164,14 +164,14 @@ create table `loader_contentlevels`  (
 	`isstrictmax`   	bit null default 0,
 	`bpweight`      	float null default 1,
 	constraint `pk_loadercl` primary key clustered(`testname`,`contentlevelid`)
-) default charset = UTF8;
+);
 
 create table `loader_errors`  ( 
 	`configid`	bigint not null,
 	`severity`	varchar(100) not null,
 	`test`    	varchar(250) null,
 	`error`   	text not null 
-	) default charset = UTF8;
+	);
 
 create table `loader_formitems`  ( 
 	`testname`    	varchar(255) not null,
@@ -184,7 +184,7 @@ create table `loader_formitems`  (
 	`_testkey`    	varchar(200) null,
 	`isactive`    	bit not null default 1,
 	constraint `pk_loaderformitems` primary key clustered(`testname`,`formkey`,`itemid`)
-) default charset = UTF8;
+);
 
 create table `loader_forms`  ( 
 	`formid`    	varchar(255) null,
@@ -199,13 +199,13 @@ create table `loader_forms`  (
 	`originalid`	varchar(255) null,
 	`cohort`    	varchar(20) not null default 'default',
 	constraint `pk_loaderforms` primary key clustered(`testname`,`formkey`)
-) default charset = UTF8;
+);
 
 create table `loader_itemclancestors`  ( 
 	`contentlevel`	varchar(255) not null,
 	`ancestor`    	varchar(255) not null,
 	constraint `pk_clancestor` primary key clustered(`contentlevel`,`ancestor`)
-) default charset = UTF8;
+);
 
 create table `loader_itemproperties`  ( 
 	`code`       	varchar(255) not null,
@@ -215,7 +215,7 @@ create table `loader_itemproperties`  (
 	`_itemkey`   	varchar(200) null,
 	`_testkey`   	varchar(250) null,
 	constraint `pk_loaderitemprops` primary key clustered(`itemid`,`property`,`code`)
-) default charset = UTF8;
+);
 
 create table `loader_itemscoredimension`  ( 
 	`dimension`        	varchar(255) null default '',
@@ -243,7 +243,7 @@ create table `loader_itemscoredimension`  (
 	`_testkey`         	varchar(200) null,
 	`p10`              	float null,
 	constraint `pk_loaderitemdim` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `loader_itembank`  ( 
 	`bankkey`   	bigint not null,
@@ -253,7 +253,7 @@ create table `loader_itembank`  (
 	`season`    	varchar(255) null,
 	`configid`  	int null,
 	constraint `pk_loaderitembank` primary key clustered(`bankkey`)
-) default charset = UTF8;
+);
 
 create table `loader_items`  ( 
 	`answerkey`       	varchar(255) null,
@@ -280,13 +280,13 @@ create table `loader_items`  (
 	`isprintable`     	bit null,
 	`responsemimetype`	varchar(255) null,
 	constraint `pk_loaderitems` primary key clustered(`testname`,`itskey`)
-) default charset = UTF8;
+);
 
 create table `loader_logicaltests`  ( 
 	`logicalid`	varchar(150) null,
 	`testkey`  	varchar(250) not null,
 	`its_id`   	varchar(150) not null 
-) default charset = UTF8;
+);
 
 create table `loader_measurementparameter`  ( 
 	`modelnum`       	float not null,
@@ -294,7 +294,7 @@ create table `loader_measurementparameter`  (
 	`parmname`       	varchar(255) null,
 	`parmdescription`	varchar(255) null,
 	`modelname`      	varchar(255) not null 
-) default charset = UTF8;
+);
 
 create table `loader_proficiencylevels`  ( 
 	`testid`  	varchar(255) not null,
@@ -306,13 +306,13 @@ create table `loader_proficiencylevels`  (
 	`scaledhi`	float null,
 	`_testkey`	varchar(255) null,
 	constraint `pk_loaderproflevels` primary key clustered(`testid`,`plevel`)
-) default charset = UTF8;
+);
 
 create table `loader_rulesrelaxvalidation`  ( 
 	`_fk_ruleid`	varchar(255) not null,
 	`startdate` 	varchar(255) null,
 	`enddate`   	varchar(255) null 
-) default charset = UTF8;
+);
 
 create table `loader_stimuli`  ( 
 	`clientid`    	varchar(255) null,
@@ -323,7 +323,7 @@ create table `loader_stimuli`  (
 	`testname`    	varchar(255) not null,
 	`_testkey`    	varchar(200) null,
 	constraint `pk_loaderstimuli` primary key clustered(`testname`,`stimulusid`)
-) default charset = UTF8;
+);
 
 create table `loader_stimulusproperties`  ( 
 	`code`       	varchar(255) not null,
@@ -331,7 +331,7 @@ create table `loader_stimulusproperties`  (
 	`property`   	varchar(255) not null default 'language',
 	`stimulusid` 	varchar(255) not null,
 	constraint `pk_loaderstimprops` primary key clustered(`stimulusid`,`property`,`code`)
-) default charset = UTF8;
+);
 
 create table `loader_strands`  ( 
 	`adminstrandkey`  	varchar(255) null,
@@ -353,7 +353,7 @@ create table `loader_strands`  (
 	`isstrictmax`     	bit null default 0,
 	`bpweight`        	float null default 1,
 	constraint `pk_loaderstrands` primary key clustered(`testname`,`subject`,`strandid`)
-) default charset = UTF8;
+);
 
 create table `loader_tests`  ( 
 	`ftendpos`             	varchar(255) null,
@@ -386,13 +386,13 @@ create table `loader_tests`  (
 	`abilityoffset`        	float null,
 	`cset1order`           	varchar(50) null default 'ability',
 	constraint `pk_loadertests` primary key clustered(`testname`)
-) default charset = UTF8;
+);
 */
 create table `measurementmodel`  ( 
 	`modelnumber`	int not null,
 	`modelname`  	varchar(50) not null,
 	constraint `pk_measurementmodel` primary key clustered(`modelnumber`)
-) default charset = UTF8;
+);
 
 create table `measurementparameter`  ( 
 	`_fk_measurementmodel`	int not null,
@@ -400,7 +400,7 @@ create table `measurementparameter`  (
 	`parmname`            	varchar(50) not null,
 	`parmdescription`     	varchar(50) null,
 	constraint `pk_measurementparameter` primary key clustered(`_fk_measurementmodel`,`parmnum`)
-) default charset = UTF8;
+);
 
 create table `performancelevels`  ( 
 	`_fk_content`	varchar(250) not null,
@@ -410,14 +410,14 @@ create table `performancelevels`  (
 	`scaledlo`   	float null,
 	`scaledhi`   	float null,
 	constraint `pk_performancelevels` primary key clustered(`_fk_content`,`plevel`)
-) default charset = UTF8;
+);
 
 create table `projects`  ( 
 	`_key`       	int not null,
 	`_fk_client` 	bigint null,
 	`description`	varchar(256) not null,
 	constraint `pk_projects` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `setoftestgrades`  ( 
 	`testid`           	varchar(100) not null,
@@ -427,14 +427,14 @@ create table `setoftestgrades`  (
 	`enrolledsubject`  	varchar(100) null,
 	`_key`             	varbinary(16) not null, -- default (newid()),
 	constraint `pk_setoftestgrades` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `testcohort`  ( 
 	`_fk_adminsubject`	varchar(200) not null,
 	`cohort`          	int not null,
 	`itemratio`       	float not null default 1,
 	constraint `pk_testcohort` primary key clustered(`_fk_adminsubject`,`cohort`)
-) default charset = UTF8;
+);
 
 create table `testform`  ( 
 	`_fk_adminsubject`	varchar(250) not null,
@@ -449,7 +449,7 @@ create table `testform`  (
 	`updateconfig`    	bigint null,
 	`cohort`          	varchar(20) not null default 'default',
 	constraint `pk_testform` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `testformitem`  ( 
 	`_fk_item`        	varchar(150) not null,
@@ -459,34 +459,34 @@ create table `testformitem`  (
 	`_fk_testform`    	varchar(100) null,
 	`isactive`        	bit not null default 1,
 	constraint `pk_testformitem` primary key clustered(`_fk_item`,`formposition`,`_fk_adminsubject`, `_fk_testform`)
-) default charset = UTF8;
+);
 
 create table `_synonyms`  ( 
 	`dbname`	varchar(200) not null,
 	`_date` 	datetime(3) not null,
 	`prefix`	varchar(200) not null,
 	constraint `pk_synonyms` primary key clustered(`prefix`)
-) default charset = UTF8;
+);
 
 create table `_sys_formtestitems`  ( 
 	`testid` 	varchar(100) not null,
 	`bankkey`	bigint not null,
 	`itemkey`	bigint not null,
 	constraint `pk_sysformitems` primary key clustered(`testid`,`bankkey`,`itemkey`)
-) default charset = UTF8;
+);
 
 create table `_testupdate`  ( 
 	`_fk_adminsubject`	varchar(250) not null,
 	`configid`        	bigint not null,
 	`_date`           	datetime(3) not null -- default (getdate()) 
-	) default charset = UTF8;
+	);
 
 create table `_dblatency`  ( 
 	`duration` 	int not null,
 	`endtime`  	datetime(3) not null,
 	`procname` 	varchar(50) not null,
 	`starttime`	datetime(3) not null 
-	) default charset = UTF8;
+	);
 
 create table `tbladminstimulus`  ( 
 	`_fk_stimulus`    	varchar(100) not null,
@@ -498,7 +498,7 @@ create table `tbladminstimulus`  (
 	`updateconfig`    	bigint null,
 	`groupid`         	varchar(50) null,
 	constraint `pk_adminstimulus` primary key clustered(`_fk_adminsubject`,`_fk_stimulus`)
-) default charset = UTF8;
+);
 
 create table `tbladminstrand`  ( 
 	`_fk_adminsubject`	varchar(250) not null,
@@ -529,7 +529,7 @@ create table `tbladminstrand`  (
     `precisiontargetnotmetweight` float DEFAULT NULL,
     `abilityweight`     float DEFAULT NULL,
 	constraint `pk_adminstrand` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblalternatetest`  ( 
 	`_key`            	bigint not null AUTO_INCREMENT,
@@ -537,7 +537,7 @@ create table `tblalternatetest`  (
 	`formlang`        	char(128) not null,
 	`filepath`        	char(255) not null,
 	constraint `pk_tblalternatetest` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblclient`  ( 
 	`_key`       	bigint not null AUTO_INCREMENT,
@@ -545,7 +545,7 @@ create table `tblclient`  (
 	`description`	varchar(255) null,
 	`homepath`   	varchar(250) null,
 	constraint `pk_tblclient` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblitem`  ( 
 	`_efk_itembank`  	bigint not null,
@@ -564,7 +564,7 @@ create table `tblitem`  (
 	`updateconfig`   	bigint null,
 	primary key (`_key`),
 	key `ix_efk_item` (`_efk_item`)
-) default charset = UTF8;
+);
 
 create table `tblitembank`  ( 
 	`_fk_client`   	bigint not null,
@@ -576,7 +576,7 @@ create table `tblitembank`  (
 	`_key`         	bigint not null,
 	`contract`     	varchar(255) null,
 	constraint `pk_tblitembank_1` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblitemprops`  ( 
 	`_fk_item`        	varchar(150) not null,
@@ -586,7 +586,7 @@ create table `tblitemprops`  (
 	`_fk_adminsubject`	varchar(250) not null,
 	`isactive`        	bit not null default 1,
 	constraint `pk_itemprops` primary key clustered(`_fk_adminsubject`,`_fk_item`,`propname`,`propvalue`)
-) default charset = UTF8;
+);
 
 create table `tblsetofadminitems`  ( 
 	`_fk_item`        	varchar(150) not null,
@@ -621,7 +621,7 @@ create table `tblsetofadminitems`  (
 	`irt2_model`      	varchar(800) null,
 	`ftweight`          float not null default 1.0,
 	constraint `pk_adminitems` primary key clustered(`_fk_adminsubject`,`_fk_item`)
-) default charset = UTF8;
+);
 
 create table `tblsetofadminsubjects`  ( 
 	`_key`                   	varchar(250) not null,
@@ -674,7 +674,7 @@ create table `tblsetofadminsubjects`  (
     `initialabilitytestID`      varchar(100) default NULL,
     `testtype`                  varchar(30) default NULL,
 	constraint `pk_tblsetofadminsubjects` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblsetofitemstimuli`  ( 
 	`_fk_item`        	varchar(150) not null,
@@ -682,7 +682,7 @@ create table `tblsetofitemstimuli`  (
 	`_fk_adminsubject`	varchar(250) not null,
 	`loadconfig`      	bigint null,
 	constraint `pk_itemstimuli` primary key clustered(`_fk_item`,`_fk_stimulus`,`_fk_adminsubject`)
-) default charset = UTF8;
+);
 
 create table `tblsetofitemstrands`  ( 
 	`_fk_item`        	varchar(150) not null,
@@ -690,7 +690,7 @@ create table `tblsetofitemstrands`  (
 	`_fk_adminsubject`	varchar(250) not null,
 	`loadconfig`      	bigint null,
 	constraint `pk_itemstrands` primary key clustered(`_fk_item`,`_fk_strand`,`_fk_adminsubject`)
-) default charset = UTF8;
+);
 
 create table `tblstimulus`  ( 
 	`_efk_itembank`  	bigint not null,
@@ -706,7 +706,7 @@ create table `tblstimulus`  (
 	`updateconfig`   	bigint null,
 	constraint `pk_tblstimulus_1` primary key clustered(`_key`),
 	key `ix_tblstimulus_efk_itskey` (`_efk_itskey`)
-) default charset = UTF8;
+);
 
 create table `tblstrand`  ( 
 	`_fk_subject`    	varchar(150) not null,
@@ -720,7 +720,7 @@ create table `tblstrand`  (
 	`loadconfig`     	bigint null,
 	`updateconfig`   	bigint null,
 	constraint `pk_tblstrand_1` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblsubject`  ( 
 	`name`        	varchar(100) not null,
@@ -730,7 +730,7 @@ create table `tblsubject`  (
 	`loadconfig`  	bigint null,
 	`updateconfig`	bigint null,
 	constraint `pk_tblsubject_1` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tbltestadmin`  ( 
 	`schoolyear`  	varchar(25) not null,
@@ -741,7 +741,7 @@ create table `tbltestadmin`  (
 	`loadconfig`  	bigint null,
 	`updateconfig`	bigint null,
 	constraint `pk_tbltestadmin_1` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tblitemgroup` (
    `_fk_adminsubject`     varchar(250) not null,
@@ -755,7 +755,7 @@ create table `tblitemgroup` (
    `ftitemcount`          int null,
    `opitemcount`          int null,
    `ftweightsum`          float null
-) default charset = UTF8;
+);
 
 
 
@@ -766,7 +766,7 @@ create table loader_errors (
   , testpackageversion 	varchar(20)
   , severity 			varchar(100) not null
   ,	errormsg 			text not null
-) default charset = UTF8;
+);
 
 create table loader_setofitemstrands (
 	_fk_package	  	 varchar(350)
@@ -774,7 +774,7 @@ create table loader_setofitemstrands (
   , _fk_strand 		 varchar(150)
   , _fk_adminsubject varchar(250)
   , version 		 bigint
-) default charset = UTF8;
+);
 
 create table loader_measurementparameter(
 	modelnum 		float not null
@@ -782,7 +782,7 @@ create table loader_measurementparameter(
   ,	parmname 		nvarchar(255) null
   ,	parmdescription nvarchar(255) null
   ,	modelname 		nvarchar(255) not null
-) default charset = UTF8;
+);
 
 create table loader_testpackage (
 	packagekey		varchar(350)
@@ -801,14 +801,14 @@ create table loader_testpackage (
   , subjectname		varchar(100)
   , testadmin 		varchar(250)
   , _efk_itembank   bigint
-) default charset = UTF8;
+);
 
 create table loader_testpackageproperties (
 	_fk_package	  varchar(350)
   , propname  	  varchar(200)
   , propvalue 	  varchar(200)
   , proplabel 	  varchar(200)
-) default charset = UTF8;
+);
 
 create table loader_testblueprint (
 	_fk_package	  	varchar(350)
@@ -825,7 +825,7 @@ create table loader_testblueprint (
   , parentid		varchar(150)
   , version 		int
   , treelevel		int
-) default charset = UTF8;
+);
 
 create table loader_testpoolproperties (
 	_fk_package	varchar(350)
@@ -833,7 +833,7 @@ create table loader_testpoolproperties (
   , propvalue	varchar(128)
   , proplabel	varchar(150)
   , itemcount	int
-) default charset = UTF8;
+);
 
 create table loader_testpassages (
 	_fk_package	varchar(350)
@@ -843,7 +843,7 @@ create table loader_testpassages (
   ,	passagename	varchar(100)
   , passagevalue varchar(200)
   ,	version		int
-) default charset = UTF8;
+);
 
 create table loader_testitem (
 	_fk_package		varchar(350)
@@ -853,7 +853,7 @@ create table loader_testitem (
   , testitemid		varchar(150)	
   , testitemname	varchar(80)
   , version			int	
-) default charset = UTF8;
+);
 
 create table loader_testitemrefs (
 	_fk_package	varchar(350)
@@ -862,7 +862,7 @@ create table loader_testitemrefs (
   , ref			varchar(150)
   , refcategory varchar(250)
   , treelevel	int
-) default charset = UTF8;
+);
 
 create table loader_testitempoolproperties (
 	_fk_package	varchar(350)
@@ -870,7 +870,7 @@ create table loader_testitempoolproperties (
   , propname	varchar(50)
   , propvalue	varchar(128)
   , proplabel	varchar(150)
-) default charset = UTF8;
+);
 
 create table loader_itemscoredimension (
 	_fk_package		varchar(350)
@@ -883,7 +883,7 @@ create table loader_itemscoredimension (
   , measurementparam varchar(50)  
   , measurementparamnum int	
   , measurementvalue float
-) default charset = UTF8;
+);
 
 create table loader_itemscoredimensionproperties (
 	_fk_package		varchar(350)
@@ -891,7 +891,7 @@ create table loader_itemscoredimensionproperties (
   , dimensionname   varchar(200)
   , propname		varchar(200)
   , propvalue		varchar(200)
-) default charset = UTF8;
+);
 
 create table loader_testforms (
 	_fk_package		varchar(350)
@@ -899,7 +899,7 @@ create table loader_testforms (
   , testformname	varchar(200)
   , testformlength	int
   , version			int
-) default charset = UTF8;
+);
 
 create table loader_testformproperties (
 	_fk_package	varchar(350)
@@ -909,7 +909,7 @@ create table loader_testformproperties (
   , proplabel	varchar(200)
   , propvalue	varchar(200)
   , itemcount	int
-) default charset = UTF8;
+);
 
 
 create table loader_testformpartition (
@@ -918,7 +918,7 @@ create table loader_testformpartition (
   , formpartitionid	varchar(200)
   , formpartitionname varchar(250)
   , version 		int
-) default charset = UTF8;
+);
 
 create table loader_testformitemgroup (
 	_fk_package			 varchar(350)
@@ -932,7 +932,7 @@ create table loader_testformitemgroup (
   , maxitems			 varchar(30)
   , maxresponses		 varchar(30)
   , passageid			 varchar(100)
-) default charset = UTF8;
+);
 
 create table loader_testformgroupitems (
 	_fk_package		varchar(350)
@@ -946,7 +946,7 @@ create table loader_testformgroupitems (
   , isactive		bit
   , isfieldtest		bit
   , blockid			varchar(10)
-) default charset = UTF8;
+);
 
 create table loader_segment (
 	_fk_package			varchar(350)
@@ -958,7 +958,7 @@ create table loader_segment (
   , itemselectorname  	varchar(200)
   , itemselectorlabel 	varchar(200)
   , version 			float	
-) default charset = UTF8;
+);
 
 create table loader_segmentblueprint (
 	_fk_package			varchar(350)
@@ -966,7 +966,7 @@ create table loader_segmentblueprint (
   ,	segmentbpelementid	varchar(150)
   , minopitems			int
   , maxopitems			int
-) default charset = UTF8;
+);
 
 create table loader_segmentitemselectionproperties (
 	_fk_package		varchar(350)
@@ -976,7 +976,7 @@ create table loader_segmentitemselectionproperties (
   , propname		varchar(200)
   , propvalue		varchar(100)
   , proplabel		varchar(500)
-) default charset = UTF8;
+);
 
 create table loader_segmentpool (
 	_fk_package		varchar(350)
@@ -986,13 +986,13 @@ create table loader_segmentpool (
   , maxitems		varchar(30)
   , maxresponses	varchar(30)
   , version			int 
-) default charset = UTF8;
+);
 
 create table loader_segmentform (
 	_fk_package		varchar(350)
   ,	segmentid 		varchar(250)
   , formpartitionid varchar(100)
-) default charset = UTF8;
+);
 
 create table loader_segmentpoolpassageref (
 	_fk_package		varchar(350)
@@ -1000,7 +1000,7 @@ create table loader_segmentpoolpassageref (
   , itemgroupid		varchar(100)
   , passageid		varchar(100)
 
-) default charset = UTF8;
+);
 
 create table loader_segmentpoolgroupitem (
 	_fk_package		varchar(350)
@@ -1013,4 +1013,4 @@ create table loader_segmentpoolgroupitem (
   , isfieldtest		bit
   , isactive		bit
   , blockid			varchar(10)
-) default charset = UTF8;
+);
