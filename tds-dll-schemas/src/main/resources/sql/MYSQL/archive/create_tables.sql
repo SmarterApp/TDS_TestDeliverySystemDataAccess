@@ -6,7 +6,7 @@ create table `auditaccommodations`  (
 	`accvalue`           	varchar(250) null,
 	`hostname`           	varchar(50) null, -- constraint `df__auditacco__hostn__2f05deda`  default (host_name()),
 	`dbname`             	varchar(50) null
-	)default charset = UTF8;
+	);
 
 create table `opportunityaudit`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -20,7 +20,7 @@ create table `opportunityaudit`  (
 	`actor`              	varchar(100) null,
 	`dbname`             	varchar(50) null, -- constraint `df__opportuni__dbnam__4f7cd00d`  default (db_name()),
 	`satellite`          	varchar(200) null 
-	)default charset = UTF8;
+	);
 
 create table `opportunityclient`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -37,7 +37,7 @@ create table `opportunityclient`  (
 	`localip`            	varchar(255) null,
 	`texttospeech`       	varchar(100) null,
 	`dbname`             	varchar(255) null
-	)default charset = UTF8;
+	);
 
 create table `serverlatency`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -55,7 +55,7 @@ create table `serverlatency`  (
 	`itemlist`           	varchar(1000) null,
 	`clientname`         	varchar(100) null,
 	`dbname`             	varchar(50) null
-	)default charset = UTF8;
+	);
 
 create table `serverlatencyarchive`  ( 
 	`client`             	varchar(100) null,
@@ -76,7 +76,7 @@ create table `serverlatencyarchive`  (
 	`_fk_testopportunity`	varbinary(16) null,
 	`datearchived`       	datetime(3) not null, -- constraint `df__serverlat__dater__37a5467c`  default (getdate()),
 	`dbname`             	varchar(50) null 
-	)default charset = UTF8;
+	);
 
 create table `sessionaudit`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -85,7 +85,7 @@ create table `sessionaudit`  (
 	`hostname`    	nchar(50) null, -- constraint `df_sessionaudit_hostname`  default (host_name()),
 	`browserkey`  	varbinary(16) not null,
 	`dbname`      	varchar(50) null
-	)default charset = UTF8;
+	);
 
 create table `systemclient`  ( 
 	`clientname`  	varchar(100) not null,
@@ -96,7 +96,7 @@ create table `systemclient`  (
 	`useragent`   	varchar(255) null,
 	`daterecorded`	datetime(3) not null, -- constraint `df_systemclient_daterecorded`  default (getdate()),
 	`dbname`      	varchar(50) null
-	)default charset = UTF8;
+	);
 
 create table `systemerrors`  ( 
 	`application`         	varchar(50) null default 'database',
@@ -114,7 +114,7 @@ create table `systemerrors`  (
 	`clientname`          	varchar(100) null,
 	`_fk_session`         	varbinary(16) null,
 	`dbname`              	varchar(50) null
-	)default charset = UTF8;
+	);
 
 create table `systemerrorsarchive`  ( 
 	`client`              	varchar(50) null,
@@ -135,7 +135,7 @@ create table `systemerrorsarchive`  (
 	`dbname`              	varchar(50) null,
 	`_fk_testopportunity` 	varbinary(16) null,
 	`_fk_session`         	varbinary(16) null 
-	)default charset = UTF8;
+	);
 
 create table `testopportunityscores_audit`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -147,7 +147,7 @@ create table `testopportunityscores_audit`  (
 	`_date`              	datetime(3) null, -- constraint `df__testoppor___date__141cde74`  default (getdate()),
 	`subject`            	varchar(100) null,
 	`dbname`             	varchar(50) null
-	)default charset = UTF8;
+	);
 
 create table `_dblatency`  ( 
 	`starttime`          	datetime(3) null,
@@ -162,7 +162,7 @@ create table `_dblatency`  (
 	`_fk_session`        	varbinary(16) null,
 	`dbname`             	varchar(50) null,
 	`comment`            	varchar(500) null 
-	)default charset = UTF8;
+	);
 
 create table `_dblatencyarchive`  ( 
 	`client`             	varchar(50) null,
@@ -179,7 +179,7 @@ create table `_dblatencyarchive`  (
 	`dbname`             	varchar(50) null,
 	`_fk_session`        	varbinary(16) null,
 	`_fk_testopportunity`	varbinary(16) null 
-	)default charset = UTF8;
+	);
 
 create table `_dblatencyreports`  ( 
 	`client`      	varchar(50) null,
@@ -194,5 +194,5 @@ create table `_dblatencyreports`  (
 	`source`      	varchar(50) null, -- constraint `df___dblatenc__sourc__25869641`  default (db_name()),
 	`daterecorded`	datetime(3) not null, -- constraint `df___dblatenc__dater__35bcfe0a`  default (getdate()),
 	`dbname`      	varchar(50) null
-	)default charset = UTF8;
+	);
 
