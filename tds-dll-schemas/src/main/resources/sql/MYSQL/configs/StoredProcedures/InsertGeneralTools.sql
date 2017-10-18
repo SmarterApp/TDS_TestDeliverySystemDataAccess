@@ -38,52 +38,55 @@ BEGIN
 		v_clientname, 'Language', b'0', b'1', 'TDSAcc-Language', b'1', b'0', b'1', b'1', b'0', NULL, 0, NOW(), 		
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'American Sign Language', b'1', b'1', 'TDSAcc-ASL', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 		
+		v_clientname, 'Print Size', b'1', b'1', 'TDSAcc-PrintSize', b'1', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Color Choices', b'1', b'1', 'TDSAcc-ColorChoices', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 		
+		v_clientname, 'American Sign Language', b'1', b'1', 'TDSAcc-ASL', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Highlight', b'1', b'0', 'TDSAcc-Highlight', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 		
+		v_clientname, 'Color Choices', b'1', b'1', 'TDSAcc-ColorChoices', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Mark for Review', b'1', b'0', 'TDSAcc-MarkForReview', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Highlight', b'1', b'0', 'TDSAcc-Highlight', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Masking', b'1', b'1', 'TDSAcc-Masking', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Mark for Review', b'1', b'0', 'TDSAcc-MarkForReview', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Strikethrough', b'1', b'0', 'TDSAcc-Strikethrough', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Masking', b'1', b'1', 'TDSAcc-Masking', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Expandable Passages', b'1', b'0', 'TDSAcc-ExpandablePassages', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(),
+		v_clientname, 'Strikethrough', b'1', b'0', 'TDSAcc-Strikethrough', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Streamlined Mode', b'1', b'0', 'TDSAcc-EAM', b'0', b'0', b'0', b'1', b'0', NULL, 999, NOW(), 		
+		v_clientname, 'Expandable Passages', b'1', b'0', 'TDSAcc-ExpandablePassages', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Word List', b'1', b'1', 'TDSAcc-WordList', b'0', b'0', b'0', b'1', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Streamlined Mode', b'1', b'0', 'TDSAcc-EAM', b'0', b'1', b'1', b'1', b'0', NULL, 999, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Student Comments', b'1', b'0', 'TDSAcc-StudentComments', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Word List', b'1', b'1', 'TDSAcc-WordList', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
+		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
+	), (
+		v_clientname, 'Student Comments', b'1', b'0', 'TDSAcc-StudentComments', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Global Notes', b'1', b'0', 'TDSAcc-GlobalNotes', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Global Notes', b'1', b'0', 'TDSAcc-GlobalNotes', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Closed Captioning', b'1', b'1', 'TDSACC-NFCLOSEDCAP', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Closed Captioning', b'1', b'1', 'TDSACC-NFCLOSEDCAP', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Print on Request', b'1', b'1', 'TDSAcc-PrintOnRequest', b'0', b'1', b'0', b'0', b'0', NULL, 0, NOW(), 
+		v_clientname, 'Print on Request', b'1', b'1', 'TDSAcc-PrintOnRequest', b'0', b'1', b'1', b'1', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'1', b'1', 'ALL'
 	), (
 		v_clientname, 'Tutorial', b'1', b'0', 'TDSAcc-Tutorial', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(), 
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, 'Language', b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Audio Playback Controls', b'1', b'0', 'TDSAcc-AudioPlaybackControls', b'0', b'0', b'0', b'0', b'1', NULL, 0, NOW(),
+		v_clientname, 'Audio Playback Controls', b'1', b'0', 'TDSAcc-AudioPlaybackControls', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
-		v_clientname, 'Font Type', b'1', b'0', 'TDSAcc-FontType', b'0', b'0', b'0', b'0', b'1', NULL, 0, NOW(), 
+		v_clientname, 'Font Type', b'1', b'0', 'TDSAcc-FontType', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
 		v_clientname, 'Hardware Checks', b'1', b'0', 'TDSAcc-HWCheck', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(), 
@@ -167,16 +170,16 @@ BEGIN
 		v_assessmentId, 14, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	),(
 		v_clientname, 'Highlight', 'TDS_Highlight0', 'False', b'0', b'0', 'Highlight feature is disabled', 
-		v_assessmentId, -1, 'TDSCore_Staging_Configs_2012', 'TDSCore_Staging_Configs_2012', 'TEST', 'ALL', NULL
+		v_assessmentId, -1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
 		v_clientname, 'Highlight', 'TDS_Highlight1', 'True', b'1', b'0', 'Highlight  feature is enabled', 
-		v_assessmentId, 1, 'TDSCore_Staging_Configs_2012', 'TDSCore_Staging_Configs_2012', 'TEST', 'ALL', NULL
+		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
-		'SBAC', 'Mark for Review', 'TDS_MfR0', 'False', b'0', b'0', 'Mark for Review feature is disabled', 
-		'CRESST G11-MATH-11', -1, 'TDSCore_Staging_Configs_2012', 'TDSCore_Staging_Configs_2012', 'TEST', 'ALL', NULL
+		v_clientname, 'Mark for Review', 'TDS_MfR0', 'False', b'0', b'0', 'Mark for Review feature is disabled',
+		v_assessmentId, -1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
-		'SBAC', 'Mark for Review', 'TDS_MfR1', 'True', b'1', b'0', 'Mark for Review  feature is enabled', 
-		'CRESST G11-MATH-11', 1, 'TDSCore_Staging_Configs_2012', 'TDSCore_Staging_Configs_2012', 'TEST', 'ALL', NULL
+		v_clientname, 'Mark for Review', 'TDS_MfR1', 'True', b'1', b'0', 'Mark for Review  feature is enabled',
+		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	),	(
 		v_clientname, 'Masking', 'TDS_Masking0', 'Masking Not Available', b'1', b'0', 'Masking is off', 
 		v_assessmentId, -1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
@@ -274,13 +277,31 @@ BEGIN
 		v_clientname, 'Expandable Passages', 'TDS_ExpandablePassages1', 'Expandable Passages On', b'1', b'0', 'Allow student to expand or collapse passages', 
 		v_assessmentId, 2, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
+		v_clientname, 'Print Size', 'TDS_PS_L0', 'No default zoom applied', b'1', b'0', 'There is no default zoom',
+		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	),  (
+		v_clientname, 'Print Size', 'TDS_PS_L1', 'Level 1', b'0', b'0', 'There is no default zoom',
+		v_assessmentId, 2, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	),  (
+		v_clientname, 'Print Size', 'TDS_PS_L2', 'Level 2', b'0', b'0', 'There is no default zoom',
+		v_assessmentId, 3, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	),  (
+		v_clientname, 'Print Size', 'TDS_PS_L3', 'Level 3', b'0', b'0', 'There is no default zoom',
+		v_assessmentId, 4, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	),  (
+		v_clientname, 'Print Size', 'TDS_PS_L4', 'Level 4', b'0', b'0', 'There is no default zoom',
+		v_assessmentId, 5, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	), (
 		v_clientname, 'Streamlined Mode', 'TDS_SLM0', 'Off', b'1', b'0', 'gen pop and accessibility in one shell', 
 		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
 		v_clientname, 'Streamlined Mode', 'TDS_SLM1', 'On', b'0', b'0', 'gen pop and accessibility in one shell', 
 		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
-		v_clientname, 'Student Comments', 'TDS_SCNotepad', 'Notepad', b'1', b'0', 'Students comments rendered as a notepad', 
+		v_clientname, 'Student Comments', 'TDS_SC0', 'Off', b'1', b'0', 'Digital Notepad is turned off',
+		v_assessmentId, 2, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	), (
+		v_clientname, 'Student Comments', 'TDS_SCNotepad', 'On', b'1', b'0', 'Digital Notepad is turned on',
 		v_assessmentId, 2, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
 		v_clientname, 'System Volume Control', 'TDS_SVC1', 'Show widget', b'1', b'0', 'allow student to change the volume', 
