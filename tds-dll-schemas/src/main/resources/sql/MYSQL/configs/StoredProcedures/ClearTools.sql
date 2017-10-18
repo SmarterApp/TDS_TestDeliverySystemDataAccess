@@ -6,7 +6,7 @@ BEGIN
 	DELETE FROM configs.client_testtooltype
 	WHERE context = v_assessmentId AND clientname = v_clientname AND toolname != 'Language' AND toolname != 'Print Size';
 	DELETE FROM configs.client_testtool
-	WHERE context = v_assessmentId AND clientname = v_clientname AND type != 'Language' AND type != 'Print Size' AND code != 'ENU'
+	WHERE context = v_assessmentId AND clientname = v_clientname AND type != 'Print Size' AND code != 'ENU';
 	DELETE FROM configs.client_tooldependencies
 	WHERE context = v_assessmentId AND clientname = v_clientname AND thentype != 'Language';
 	DELETE FROM __accommodationcache;
