@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opentestsystem.delivery</groupId>
   <artifactId>tds-dll-master</artifactId>
-  <version>4.0.3-SNAPSHOT</version>
+  <version>4.0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>TDS Data Logic Layer Master</name>
 
@@ -32,6 +32,7 @@
   <properties>
 		<java-version>1.8</java-version>
 		<shared-master.version>4.0.7</shared-master.version>
+		<progman-client.version>4.0.5.RELEASE</progman-client.version>
 		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
@@ -72,24 +73,35 @@
   </licenses>
   
   <dependencyManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.opentestsystem.shared</groupId>
-			<artifactId>shared-db</artifactId>
-			<version>${shared-master.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opentestsystem.shared</groupId>
-			<artifactId>shared-tr-api</artifactId>
-			<version>${shared-master.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opentestsystem.shared</groupId>
-			<artifactId>shared-db-test</artifactId>
-			<version>${shared-master.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+		<dependencies>
+			<dependency>
+				<groupId>org.opentestsystem.shared</groupId>
+				<artifactId>shared-db</artifactId>
+				<version>${shared-master.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.opentestsystem.shared</groupId>
+				<artifactId>shared-tr-api</artifactId>
+				<version>${shared-master.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.opentestsystem.shared</groupId>
+				<artifactId>shared-db-test</artifactId>
+				<version>${shared-master.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.opentestsystem.shared</groupId>
+				<artifactId>prog-mgmnt-client</artifactId>
+				<version>${progman-client.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.opentestsystem.shared</groupId>
+				<artifactId>prog-mgmnt-client-null-impl</artifactId>
+				<version>${progman-client.version}</version>
+			</dependency>
+		</dependencies>
   </dependencyManagement>
   
 	<build>

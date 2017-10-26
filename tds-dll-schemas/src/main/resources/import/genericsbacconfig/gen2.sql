@@ -2230,7 +2230,7 @@ insert into client_messagetranslation values (2622,'AIR','E koho ''oe i kahi no 
 insert into client_messagetranslation values (2432,'AIR','Pono ka Flash {0} a ''oi aku no ka hana ''ana i keia ho''ike','HAW','--ANY--','--ANY--',UNHEX(REPLACE('79B54618-D763-402A-AF91-DDA07CACD110','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2664,'AIR','Interfaz del Estudiante','ESN','--ANY--','--ANY--',UNHEX(REPLACE('130708C6-2C26-46E2-A60F-DDD11590A479','-','')),'2014-03-22 20:33:38.133');
 insert into client_messagetranslation values (2700,'AIR','Loa''a Ka Palapala Ho''ole Ho''ike Makua  ','HAW','--ANY--','--ANY--',UNHEX(REPLACE('35FC1564-EF13-48B3-9FBF-DDF1CDC6DCFC','-','')),'2013-08-01 11:02:31.780');
-insert into client_messagetranslation values (3002,'AIR','Someter y cerrar','ESN','--ANY--','--ANY--',UNHEX(REPLACE('A4CFCE58-9811-407F-A8EF-DE45038BCCE8','-','')),'2014-03-22 20:34:47.200');
+insert into client_messagetranslation values (3002,'AIR','Guardar y cerrar','ESN','--ANY--','--ANY--',UNHEX(REPLACE('A4CFCE58-9811-407F-A8EF-DE45038BCCE8','-','')),'2014-03-22 20:34:47.200');
 insert into client_messagetranslation values (2427,'AIR','<span>Sí, comenzar la prueba</span>','ESN','--ANY--','--ANY--',UNHEX(REPLACE('543F5FFF-15C6-410F-930C-DE5563E2C06D','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (2646,'AIR','Ua lohe anei ‘oe i ke kani ma ka ‘ōlelo Paniolo? E kaomi [‘Ae] ‘a i ‘ole [‘A‘ole]','HAW','--ANY--','--ANY--',UNHEX(REPLACE('4DD1817D-C8E0-45A0-9FB3-DE6A5EF3538B','-','')),'2013-08-01 11:02:31.780');
 insert into client_messagetranslation values (3643,'AIR','Versión:','ESN','--ANY--','--ANY--',UNHEX(REPLACE('ECF823AC-7102-450D-851A-DF134E80099A','-','')),'2014-03-22 20:36:39.643');
