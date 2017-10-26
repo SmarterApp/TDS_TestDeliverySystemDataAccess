@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.opentestsystem.shared</groupId>
 		<artifactId>shared-build-parent</artifactId>
-		<version>4.0.7.RELEASE</version>
+		<version>4.0.8</version>
 	</parent>
 
 	<scm>
@@ -24,14 +24,14 @@
   	<module>tds-dll-api</module>
   	<module>tds-dll-mssql</module>
   	<module>tds-dll-mysql</module>
-		<module>tds-dll-common</module>
+	<module>tds-dll-common</module>
     <module>tds-dll-schemas</module>
-		<module>tds-dll-integration-tests</module>
+	<module>tds-dll-integration-tests</module>
   </modules>
   
   <properties>
 		<java-version>1.8</java-version>
-		<shared-master.version>4.0.6.RELEASE</shared-master.version>
+		<shared-master.version>4.0.7</shared-master.version>
 		<progman-client.version>4.0.5.RELEASE</progman-client.version>
 		<jedis.version>2.4.1</jedis.version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
@@ -50,14 +50,14 @@
 		<junit-version>4.11</junit-version>
 		<mockito-version>1.10.19</mockito-version>
 		<maven-eclipse-plugin-version>2.9</maven-eclipse-plugin-version>
-	  <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+	  	<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 		<maven-jxr-plugin-version>2.3</maven-jxr-plugin-version>
 		<maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
 		<exec-maven-plugin-version>1.2.1</exec-maven-plugin-version>
 		<maven-javadoc-plugin-version>2.9</maven-javadoc-plugin-version>
 		<maven-project-info-plugin-version>2.7</maven-project-info-plugin-version>
-	  <maven-release-plugin.version>2.4</maven-release-plugin.version>
-	  <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+	  	<maven-release-plugin.version>2.4</maven-release-plugin.version>
+	  	<maven-source-plugin.version>2.2.1</maven-source-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<file.encoding>UTF-8</file.encoding>
@@ -100,7 +100,7 @@
 				<groupId>org.opentestsystem.shared</groupId>
 				<artifactId>prog-mgmnt-client-null-impl</artifactId>
 				<version>${progman-client.version}</version>
-			</dependency>		
+			</dependency>
 		</dependencies>
   </dependencyManagement>
   
