@@ -10,4 +10,11 @@ BEGIN
 	DELETE FROM configs.client_tooldependencies
 	WHERE context = v_assessmentId AND clientname = v_clientname AND thentype != 'Language';
 	DELETE FROM __accommodationcache;
+
+	DELETE FROM configs.client_testtooltype
+	WHERE clientname = v_clientname AND context IN (
+	  SELECT segmentid
+	  FROM configs.client_segmentproperties
+	  WHERE parenttest = v_assessmentId
+	);
 END
