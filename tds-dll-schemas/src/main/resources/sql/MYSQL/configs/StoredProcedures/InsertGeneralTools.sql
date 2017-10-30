@@ -1,7 +1,7 @@
 -- This stored procedure inserts tool data that should be enabled for every loaded assessment
 
 DROP PROCEDURE IF EXISTS `InsertGeneralTools`;
-CREATE PROCEDURE `InsertGeneralTools`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120))
+CREATE PROCEDURE `InsertGeneralTools`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120), v_soundCheck BIT(1))
 BEGIN
 	-- Clear the current tools
 	DELETE FROM configs.client_testtooltype
@@ -108,6 +108,9 @@ BEGIN
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'0', 'ALL'
 	), (
 		v_clientname, 'Passage Font Size', b'1', b'0', 'TDSAcc-FontSize', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(),
+		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
+	), (
+		v_clientname, 'Review Screen Layout', b'1', b'0', 'TDSAcc-RvScrn', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(),
 		'FairwayToolScript', 'FairwayToolScript', 'TEST', v_assessmentId, NULL, b'0', b'1', 'ALL'
 	), (
 		v_clientname, 'System Volume Control', b'1', b'0', 'TDSAcc-SVC', b'0', b'0', b'0', b'0', b'0', NULL, 0, NOW(),
@@ -295,6 +298,9 @@ BEGIN
 		v_clientname, 'Print Size', 'TDS_PS_L4', 'Level 4', b'0', b'0', 'There is no default zoom',
 		v_assessmentId, 5, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
+		v_clientname, 'Review Screen Layout', 'TDS_RSL_ListView', 'List', b'1', b'0', 'List',
+		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+	), (
 		v_clientname, 'Streamlined Mode', 'TDS_SLM0', 'Off', b'1', b'0', 'gen pop and accessibility in one shell',
 		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	), (
@@ -463,6 +469,28 @@ BEGIN
 		v_clientname, 'Closed Captioning', 'TDS_ClosedCap1', 'Closed Captioning Available', b'0', b'0', 'Closed Captioning is on',
 		v_assessmentId, 1, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
 	);
+
+  IF (v_soundCheck = 1) THEN
+    INSERT IGNORE INTO configs.client_testtool (
+      clientname,
+      type,
+      code,
+      value,
+      isdefault,
+      allowcombine,
+      valuedescription,
+      context,
+      sortorder,
+      origin,
+      source,
+      contexttype,
+      testmode,
+      equivalentclientcode
+    ) VALUES (
+      v_clientname, 'Hardware Checks', 'TDS_HWPlayback', 'Check Playback Capabilities', b'1', b'0', 'Check Playback Capabilities',
+      v_assessmentId, 3, 'FairwayToolScript', 'FairwayToolScript', 'TEST', 'ALL', NULL
+    );
+  END IF;
 
 	INSERT IGNORE INTO configs.client_tooldependencies (
 		context,
