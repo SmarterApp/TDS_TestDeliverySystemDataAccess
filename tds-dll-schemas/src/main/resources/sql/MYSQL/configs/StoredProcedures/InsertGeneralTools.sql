@@ -1,6 +1,7 @@
--- This stored procedure inserts tool data that should be enabled for every loaded assessment
 
+-- This stored procedure inserts tool data that should be enabled for every loaded assessment
 DROP PROCEDURE IF EXISTS `InsertGeneralTools`;
+DELIMITER $$
 CREATE PROCEDURE `InsertGeneralTools`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120), v_soundCheck BIT(1))
 BEGIN
 	-- Clear the current tools
@@ -897,4 +898,5 @@ BEGIN
   (v_assessmentId, 'TEST', 'Braille Type', 'TDS_BT_UXT', 0, 'Mute System Volume', 'TDS_Mute1', v_clientname, UNHEX(REPLACE(UUID(),'-','')), 'ALL'),
   (v_assessmentId, 'TEST', 'Braille Type', 'TDS_BT_UCT', 0, 'Mute System Volume', 'TDS_Mute1', v_clientname, UNHEX(REPLACE(UUID(),'-','')), 'ALL');
 	DELETE FROM __accommodationcache;
-END
+END$$
+DELIMITER ;
