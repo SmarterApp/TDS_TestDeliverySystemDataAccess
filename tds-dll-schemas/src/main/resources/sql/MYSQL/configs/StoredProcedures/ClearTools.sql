@@ -1,5 +1,6 @@
 -- This stored procedure inserts tool data that should be enabled for every Braille assessment
 DROP PROCEDURE IF EXISTS `ClearTools`;
+DELIMITER $$
 CREATE PROCEDURE `ClearTools`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120))
 BEGIN
 	-- Clear the current tools (aside from the Language/ENU tool, if it exists
@@ -17,4 +18,5 @@ BEGIN
 	  FROM configs.client_segmentproperties
 	  WHERE parenttest = v_assessmentId
 	);
-END
+END$$
+DELIMITER ;

@@ -1,5 +1,6 @@
 -- This stored procedure inserts tool data that should be enabled for every Braille assessment
 DROP PROCEDURE IF EXISTS `InsertBrailleTools`;
+DELIMITER $$
 CREATE PROCEDURE `InsertBrailleTools`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120))
 BEGIN
 	-- Braille Tools
@@ -99,4 +100,5 @@ BEGIN
 	);
 
 	DELETE FROM __accommodationcache;
-END
+END$$
+DELIMITER ;

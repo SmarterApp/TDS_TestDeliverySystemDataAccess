@@ -1,5 +1,6 @@
 -- This stored procedure inserts calculator tool data
 DROP PROCEDURE IF EXISTS `InsertDictionaryTool`;
+DELIMITER $$
 CREATE PROCEDURE `InsertDictionaryTool`(v_clientname VARCHAR(100), v_segmentId VARCHAR(120), v_grade INT(11), v_issegment BIT)
 BEGIN
 	-- Braille Tools
@@ -216,4 +217,5 @@ BEGIN
 	END IF;
 
 	DELETE FROM __accommodationcache;
-END
+END$$
+DELIMITER ;

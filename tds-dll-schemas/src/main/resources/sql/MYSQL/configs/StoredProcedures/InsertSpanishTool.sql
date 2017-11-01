@@ -1,5 +1,6 @@
 -- This stored procedure inserts tool data that should be enabled for every Braille assessment
 DROP PROCEDURE IF EXISTS `InsertSpanishTool`;
+DELIMITER $$
 CREATE PROCEDURE `InsertSpanishTool`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120))
 BEGIN
 	INSERT IGNORE INTO configs.client_testtool (
@@ -23,4 +24,5 @@ BEGIN
 	);
 
 	DELETE FROM __accommodationcache;
-END
+END$$
+DELIMITER ;
