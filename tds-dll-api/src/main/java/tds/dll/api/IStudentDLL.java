@@ -652,6 +652,8 @@ public interface IStudentDLL
       UUID sessionKey, UUID browserKey, String testeeID, String testeeName, String status, String guestAccommodations, _Ref<UUID> testoppkeyRef)
       throws ReturnStatusException;
 
+  public boolean _SecureBrowserRequired_FN (SQLConnection connection, String clientname) throws ReturnStatusException;
+
   public boolean _AllowProctorlessSessions_FN (SQLConnection connection, String clientname) throws ReturnStatusException;
 
   public int IsSessionOpen_FN (SQLConnection connection, UUID sessionKey) throws ReturnStatusException;

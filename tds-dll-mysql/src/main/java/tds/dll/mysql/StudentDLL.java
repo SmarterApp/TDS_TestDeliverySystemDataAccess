@@ -7121,6 +7121,23 @@ public class StudentDLL extends AbstractDLL implements IStudentDLL
     return null;
   }
 
+  public boolean _SecureBrowserRequired_FN (SQLConnection connection, String clientname) throws ReturnStatusException {
+
+    Integer secureBrowserRequired = null;
+
+    final String SQL_QUERY1 = "select IsOn as secureBrowserRequired from ${ConfigDB}.client_systemflags where ClientName=${ClientName} and AuditOBject='secureBrowserRequired'";
+    SqlParametersMaps parms1 = (new SqlParametersMaps ()).put ("clientname", clientname);
+    SingleDataResultSet result = executeStatement (connection, fixDataBaseNames (SQL_QUERY1), parms1, true).getResultSets ().next ();
+    DbResultRecord record = (result.getCount () > 0 ? result.getRecords ().next () : null);
+    if (record != null) {
+      secureBrowserRequired = record.<Integer> get ("secureBrowserRequired");
+    }
+    if (DbComparator.isEqual (secureBrowserRequired, 1))
+      return true;
+
+    return false;
+  }
+
   public boolean _AllowProctorlessSessions_FN (SQLConnection connection, String clientname) throws ReturnStatusException {
 
     Integer allow = null;
