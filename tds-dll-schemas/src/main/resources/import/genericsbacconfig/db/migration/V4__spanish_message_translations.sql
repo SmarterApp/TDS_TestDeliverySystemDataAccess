@@ -5,12 +5,16 @@
 
 ***********************************************************************************************************************/
 
+USE configs;
 
 -- "Loading the page content."
 UPDATE client_messagetranslation
-SET message = 'Subiendo el contenido de la página.',
-appkey = 'UI.LoadingContent'
-WHERE _fk_coremessageobject IN (2991) AND language = 'ESN';
+SET message = 'Subiendo el contenido de la página.'
+WHERE _fk_coremessageobject IN (2913, 2991) AND language = 'ESN';
+
+UPDATE tds_coremessageobject
+SET appkey = 'UI.LoadingContent'
+WHERE _key = 2991;
 
 -- "Thesaurus"
 INSERT INTO client_messagetranslation (_fk_coremessageobject, client, message, language, grade, subject, _key, datealtered)
