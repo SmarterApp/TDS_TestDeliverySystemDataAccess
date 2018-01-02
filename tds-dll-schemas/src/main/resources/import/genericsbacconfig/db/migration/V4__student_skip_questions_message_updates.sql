@@ -83,6 +83,13 @@ WHERE ownerapp = 'Student'
 AND appkey = 'QuestionsAreMarkedForReview';
 
 
+DELETE FROM tds_coremessageuser
+WHERE _fk_coremessageobject
+IN ((select _key
+        from tds_coremessageobject
+        where ownerapp = 'Student'
+        and appkey = 'QuestionsAreUnanswered'));
+
 DELETE FROM tds_coremessageobject
 WHERE ownerapp = 'Student'
 AND appkey = 'QuestionsAreUnanswered';
@@ -104,6 +111,16 @@ VALUES (
     'question(s) are unanswered.',
     NOW()); 
 
+INSERT INTO tds_coremessageuser (
+    _fk_coremessageobject,
+    systemid)
+VALUES (
+    (select _key
+        from tds_coremessageobject
+        where ownerapp = 'Student'
+        and appkey = 'QuestionsAreUnanswered'),
+    'Student'
+);
 
 /** Below Delete is to delete cache table and its context, once user login it will populate the cache table from tds_coremessageobject,tds_coremessageuser,client_messagetranslation table **/
 DELETE FROM __appmessages;
