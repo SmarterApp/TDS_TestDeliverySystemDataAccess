@@ -1,6 +1,6 @@
 
 -- This stored procedure inserts tool data that should be enabled for every loaded assessment
-DROP PROCEDURE IF EXISTS `InsertGeneralTools`;
+DROP PROCEDURE IF EXISTS `InsertToolDependencies`;
 DELIMITER $$
 CREATE PROCEDURE `InsertToolDependencies`(v_clientname VARCHAR(100), v_assessmentId VARCHAR(120))
 BEGIN
