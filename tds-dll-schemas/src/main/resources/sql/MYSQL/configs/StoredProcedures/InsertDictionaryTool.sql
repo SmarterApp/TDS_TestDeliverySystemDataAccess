@@ -3,36 +3,68 @@ DROP PROCEDURE IF EXISTS `InsertDictionaryTool`;
 DELIMITER $$
 CREATE PROCEDURE `InsertDictionaryTool`(v_clientname VARCHAR(100), v_segmentId VARCHAR(120), v_grade INT(11), v_issegment BIT)
 BEGIN
-	-- Braille Tools
-	INSERT IGNORE INTO configs.client_testtooltype (
-		clientname,
-		toolname,
-		allowchange,
-		tideselectable,
-		rtsfieldname,
-		isrequired,
-		tideselectablebysubject,
-		isselectable,
-		isvisible,
-		studentcontrol,
-		tooldescription,
-		sortorder,
-		dateentered,
-		origin,
-		source,
-		contexttype,
-		context,
-		dependsontooltype,
-		disableonguestsession,
-		isfunctional,
-		testmode
-	) VALUES (
-		v_clientname, 'Dictionary', b'1', b'0', 'TDSAcc-Dictionary', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
-		'FairwayToolScript', 'FairwayToolScript', 'SEGMENT', v_segmentId, 'Language', b'0', b'1', 'ALL'
-	), (
-		v_clientname, 'Thesaurus', b'1', b'0', 'TDSAcc-Thesaurus', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
-		'FairwayToolScript', 'FairwayToolScript', 'SEGMENT', v_segmentId, 'Language', b'0', b'1', 'ALL'
-	);
+
+	IF (v_issegment = 1) THEN
+    INSERT IGNORE INTO configs.client_testtooltype (
+      clientname,
+      toolname,
+      allowchange,
+      tideselectable,
+      rtsfieldname,
+      isrequired,
+      tideselectablebysubject,
+      isselectable,
+      isvisible,
+      studentcontrol,
+      tooldescription,
+      sortorder,
+      dateentered,
+      origin,
+      source,
+      contexttype,
+      context,
+      dependsontooltype,
+      disableonguestsession,
+      isfunctional,
+      testmode
+    ) VALUES (
+      v_clientname, 'Dictionary', b'1', b'0', 'TDSAcc-Dictionary', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
+      'FairwayToolScript', 'FairwayToolScript', 'SEGMENT', v_segmentId, NULL, b'0', b'1', 'ALL'
+    ), (
+      v_clientname, 'Thesaurus', b'1', b'0', 'TDSAcc-Thesaurus', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
+      'FairwayToolScript', 'FairwayToolScript', 'SEGMENT', v_segmentId, NULL, b'0', b'1', 'ALL'
+    );
+  ELSE
+    INSERT IGNORE INTO configs.client_testtooltype (
+      clientname,
+      toolname,
+      allowchange,
+      tideselectable,
+      rtsfieldname,
+      isrequired,
+      tideselectablebysubject,
+      isselectable,
+      isvisible,
+      studentcontrol,
+      tooldescription,
+      sortorder,
+      dateentered,
+      origin,
+      source,
+      contexttype,
+      context,
+      dependsontooltype,
+      disableonguestsession,
+      isfunctional,
+      testmode
+    ) VALUES (
+      v_clientname, 'Dictionary', b'1', b'0', 'TDSAcc-Dictionary', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
+      'FairwayToolScript', 'FairwayToolScript', 'TEST', v_segmentId, NULL, b'0', b'1', 'ALL'
+    ), (
+      v_clientname, 'Thesaurus', b'1', b'0', 'TDSAcc-Thesaurus', b'0', b'0', b'1', b'1', b'0', NULL, 0, NOW(),
+      'FairwayToolScript', 'FairwayToolScript', 'TEST', v_segmentId, NULL, b'0', b'1', 'ALL'
+    );
+  END IF;
 
 	IF (v_grade < 6) THEN
 	  IF (v_issegment = 1) THEN
