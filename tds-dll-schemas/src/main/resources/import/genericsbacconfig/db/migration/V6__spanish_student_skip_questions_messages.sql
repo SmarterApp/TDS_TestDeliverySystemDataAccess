@@ -1,5 +1,6 @@
 USE configs;
 
+SET @client = 'AIR';
 
 SET @cmokey = (
     SELECT _key from tds_coremessageobject
@@ -14,7 +15,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Has contestado todas las preguntas. Puedes revisar y cambiar cualquier respuesta. Cuando estés listo para terminar la prueba, haz clic en el botón [Finalizar la prueba].',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -32,7 +33,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Has llegado a la última pregunta de esta prueba. Cuando hayas terminado de revisar tus respuestas, haz clic en el botón [Finalizar la prueba].',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -50,7 +51,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Te estás preparando para enviar tu prueba. Puedes revisar tus respuestas seleccionando el número de pregunta abajo.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -68,7 +69,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Te estás preparando para enviar tu prueba. Puedes revisar tus respuestas seleccionando el número de pregunta abajo.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -86,7 +87,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Te estás preparando para enviar tu prueba.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -104,7 +105,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Te estás preparando para enviar tu prueba.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -122,7 +123,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'Puedes revisar tus respuestas seleccionando el número de pregunta abajo.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -140,7 +141,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'pregunta(s) están marcadas para revisión.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
@@ -158,7 +159,7 @@ INSERT INTO client_messagetranslation (
     message,
     language, grade, subject, _key, datealtered)
 VALUES (
-    @cmokey, 'AIR',
+    @cmokey, @client,
     'pregunta(s) están sin contestar.',
     'ESN', '--ANY--', '--ANY--', UNHEX(REPLACE(UUID(),'-','')), NOW());
 
