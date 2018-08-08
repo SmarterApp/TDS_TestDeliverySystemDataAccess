@@ -1,6 +1,6 @@
 USE configs;
 
-SET @client = 'SBAC_PT';
+SET @client = 'AIR';
 
 SET @cmokey = (
     SELECT _key from tds_coremessageobject
