@@ -201,8 +201,8 @@ INSERT INTO `client_forbiddenappslist` VALUES ('OSX','Numbers','Mac Numbers - Sp
 INSERT INTO `client_forbiddenappslist` VALUES ('OSX','Numbers','Mac Numbers - Spreadsheets','SBAC_PT');
 INSERT INTO `client_forbiddenappslist` VALUES ('OSX','OpenOffice.org','Sun OpenOffice.org','SBAC');
 INSERT INTO `client_forbiddenappslist` VALUES ('OSX','OpenOffice.org','Sun OpenOffice.org','SBAC_PT');
-INSERT INTO `client_forbiddenappslist` VALUES ('OSX','OpenOffice.org ','Open Office','SBAC');
-INSERT INTO `client_forbiddenappslist` VALUES ('OSX','OpenOffice.org ','Open Office','SBAC_PT');
+INSERT IGNORE INTO `client_forbiddenappslist` VALUES ('OSX','OpenOffice.org ','Open Office','SBAC');
+INSERT IGNORE INTO `client_forbiddenappslist` VALUES ('OSX','OpenOffice.org ','Open Office','SBAC_PT');
 INSERT INTO `client_forbiddenappslist` VALUES ('OSX','Opera','Opera Web Browser','SBAC');
 INSERT INTO `client_forbiddenappslist` VALUES ('OSX','Opera','Opera Web Browser','SBAC_PT');
 INSERT INTO `client_forbiddenappslist` VALUES ('OSX','OSxVNC-server','OSX VNC Server','SBAC');
