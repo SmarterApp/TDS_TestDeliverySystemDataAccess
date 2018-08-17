@@ -5,7 +5,7 @@ CREATE TABLE __accommodationcache (
 	_date        	datetime NOT NULL,
 	dategenerated	datetime NULL,
 	CONSTRAINT pk_accomcache PRIMARY KEY CLUSTERED(_Key)
-) default charset = UTF8;
+);
 
 CREATE TABLE __cachedaccommodations ( 
 	_fk_accommodationcache	bigint not null,
@@ -27,7 +27,7 @@ CREATE TABLE __cachedaccommodations (
 	studentcontrol        	bit null,
 	valcount              	int null,
 	dependsontooltype     	varchar(100) null 
-) default charset = UTF8;
+);
 
 create table __cachedaccomdepends ( 
 	_fk_accommodationcache	bigint not null,
@@ -39,7 +39,7 @@ create table __cachedaccomdepends (
 	thentype              	varchar(200) null,
 	thenvalue             	varchar(200) null,
 	isdefault             	bit null 
-) default charset = UTF8;
+);
 
 create table __appmessagecontexts (
 	clientname varchar(100) not null,
@@ -52,7 +52,7 @@ create table __appmessagecontexts (
 	contextindex varchar(50) null,
 	delim char(1) null,
 	constraint pk_messagecontext primary key nonclustered (_key asc)
-) default charset = UTF8;
+);
 
 create table __appmessages (
 	_fk_appmessagecontext bigint null,
@@ -67,7 +67,7 @@ create table __appmessages (
 	`subject` varchar(50) null,
 	paralabels varchar(255) null,
 	message text null
-) default charset = UTF8;
+);
 
 create table `client`  ( 
 	`name`            	varchar(100) not null,
@@ -75,14 +75,14 @@ create table `client`  (
 	`internationalize`	bit not null default 1,
 	`defaultlanguage` 	varchar(50) not null default 'enu',
 	constraint `pk_client` primary key clustered(`name`)
-) default charset = UTF8;
+);
 
 create table `client_accommodationfamily`  ( 
 	`clientname`	varchar(100) not null,
 	`family`    	varchar(50) not null,
 	`label`     	varchar(200) not null,
 	constraint `pk_accomfamily` primary key clustered(`clientname`,`family`)
-) default charset = UTF8;
+);
 
 create table `client_accommodations`  ( 
 	`clientname`      	varchar(100) not null,
@@ -98,7 +98,7 @@ create table `client_accommodations`  (
 	`tideselectable`  	bit null,
 	`rtsfieldname`    	varchar(100) not null,
 	constraint `pk_clientaccommodations` primary key clustered(`clientname`,`code`)
-) default charset = UTF8;
+);
 
 create table `client_allowips`  ( 
 	`clientname`     	varchar(100) not null,
@@ -112,7 +112,7 @@ create table `client_allowips`  (
 	`message`        	text null,
 	`datecreated`    	datetime(3) null, -- constraint `df_client_allowips_datecreated`  default (getdate()),
 	constraint `pk_client_allowips` primary key clustered(`clientname`,`applicationname`,`allowip`,`environment`)
-) default charset = UTF8;
+);
 
 create table `client_externs`  ( 
 	`_key`              	varbinary(16) not null, -- constraint `df_client_externs__key`  default (newid()),
@@ -140,7 +140,7 @@ create table `client_externs`  (
 	`qabrokerguid`      	varbinary(16) null,
 	`expiresatminutes`  	int null,
 	constraint `pk_client_externs` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_fieldtestpriority`  ( 
 	`tds_id`    	varchar(50) not null,
@@ -148,7 +148,7 @@ create table `client_fieldtestpriority`  (
 	`priority`  	int not null,
 	`testid`    	varchar(200) not null,
 	constraint `pk_clientft` primary key clustered(`clientname`,`testid`,`tds_id`,`priority`)
-) default charset = UTF8;
+);
 
 create table `client_forbiddenappsexcludeschools`  ( 
 	`districtname`	varchar(150) null,
@@ -157,7 +157,7 @@ create table `client_forbiddenappsexcludeschools`  (
 	`schoolid`    	varchar(150) not null,
 	`clientname`  	varchar(100) not null,
 	constraint `pk_client_forbiddenappsexcludeschools` primary key clustered(`districtid`,`schoolid`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `client_forbiddenappslist`  ( 
 	`os_id`             	varchar(25) not null,
@@ -165,7 +165,7 @@ create table `client_forbiddenappslist`  (
 	`processdescription`	varchar(150) null,
 	`clientname`        	varchar(100) not null,
 	constraint `pk_client_forbiddenappslist` primary key clustered(`os_id`,`processname`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `client_grade`  ( 
 	`gradecode` 	varchar(25) not null,
@@ -173,7 +173,7 @@ create table `client_grade`  (
 	`clientname`	varchar(100) not null,
 	`origin`    	varchar(50) null, -- constraint `df__client_gr__origi__5d56b96f`  default (db_name()),
 	constraint `pk_client_grade` primary key clustered(`gradecode`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `client_language`  ( 
 	`clientname`  	varchar(100) not null,
@@ -181,7 +181,7 @@ create table `client_language`  (
 	`languagecode`	varchar(25) not null,
 	`origin`      	varchar(50) null, -- constraint `df__client_la__origi__5f3f01e1`  default (db_name()),
 	constraint `pk_client_language` primary key clustered(`clientname`,`languagecode`)
-) default charset = UTF8;
+);
 
 create table `client_message`  ( 
 	`clientname`    	varchar(100) not null,
@@ -201,7 +201,7 @@ create table `client_message`  (
 	`datechanged`   	datetime(3) not null, -- constraint `df_client_message_datechanged`  default (getdate()),
 	`datepublished` 	datetime(3) null,
 	constraint `pk_client_message` primary key clustered(`clientname`,`messageid`,`translationid`,`systemid`)
-) default charset = UTF8;
+);
 
 create table `client_messagearchive`  ( 
 	`clientname`    	varchar(100) not null,
@@ -224,7 +224,7 @@ create table `client_messagearchive`  (
 	`username`      	varchar(128) null,
 	`action`        	varchar(128) null,
 	constraint `pk_client_messagearchive` primary key clustered(`clientname`,`messageid`,`translationid`,`systemid`,`_date`)
-) default charset = UTF8;
+);
 
 create table `client_messagetranslation`  ( 
 	`_fk_coremessageobject`	bigint not null,
@@ -236,7 +236,7 @@ create table `client_messagetranslation`  (
 	`_key`                 	varbinary(16) not null, -- constraint `df__client_mes___key__1293bd5e`  default (newid()),
 	`datealtered`          	datetime(3) null,
 	constraint `pk_clientmsgtranslation` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_messagetranslationaudit`  ( 
 	`_fk_coremessageobject`	bigint not null,
@@ -253,7 +253,7 @@ create table `client_messagetranslationaudit`  (
 	`username`             	varchar(128) not null,
 	`_date`                	datetime(3) not null,
 	`action`               	varchar(128) not null 
-) default charset = UTF8;
+);
 
 create table `client_pilotschools`  ( 
 	`clientname` 	varchar(100) not null,
@@ -261,7 +261,7 @@ create table `client_pilotschools`  (
 	`schoolid`   	varchar(50) not null,
 	`schoolname` 	varchar(100) null,
 	constraint `pk_client_pilotschools` primary key clustered(`clientname`,`_efk_testid`,`schoolid`)
-) default charset = UTF8;
+);
 
 create table `client_rtsroles`  ( 
 	`tds_role`     	varchar(100) not null,
@@ -271,7 +271,7 @@ create table `client_rtsroles`  (
 	`datepublished`	datetime(3) null,
 	`sessiontype`  	int not null default 0,
 	constraint `pk_clientrtsroles` primary key clustered(`clientname`,`tds_role`,`rts_role`,`sessiontype`)
-) default charset = UTF8;
+);
 
 create table `client_segmentproperties`  ( 
 	`ispermeable`    	int not null,
@@ -289,7 +289,7 @@ create table `client_segmentproperties`  (
 	`restart`           int null,
 	`graceperiodminutes` int null,
 	constraint `pk_segmentprops` primary key clustered(`clientname`,`parenttest`,`segmentid`)
-) default charset = UTF8;
+);
 
 create table `client_server`  ( 
 	`_key`           	varbinary(16) not null, -- constraint `df_client_server__key`  default (newid()),
@@ -300,7 +300,7 @@ create table `client_server`  (
 	`servertype`     	varchar(100) not null,
 	`virtualdirname` 	varchar(50) null,
 	constraint `pk_client_server` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_subject`  ( 
 	`subjectcode`	varchar(25) null,
@@ -308,7 +308,7 @@ create table `client_subject`  (
 	`clientname` 	varchar(100) not null,
 	`origin`     	varchar(50) null, -- constraint `df__client_su__origi__61274a53`  default (db_name(,
 	constraint `pk_client_subject_1` primary key clustered(`subject`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `client_systemflags`  ( 
 	`auditobject`   	varchar(255) not null,
@@ -319,7 +319,7 @@ create table `client_systemflags`  (
 	`datechanged`   	datetime(3) null, -- constraint `df__client_sy__datec__3e1d39e1`  default (getdate()),
 	`datepublished` 	datetime(3) null,
 	constraint `pk_clientsystemflags` primary key clustered(`clientname`,`auditobject`,`ispracticetest`)
-) default charset = UTF8;
+);
 
 create table `client_tds_rtsattribute`  ( 
 	`clientname`     	varchar(100) not null,
@@ -330,7 +330,7 @@ create table `client_tds_rtsattribute`  (
 	`type`           	varchar(25) not null default 'attribute',
 	`entitytype`     	varchar(100) null,
 	constraint `pk_rts_attribute` primary key clustered(`clientname`,`fieldname`,`_efk_entitytype`,`type`)
-) default charset = latin1;
+);
 
 create table `client_tds_rtsattributevalues`  ( 
 	`clientname`     	varchar(100) not null,
@@ -341,7 +341,7 @@ create table `client_tds_rtsattributevalues`  (
 	`type`           	varchar(25) not null default 'attribute',
 	constraint `pk_rts_attributevalues` primary key clustered(`clientname` (50),`fieldname`,`value` (100),`_efk_entitytype`,`type`)
 	
-) default charset = latin1; 
+);
 
 create table `client_testeligibility`  ( 
 	`_key`           	varbinary(16) not null, -- default (newid()),
@@ -355,7 +355,7 @@ create table `client_testeligibility`  (
 	`eligibilitytype`	varchar(50) null,
 	`matchtype`      	int not null default 0,
 	constraint `pk_client_testeligibility` primary key clustered(`_key`)
-) default charset = latin1;
+);
 
 create table `client_testgrades`  ( 
 	`clientname`       	varchar(100) not null,
@@ -364,7 +364,7 @@ create table `client_testgrades`  (
 	`requireenrollment`	bit not null default 0,
 	`enrolledsubject`  	varchar(100) null,
 	constraint `pk_testgrades` primary key clustered(`clientname`,`testid`,`grade`)
-) default charset = UTF8;
+);
 
 create table `client_testmode`  ( 
 	`clientname`            	varchar(100) not null,
@@ -381,7 +381,7 @@ create table `client_testmode`  (
 	`testkey`               	varchar(250) null,
 	`_key`                  	varbinary(16) not null, -- constraint `df_client_testmode__key`  default (newid()),
 	constraint `pk_client_testmode` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_testprerequisite`  ( 
 	`clientname`  	varchar(100) not null,
@@ -390,7 +390,7 @@ create table `client_testprerequisite`  (
 	`testid`      	varchar(255) not null,
 	`_key`        	varbinary(16) not null, -- constraint `df_client_testprerequisite__key`  default (newid()),
 	constraint `pk_client_testprerequisite` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_testproperties`  ( 
 	`clientname`             	varchar(100) not null,
@@ -437,7 +437,7 @@ create table `client_testproperties`  (
 	`category`                  varchar(50) null,
     `msb`                       bit not null default 0,
 	constraint `pk_client_testproperties` primary key clustered(`clientname`,`testid`)
-) default charset = UTF8;
+);
 
 create table `client_testrtsspecs`  ( 
 	`_key`        	varbinary(16) not null, -- default (newid()),
@@ -448,7 +448,7 @@ create table `client_testrtsspecs`  (
 	`disables`    	bit not null,
 	`attrvalues`  	text not null,
 	constraint `pk_client_testrtsspecs` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_testtool`  ( 
 	`clientname`          	varchar(100) not null,
@@ -466,7 +466,7 @@ create table `client_testtool`  (
 	`testmode`            	varchar(25) not null default 'all',
 	`equivalentclientcode`	varchar(255) null,
 	constraint `pk_client_toolvalues` primary key clustered(`clientname`,`context`,`contexttype`,`type`,`code`)
-) default charset = UTF8;
+);
 
 create table `client_testtoolrule`  ( 
 	`clientname`	varchar(100) not null,
@@ -476,7 +476,7 @@ create table `client_testtoolrule`  (
 	`rule`      	varchar(100) not null,
 	`rulevalue` 	varchar(255) not null,
 	constraint `pk_clienttoolrule` primary key clustered(`clientname`,`testid`,`toolcode`,`rule`)
-) default charset = UTF8;
+);
 
 create table `client_testtooltype`  ( 
 	`clientname`             	varchar(100) not null,
@@ -502,7 +502,7 @@ create table `client_testtooltype`  (
 	`testmode`               	varchar(25) not null default 'all',
 	`isentrycontrol`           	bit not null default 0,
 	constraint `pk_clienttesttool` primary key clustered(`clientname`,`context`,`contexttype`,`toolname`)
-) default charset = UTF8;
+);
 
 create table `client_testwindow`  ( 
 	`clientname` 	varchar(100) not null,
@@ -518,7 +518,7 @@ create table `client_testwindow`  (
 	`sessiontype`	int not null default -1,
 	`sortorder`  	int null default 1,
 	constraint `pk_testwindow` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_test_itemconstraint`  ( 
 	`clientname`	varchar(100) not null,
@@ -529,7 +529,7 @@ create table `client_test_itemconstraint`  (
 	`toolvalue` 	varchar(255) not null,
 	`item_in`   	bit not null,
 	constraint `pk_itemconstraint` primary key clustered(`clientname`,`testid`,`propname`,`propvalue`,`item_in`)
-) default charset = UTF8;
+);
 
 create table `client_test_itemtypes`  ( 
 	`clientname`	varchar(100) not null,
@@ -538,7 +538,7 @@ create table `client_test_itemtypes`  (
 	`origin`    	varchar(50) null, -- default (db_name()),
 	`source`    	varchar(50) null, -- default (db_name()),
 	constraint `pk_itemtypes` primary key clustered(`clientname`,`testid`,`itemtype`)
-) default charset = UTF8;
+);
 
 create table `client_testeeattribute`  ( 
 	`rtsname`      	varchar(50) not null,
@@ -552,7 +552,7 @@ create table `client_testeeattribute`  (
 	`islatencysite`	bit not null default 0,
 	`showonproctor` bit null default 1,
 	constraint `pk_testeeattribute` primary key clustered(`clientname`,`tds_id`)
-) default charset = UTF8;
+);
 
 create table `client_testeerelationshipattribute`  ( 
 	`clientname`      	varchar(50) not null,
@@ -564,7 +564,7 @@ create table `client_testeerelationshipattribute`  (
 	`sortorder`       	int null,
 	`reportname`      	varchar(50) null,
 	constraint `pk_client_testeerelationshipattribute` primary key clustered(`clientname`,`tds_id`)
-) default charset = UTF8;
+);
 
 create table `client_testformproperties`  ( 
 	`clientname`    	varchar(100) not null,
@@ -578,7 +578,7 @@ create table `client_testformproperties`  (
 	`clientformid`  	varchar(25) null,
 	`accommodations`	text null,
 	constraint `pk_testform` primary key clustered(`clientname`,`_efk_testform`)
-) default charset = UTF8;
+);
 
 create table `client_testkey`  ( 
 	`clientname`       	varchar(100) not null,
@@ -589,7 +589,7 @@ create table `client_testkey`  (
 	`source`           	varchar(100) not null, -- constraint `df__client_te__sourc__245d67de`  default (db_name()),
 	`origin`           	varchar(100) not null, -- constraint `df__client_te__origi__25518c17`  default (db_name()),
 	constraint `pk_client_testkey` primary key clustered(`clientname`,`testid`,`_efk_adminsubject`)
-) default charset = UTF8;
+);
 
 create table `client_testscorefeatures`  ( 
 	`clientname`           	varchar(100) not null,
@@ -603,7 +603,7 @@ create table `client_testscorefeatures`  (
 	`reportlabel`          	text null,
 	`reportorder`          	int null,
 	constraint `pk_scorefeatures` primary key clustered(`clientname`,`testid`,`measureof`,`measurelabel`)
-) default charset = UTF8;
+);
 
 create table `client_timelimits`  ( 
 	`_key`                   	varbinary(16) not null, -- constraint `df_client_timelimits__key`  default (newid()),
@@ -624,7 +624,7 @@ create table `client_timelimits`  (
 	`requestinterfacetimeout`	int not null default 120,
 	`refreshvaluemultiplier` 	int not null default 2,
 	constraint `pk_client_timelimits` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_timewindow`  ( 
 	`clientname` 	varchar(100) not null,
@@ -633,7 +633,7 @@ create table `client_timewindow`  (
 	`enddate`    	datetime(3) null,
 	`description`	varchar(200) null,
 	constraint `pk_timewindow` primary key clustered(`clientname`,`windowid`)
-) default charset = UTF8;
+);
 
 create table `client_tooldependencies`  ( 
 	`context`    	varchar(250) not null,
@@ -647,7 +647,7 @@ create table `client_tooldependencies`  (
 	`_key`       	varbinary(16) not null, -- constraint `df_client_tooldependencies__key`  default (newid()),
 	`testmode`   	varchar(25) not null default 'all',
 	constraint `pk_client_tooldependencies` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `client_toolusage`  ( 
 	`clientname` 	varchar(100) not null,
@@ -656,7 +656,7 @@ create table `client_toolusage`  (
 	`recordusage`	bit not null,
 	`reportusage`	bit not null,
 	constraint `pk_toolusage` primary key clustered(`clientname`,`testid`,`tooltype`)
-) default charset = UTF8;
+);
 
 create table `client_voicepack`  ( 
 	`os_id`        	varchar(25) not null,
@@ -665,7 +665,7 @@ create table `client_voicepack`  (
 	`languagecode` 	varchar(25) not null,
 	`clientname`   	varchar(100) not null,
 	constraint `pk_client_voicepack` primary key clustered(`os_id`,`voicepackname`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `geo_clientapplication`  ( 
 	`clientname`      	varchar(100) not null,
@@ -677,7 +677,7 @@ create table `geo_clientapplication`  (
 	`_key`            	varbinary(16) not null, -- constraint `df_geo_clientapplication__key`  default (newid()),
 	`isactive`          bit null,
 	constraint `pk__geo_clientapplic` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `geo_database`  ( 
 	`servername`	varchar(100) not null,
@@ -686,14 +686,14 @@ create table `geo_database`  (
 	`_key`      	varbinary(16) not null,
 	`tds_id`    	varchar(25) null,
 	constraint `pk_geodatabase` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `rts_role`  ( 
 	`clientname` 	varchar(100) not null,
 	`rolename`   	varchar(100) not null,
 	`description`	varchar(100) null,
 	constraint `pk_rts_role` primary key clustered(`clientname`,`rolename`)
-) default charset = UTF8;
+);
 
 create table `statuscodes`  ( 
 	`usage`      	varchar(50) not null,
@@ -702,7 +702,7 @@ create table `statuscodes`  (
 	`stage`      	varchar(50) null,
 	`_key`       	varbinary(16) not null, -- constraint `df_statuscodes__key`  default (newid()),
 	constraint `pk_statuscodes` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `system_applicationsettings`  ( 
 	`clientname`                 	varchar(100) not null,
@@ -712,11 +712,11 @@ create table `system_applicationsettings`  (
 	`type`                       	varchar(100) not null,
 	`value`                      	varchar(100) not null,
 	`_fk_tds_applicationsettings`	varbinary(16) not null,
-	`servername`	                varchar(256) not null default '*',
-	`siteid`                        varchar(256) not null default '*',
+	`servername`	                varchar(100) not null default '*',
+	`siteid`                        varchar(100) not null default '*',
 
 	constraint `pk_systemapplicationsetting` primary key clustered(`clientname`, `servername`, `siteid`,`_fk_tds_applicationsettings`)
-) default charset = latin1; -- UTF8;
+); -- UTF8;
 
 create table `system_browserwhitelist`  ( 
 	`clientname`              	varchar(100) not null,
@@ -739,7 +739,7 @@ create table `system_browserwhitelist`  (
 
 	constraint `pk_system_browserwhitelist` primary key (`_key`)	
 
-) default charset = UTF8;
+);
 
 create table `system_networkdiagnostics`  ( 
 	`clientname`     	varchar(100) not null,
@@ -750,14 +750,14 @@ create table `system_networkdiagnostics`  (
 	`responsetime`   	int null,
 	`_key`           	varbinary(16) not null, -- default (newid()),
 	constraint `pk_system_networkdiagnostics` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_application`  ( 
 	`_key`       	varbinary(16) not null, -- constraint `df_tds_application__key`  default (newid()),
 	`name`       	varchar(50) not null,
 	`description`	varchar(255) not null,
 	constraint `pk_tds_application` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_applicationsettings`  ( 
 	`_key`         	varbinary(16) not null, -- constraint `df__tds_applic___key__573ded66`  default (newid(,
@@ -768,7 +768,7 @@ create table `tds_applicationsettings`  (
 	`isoperational`	bit not null default 1,
 	`value`         varchar(100) null,
 	constraint `pk_tds_applicationsettings` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_browserwhitelist`  ( 
 	`_key`             	varbinary(16) not null, -- constraint `df__tds_browse___key__5b0e7e4a`  default (newid()),
@@ -787,7 +787,7 @@ create table `tds_browserwhitelist`  (
 	`messagekey`       	varchar(255) null,
 
 	constraint `pk_tds_browserwhitelist` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_clientaccommodationtype`  ( 
 	`toolname`               	varchar(255) not null,
@@ -798,7 +798,7 @@ create table `tds_clientaccommodationtype`  (
 	`isrequired`             	bit not null,
 	`tideselectablebysubject`	bit not null,
 	constraint `pk_clientacctype` primary key clustered(`toolname`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `tds_clientaccommodationvalue`  ( 
 	`clientname`      	varchar(100) not null,
@@ -811,7 +811,7 @@ create table `tds_clientaccommodationvalue`  (
 	`allowadd`        	bit not null,
 	`sortorder`       	int not null,
 	constraint `pk_clientaccvalue` primary key clustered(`clientname`,`code`)
-) default charset = UTF8;
+);
 
 create table `tds_configtype`  ( 
 	`configtype`     	varchar(25) not null,
@@ -820,7 +820,7 @@ create table `tds_configtype`  (
 	`pagepath`       	varchar(100) not null,
 	`_key`           	varbinary(16) not null, -- constraint `df_tds_configtype__key`  default (newid()),
 	constraint `pk_tds_configtype` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_coremessageobject`  ( 
 	`context`            	varchar(100) not null,
@@ -836,26 +836,26 @@ create table `tds_coremessageobject`  (
 	`nodes`              	text null,
 	`ismessageshowtouser`	bit null,
 	constraint `pk_coremsgobject` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_coremessageuser`  ( 
 	`_fk_coremessageobject`	bigint not null,
 	`systemid`             	varchar(100) not null,
 	constraint `pk_msguser` primary key clustered(`_fk_coremessageobject`,`systemid`)
-) default charset = UTF8;
+);
 
 create table `tds_fieldtestpriority`  ( 
 	`tds_id`  	varchar(50) not null,
 	`priority`	int not null,
 	constraint `pk_tds_ftattribute` primary key clustered(`tds_id`,`priority`)
-) default charset = UTF8;
+);
 
 create table `tds_role`  ( 
 	`rolename`   	varchar(100) not null,
 	`description`	varchar(100) null,
 	`_key`       	varbinary(16) not null, -- constraint `df_tds_role__key`  default (newid()),
 	constraint `pk_tds_role` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_systemflags`  ( 
 	`auditobject`   	varchar(255) not null,
@@ -864,7 +864,7 @@ create table `tds_systemflags`  (
 	`ispracticetest`	bit not null,
 	`_key`          	varbinary(16) not null, -- constraint `df_tds_systemflags__key`  default (newid(,
 	constraint `pk_tds_systemflags` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_testproperties`  ( 
 	`fieldname`  	varchar(100) not null,
@@ -872,7 +872,7 @@ create table `tds_testproperties`  (
 	`isrequired` 	bit not null,
 	`_key`       	varbinary(16) not null, -- constraint `df_tds_testproperties__key`  default (newid(,
 	constraint `pk_tds_testproperties` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `tds_testtool`  ( 
 	`type`            	varchar(255) not null,
@@ -884,14 +884,14 @@ create table `tds_testtool`  (
 	`allowadd`        	bit not null,
 	`sortorder`       	int not null,
 	constraint `pk_testtool` primary key clustered(`code`)
-) default charset = UTF8;
+);
 
 create table `tds_testtoolrule`  ( 
 	`tooltype`	varchar(255) not null,
 	`toolcode`	varchar(255) not null,
 	`rule`    	varchar(100) not null,
 	constraint `pk_toolrule` primary key clustered(`tooltype`,`toolcode`,`rule`)
-) default charset = UTF8;
+);
 
 create table `tds_testtooltype`  ( 
 	`toolname`               	varchar(255) not null,
@@ -901,7 +901,7 @@ create table `tds_testtooltype`  (
 	`isrequired`             	bit not null,
 	`tideselectablebysubject`	bit not null,
 	constraint `pk_tooltype` primary key clustered(`toolname`)
-) default charset = UTF8;
+);
 
 create table `tds_testeeattribute`  ( 
 	`rtsname`      	varchar(50) not null,
@@ -914,7 +914,7 @@ create table `tds_testeeattribute`  (
 	`islatencysite`	bit not null default 0,
 	`showonproctor` bit null default 1,
 	constraint `pk_tds_testeeattribute` primary key clustered(`tds_id`)
-) default charset = UTF8;
+);
 
 create table `tds_testeerelationshipattribute`  ( 
 	`relationshiptype`	varchar(50) not null,
@@ -925,13 +925,13 @@ create table `tds_testeerelationshipattribute`  (
 	`sortorder`       	int null,
 	`reportname`      	varchar(50) null,
 	constraint `pk_tds_testeerelationshipattribute` primary key clustered(`tds_id`)
-) default charset = UTF8;
+);
 
 create table `_messageid`  ( 
 	`_key`	int not null auto_increment,
 	`date`	datetime(3) null,
 	constraint `pk__messageid` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 -- identity(10000,1)
 alter table `_messageid` auto_increment = 10000;
@@ -948,7 +948,7 @@ CREATE TABLE client_itemscoringconfig(
 	`serverurl` varchar(255) NOT NULL DEFAULT '*',
 	`environment` varchar(50) NULL,
  PRIMARY KEY CLUSTERED (`_key` ASC)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+);
 
 create table `systemerrors`  ( 
 	`application`         	varchar(50) null default 'database',
@@ -965,4 +965,4 @@ create table `systemerrors`  (
 	`_fk_testopportunity` 	varbinary(16) null,
 	`clientname`          	varchar(100) null,
 	`_fk_session`         	varbinary(16) null
-	) default charset = UTF8;
+	);

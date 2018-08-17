@@ -207,11 +207,16 @@ UNLOCK TABLES;
 
 LOCK TABLES `client_itemscoringconfig` WRITE;
 /*!40000 ALTER TABLE `client_itemscoringconfig` DISABLE KEYS */;
-INSERT INTO `client_itemscoringconfig` VALUES ('SBAC','*','*','*','HTQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/item-scoring-service/Scoring/ItemScoring','Development')
-											 ,('SBAC','*','*','*','*','',0,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
-											 ,('*','*','*','*','QTI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
-											 ,('SBAC','*','*','*','EQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
-											 ,('SBAC','*','*','*','GI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development');
+INSERT INTO `client_itemscoringconfig`
+VALUES ('SBAC','*','*','*','HTQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/item-scoring-service/Scoring/ItemScoring','Development')
+      ,('SBAC','*','*','*','*','',0,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+      ,('*','*','*','*','QTI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+      ,('SBAC','*','*','*','EQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+      ,('SBAC','*','*','*','GI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+      ,('SBAC_PT','*','*','*','HTQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/item-scoring-service/Scoring/ItemScoring','Development')
+      ,('SBAC_PT','*','*','*','*','',0,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+      ,('SBAC_PT','*','*','*','EQ','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development')
+      ,('SBAC_PT','*','*','*','GI','',1,unhex(replace(uuid(), '-', '')),'http://localhost:8080/itemscoring/Scoring/ItemScoring','Development');
 /*!40000 ALTER TABLE `client_itemscoringconfig` ENABLE KEYS */;
 UNLOCK TABLES;
 
