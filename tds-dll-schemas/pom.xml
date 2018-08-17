@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opentestsystem.delivery</groupId>
     <artifactId>tds-dll-master</artifactId>
-    <version>4.0.5-SNAPSHOT</version>
+    <version>4.2.1-SNAPSHOT</version>
   </parent>
 
   <dependencies>
