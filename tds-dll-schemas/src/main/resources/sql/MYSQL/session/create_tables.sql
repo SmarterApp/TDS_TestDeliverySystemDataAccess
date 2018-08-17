@@ -6,7 +6,7 @@ create table `r_studentpackagedetails` (
   `attrvalue` text not null,
   `istesteeattribute` bit default 0,
   KEY `fk_studentpackage` (`_fk_studentpackagekey`)
-) default charset = UTF8;
+);
 
 create table `adminevent`  ( 
 	`_key`       	varbinary(16) not null,
@@ -17,7 +17,7 @@ create table `adminevent`  (
 	`enddate`    	datetime(3) not null, -- constraint `df__admineven__endda__46735417`  default (date_add(now(), interval 4 hour)),
 	`clientname` 	varchar(100) not null,
 	constraint `pk_adminevent` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `admineventitems`  ( 
 	`_fk_adminevent` 	varbinary(16) not null,
@@ -27,7 +27,7 @@ create table `admineventitems`  (
 	`alterationvalue`	varchar(25) null,
 	`itemstart`      	datetime(3) null,
 	`itemend`        	datetime(3) null 
-) default charset = UTF8;
+);
 
 create table `admineventopportunities`  ( 
 	`_fk_adminevent`     	varbinary(16) not null,
@@ -38,7 +38,7 @@ create table `admineventopportunities`  (
 	`dateinserted`       	datetime(3), -- null constraint `df__admineven__datei__2a4129bd`  default (now()),
 	`reason`             	nvarchar(255) null,
 	constraint `pk_adminevntopps` primary key clustered(`_fk_adminevent`,`_fk_testopportunity`)
-) default charset = UTF8;
+);
 
 create table `alertmessages`  ( 
 	`_key`         	varbinary(16) not null,
@@ -54,7 +54,7 @@ create table `alertmessages`  (
 	`cancelleduser`	varchar(127) null,
 	`clientname`   	varchar(100) not null,
 	constraint `pk_alertmessages` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `clientlatency`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -76,7 +76,7 @@ create table `clientlatency`  (
 	`siteid`             	varchar(100) null,
 	`sitekey`            	bigint null,
 	`sitename`           	varchar(200) null 
-) default charset = UTF8;
+);
 
 create table `clientlatencyarchive`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -98,12 +98,12 @@ create table `clientlatencyarchive`  (
 	`siteid`             	varchar(100) null,
 	`sitekey`            	bigint null,
 	`sitename`           	varchar(200) null 
-) default charset = UTF8;
+);
 
 create table `client_os`  ( 
 	`agentos`	varchar(200) not null,
 	`os_id`  	varchar(25) null 
-) default charset = UTF8;
+);
 
 create table `client_reportingid`  ( 
 	`clientname`         	varchar(100) not null,
@@ -111,14 +111,14 @@ create table `client_reportingid`  (
 	`_fk_testopportunity`	varbinary(16) not null,
 	`_date`              	datetime(3), -- not null constraint `df__client_re___date__5031c87b`  default (now()),
 	constraint `pk_clientreportingid` primary key clustered(`clientname`,`reportingid`)
-) default charset = UTF8;
+);
 
 create table `client_sessionid`  ( 
 	`clientname`	varchar(100) not null,
 	`idprefix`  	varchar(25) not null,
 	`cnt`       	int not null,
 	constraint `pk_clientsessionid` primary key clustered(`clientname`,`idprefix`)
-) default charset = UTF8;
+);
 
 create table `ft_groupsamples`  ( 
 	`_efk_adminsubject`	varchar(255) not null,
@@ -130,7 +130,7 @@ create table `ft_groupsamples`  (
 	`clientname`       	varchar(100) not null,
 	`_fk_session`      	varbinary(16) null,
 	`_date`            	datetime(3) -- null constraint `df__ft_groups___date__473e2675`  default (now()) 
-	) default charset = UTF8;
+	);
 
 create table `ft_opportunityitem`  ( 
 	`_efk_fieldtest`      	varchar(200) not null,
@@ -154,7 +154,7 @@ create table `ft_opportunityitem`  (
 	`language`            	varchar(50) null,
 	`dateassigned`        	datetime(3) null,
 	`_fk_session`         	varbinary(16) null 
-	) default charset = UTF8;
+	);
 
 create table `geo_clientsystem`  ( 
 	`url`           	varchar(256) null,
@@ -165,7 +165,7 @@ create table `geo_clientsystem`  (
 	`systemrole`    	varchar(32) not null,
 	`systemid`      	varchar(128) not null,
 	constraint `pk_geoclientsystem` primary key clustered(`systemid`)
-) default charset = UTF8;
+);
 
 create table `geo_session`  ( 
 	`_fk_session`     	varbinary(16) not null,
@@ -174,7 +174,7 @@ create table `geo_session`  (
 	`logintoken`      	varbinary(16) not null,
 	`_fk_clientsystem`	varchar(128) not null,
 	`testeecount`     	int not null default 0
-	) default charset = UTF8;
+	);
 
 create table `itemdistribution`  ( 
 	`clientname`       	varchar(100) not null,
@@ -183,13 +183,13 @@ create table `itemdistribution`  (
 	`admincount`       	int not null default 0,
 	`_fk_session`      	varbinary(16) null,
 	`groupid`          	varchar(50) not null 
-	) default charset = UTF8;
+	);
 
 create table `loadtest_testee`  ( 
 	`testeekey` 	bigint not null auto_increment,
 	`sessionkey`	varbinary(16) not null,
     constraint `pk_loadtest_testee` primary key clustered(`testeekey`) 
-	) default charset = UTF8;
+	);
 
 create table `qareportqueue`  ( 
      `_key`                    BIGINT NOT NULL AUTO_INCREMENT,
@@ -199,7 +199,7 @@ create table `qareportqueue`  (
       `datesent`               datetime(3)  null,
       `processstate`           varchar(50) null,
    constraint `pk_qareportqueue` primary key clustered(`_key`)
-  ) default charset = UTF8;
+  );
 
 create table `qc_validationexception`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -209,7 +209,7 @@ create table `qc_validationexception`  (
 	`_efk_ruleid`        	varchar(50) null,
 	`resultdocid`        	varchar(50) null,
 	`dateentered`        	datetime(3) -- not null constraint `df__qc_valida__datee__59f03cdf`  default (now()) 
-	) default charset = UTF8;
+	);
 
 create table `rtsschoolgrades`  ( 
 	`schoolkey`  	bigint not null,
@@ -217,7 +217,7 @@ create table `rtsschoolgrades`  (
 	`dateentered`	datetime(3), -- not null constraint `df__rtsschool__datee__5e6ad939`  default (now()),
 	`enrollment` 	int null,
 	`clientname` 	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_abnormallogins`  ( 
 	`ipaddress`          	varchar(25) not null,
@@ -232,7 +232,7 @@ create table `r_abnormallogins`  (
 	`schoolid`           	varchar(100) null,
 	`schoolname`         	varchar(200) not null,
 	`testeeid`           	varchar(100) null 
-	) default charset = UTF8;
+	);
 
 create table `r_blueprintreport`  ( 
 	`dategenerated`    	datetime(3), -- not null constraint `df__r_blueprintdate`  default (now()),
@@ -248,7 +248,7 @@ create table `r_blueprintreport`  (
 	`_date`            	datetime(3) null,
 	`clientname`       	varchar(100) not null,
 	`_efk_adminsubject`	varchar(250) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_geolatencyreport`  ( 
 	`_date`        	datetime(3) not null,
@@ -266,7 +266,7 @@ create table `r_geolatencyreport`  (
 	`servern`      	int null,
 	`dategenerated`	datetime(3), -- not null constraint `df__r_geolate__dateg__3c1fe2d6`  default (now()),
 	`clientname`   	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_hourlygeolatencytable`  ( 
 	`_date`        	datetime(3) not null,
@@ -283,7 +283,7 @@ create table `r_hourlygeolatencytable`  (
 	`requestmean`  	float null,
 	`dategenerated`	datetime(3), -- not null constraint `df__r_hrgeolate__dateg__3c1fe2d6`  default (now()),
 	`clientname`   	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_hourlyusers`  ( 
 	`_date`        	datetime(3) not null,
@@ -294,7 +294,7 @@ create table `r_hourlyusers`  (
 	`label`        	varchar(100) null,
 	`dategenerated`	datetime(3), -- not null constraint `df__r_hourlyu__dateg__6f9f86dc`  default (now()),
 	`clientname`   	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_participationcountstable`  ( 
 	`_date`                	datetime(3) not null,
@@ -310,7 +310,7 @@ create table `r_participationcountstable`  (
 	`testname`             	varchar(255) null,
 	`opportunity`          	int null,
 	`clientname`           	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_proctorpackage`  ( 
 	`_key`       	bigint not null auto_increment,
@@ -323,7 +323,7 @@ create table `r_proctorpackage`  (
 	`dateend`    	datetime(3) null,
 	`testtype` 		varchar(60) NOT NULL default 'ANY',
 	constraint `pk_r_proctorpackage` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `r_schoolparticipationreport`  ( 
 	`schoolrtskey`       	bigint not null,
@@ -350,7 +350,7 @@ create table `r_schoolparticipationreport`  (
 	`schoolid`           	varchar(100) null,
 	`schoolname`         	varchar(200) null,
 	`clientname`         	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `r_studentkeyid` (
 	`studentkey` bigint not null auto_increment,
@@ -358,7 +358,7 @@ create table `r_studentkeyid` (
 	`statecode` varchar(7) not null,
 	`clientname` varchar(100) not null,
 	constraint `pk_r_studentkeyid` primary key clustered(`studentkey`)
-) default charset = UTF8;
+);
 	
 create table `r_studentpackage`  ( 
 	`_key`       	bigint not null auto_increment,
@@ -370,7 +370,7 @@ create table `r_studentpackage`  (
 	`datecreated`	datetime(3) not null, -- constraint `df_r_studentpackage_datecreated`  default (now()),
 	`dateend`    	datetime(3) null,
 	constraint `pk_r_studentpackage` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `r_testcounts`  ( 
 	`_date`        	datetime(3) not null,
@@ -379,7 +379,7 @@ create table `r_testcounts`  (
 	`count`        	int null,
 	`dategenerated`	datetime(3) not null, -- constraint `df__r_testcou__dateg__6eab62a3`  default (now()),
 	`clientname`   	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `simp_itemgroup`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -388,7 +388,7 @@ create table `simp_itemgroup`  (
 	`maxitems`    	int not null,
 	`passagekey`  	bigint null,
 	constraint `pk_simpsegmentgroup` primary key clustered(`_fk_session`,`_efk_segment`,`groupid`)
-) default charset = UTF8;
+);
 
 create table `simp_segment`  ( 
 	`_fk_session`       	varbinary(16) not null,
@@ -431,7 +431,7 @@ create table `simp_segment`  (
     `terminationtooclose`    bit NOT NULL DEFAULT 0,
     `terminationflagsand`    bit NOT NULL  DEFAULT 0,
 	constraint `pk_simptestsegment` primary key clustered(`_fk_session`,`_efk_segment`)
-) default charset = UTF8;
+);
 
 create table `simp_segmentcontentlevel`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -452,7 +452,7 @@ create table `simp_segmentcontentlevel`  (
     `precisiontargetmetweight`    float NULL,
     `precisiontargetnotmetweight` float NULL,
 	constraint `pk_simpsegmentblueprint` primary key clustered(`_fk_session`,`_efk_segment`,`contentlevel`)
-) default charset = UTF8;
+);
 
 create table `simp_segmentitem`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -465,7 +465,7 @@ create table `simp_segmentitem`  (
 	`groupid`     	varchar(50) null,
 	`itemkey`     	bigint null,
 	constraint `pk_simpsegmentitem` primary key clustered(`_fk_session`,`_efk_segment`,`_efk_item`)
-) default charset = UTF8;
+);
 
 create table `simp_session`  ( 
 	`_key`        	varbinary(16) not null, -- default uuid(),
@@ -480,7 +480,7 @@ create table `simp_session`  (
 	`clientname`  	varchar(100) not null,
 	`language`    	varchar(50) null,
 	constraint `pk_tblsimpsession` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `simp_sessiontests`  ( 
 	`_fk_session`      	varbinary(16) not null,
@@ -493,7 +493,7 @@ create table `simp_sessiontests`  (
 	`strandcorrelation`	float null,
     `handscoreitemtypes` varchar(256) null,
 	constraint `pk_simpsessiontests` primary key clustered(`_fk_session`,`_efk_adminsubject`)
-) default charset = UTF8;
+);
 
 create table `simp_itemselectionparameter` (
 	`_fk_session`	   varbinary(16) not null,
@@ -503,7 +503,7 @@ create table `simp_itemselectionparameter` (
 	`value`            varchar(200) not null,
 	`label`            varchar(200) default null,
 	constraint `pk_simpitemselectionparameter` primary key clustered(`_fk_session`,`_fk_adminsubject`,`bpelementid`,`name`)
-) default charset = UTF8;
+);
 
 create table `sim_itemgroup`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -511,7 +511,7 @@ create table `sim_itemgroup`  (
 	`groupid`     	varchar(50) not null,
 	`maxitems`    	int not null,
 	constraint `pk_segmentgroup` primary key clustered(`_fk_session`,`_efk_segment`,`groupid`)
-) default charset = UTF8;
+);
 
 create table `sim_segment`  ( 
 	`_fk_session`       	varbinary(16) not null,
@@ -551,7 +551,7 @@ create table `sim_segment`  (
     `terminationtooclose`    bit NOT NULL DEFAULT 0,
     `terminationflagsand`    bit NOT NULL  DEFAULT 0,
 	constraint `pk_sim_testsegment` primary key clustered(`_fk_session`,`_efk_segment`)
-) default charset = UTF8;
+);
 
 create table `sim_segmentcontentlevel`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -570,7 +570,7 @@ create table `sim_segmentcontentlevel`  (
     `precisiontargetmetweight`    float NULL,
     `precisiontargetnotmetweight` float NULL,
 	constraint `pk_segmentblueprint` primary key clustered(`_fk_session`,`_efk_segment`,`contentlevel`)
-) default charset = UTF8;
+);
 
 create table `sim_segmentitem`  ( 
 	`_fk_session` 	varbinary(16) not null,
@@ -582,7 +582,7 @@ create table `sim_segmentitem`  (
 	`strand`      	varchar(150) null,
 	`groupid`     	varchar(50) null,
 	constraint `pk_sim_segmentitem` primary key clustered(`_fk_session`,`_efk_segment`,`_efk_item`)
-) default charset = UTF8;
+);
 
 create table `sim_user`  ( 
 	`userid`    	varchar(100) not null,
@@ -591,14 +591,14 @@ create table `sim_user`  (
 	`password`  	varchar(25) null,
 	`userkey`   	bigint not null default 0,
 	constraint `pk_simuser` primary key clustered(`userid`)
-) default charset = UTF8;
+);
 
 create table `sim_userclient`  ( 
 	`_fk_simuser`	varchar(100) not null,
 	`clientname` 	varchar(100) not null,
 	`isadmin`    	bit not null default 0,
 	constraint `pk_simuserclient` primary key clustered(`_fk_simuser`,`clientname`)
-) default charset = UTF8;
+);
 
 create table `sim_itemselectionparameter` (
 	`_fk_session`      varbinary(16) not null,
@@ -609,7 +609,7 @@ create table `sim_itemselectionparameter` (
 	`value`            varchar(200) not null,
 	`label`            varchar(200) default null,
 	constraint `pk_simitemselectionparameter` primary key clustered(`_fk_session`,`_fk_adminsubject`,`bpelementid`, `name`)
-) default charset = UTF8;
+);
 
 create table  `sim_defaultitemselectionparameter`(
 	`algorithmtype` varchar(100) not null,
@@ -617,21 +617,21 @@ create table  `sim_defaultitemselectionparameter`(
 	`name` 		varchar(100) not null,
 	`value` 	varchar(200) not null,
 	`label` 	varchar(200) default null
-) default charset = UTF8;
+);
 
 create table `sim_sessiontestpackage` (
 	`_fk_session`      varbinary(16) not null,
 	`_fk_adminsubject` varchar(250) not null,
 	`_fk_testpackage`  varbinary(16) not null,
 	constraint `pk_sim_sessiontestpackage` primary key clustered(`_fk_session`, `_fk_adminsubject`, `_fk_testpackage`)
-) default charset = UTF8;
+);
 
 create table `sirve_audit`  ( 
 	`_date`           	datetime(3) not null, -- constraint `df__sirve_aud___date__30a40e89`  default (now()),
 	`_fk_sirvesession`	varbinary(16) not null,
 	`action`          	varchar(100) not null,
 	`values`          	text null 
-	) default charset = UTF8;
+	);
 
 create table `sirve_session`  ( 
 	`_key`         	varbinary(16) not null,
@@ -642,7 +642,7 @@ create table `sirve_session`  (
 	`proctorname`  	varchar(100) null,
 	`status`       	varchar(25) null,
 	constraint `pk_sirvesession` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `session`  ( 
 	`_key`            	varbinary(16) not null, -- constraint `df_tblsession__key`  default (newid()),
@@ -671,7 +671,7 @@ create table `session`  (
 	`sim_start`       	datetime(3) null,
 	`sim_stop`        	datetime(3) null,
 	constraint `pk_tblsession` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `sessiontests`  ( 
 	`_fk_session`      	varbinary(16) not null,
@@ -686,13 +686,13 @@ create table `sessiontests`  (
 	`sim_thinktime`    	int null default 0,
 	`handscoreitemtypes` varchar(256) null,
 	constraint `pk_sessiontests` primary key clustered(`_fk_session`,`_efk_adminsubject`)
-) default charset = UTF8;
+);
 
 create table `setofproctoralertmessages`  ( 
 	`_efk_proctor`     	bigint not null,
 	`_fk_alertmessages`	varbinary(16) not null,
 	`datechanged`      	datetime(3) not null 
-	) default charset = UTF8;
+	);
 
 create table `testopportunity`  ( 
 	`_efk_testee`         	bigint not null,
@@ -762,7 +762,7 @@ create table `testopportunity`  (
 	`scorestring`           varchar(4096) null,
 	`scoretuples`           varchar(4096) null,
 	constraint `pk_testopportunity_guid` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `testopportunitycontentcounts`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -772,7 +772,7 @@ create table `testopportunitycontentcounts`  (
 	`dateentered`        	datetime(3) not null, -- constraint `df__testoppor__datee__08ab2bc8`  default (now()),
 	`_efk_adminsubject`  	varchar(250) not null,
 	constraint `pk_testoppcontentcnts` primary key clustered(`_fk_testopportunity`,`contentlevel`)
-) default charset = UTF8;
+);
 
 create table `testopportunityscores`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -786,7 +786,7 @@ create table `testopportunityscores`  (
 	`useforability`      	bit not null default 0,
 	`hostname`           	varchar(25) null, -- constraint `df__testoppor__hostn__104c4d90`  default (host_name()),
 	constraint `pk_testopportunityscores` primary key clustered(`_fk_testopportunity`,`measureof`,`measurelabel`)
-) default charset = UTF8;
+);
 
 create table `testopportunitysegment`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -814,7 +814,7 @@ create table `testopportunitysegment`  (
 	`satisfiedreason`       varchar(20) DEFAULT NULL,
 	`offgradeitems`      	varchar(50) null,
 	constraint `pk_testoppsegment` primary key clustered(`_fk_testopportunity`,`segmentposition`)
-) default charset = UTF8;
+);
 
 create table `testopportunitysegmentcounts`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -827,7 +827,7 @@ create table `testopportunitysegmentcounts`  (
 	`minitems`           	int null,
 	`maxitems`           	int null,
 	constraint `pk_testoppsegmentcnts` primary key clustered(`_fk_testopportunity`,`_efk_segment`,`contentlevel`)
-) default charset = UTF8;
+);
 
 create table `testopportunity_readonly`  ( 
 	`_efk_testee`         	bigint null,
@@ -884,7 +884,7 @@ create table `testopportunity_readonly`  (
 	`environment`         	varchar(50) null,
 	`mode`                	varchar(50) null,
 	constraint `pk_testopportunity_readonly` primary key clustered(`_fk_testopportunity`)
-) default charset = UTF8;
+);
 
 create table `testeeaccommodations`  ( 
 	`acctype`            	varchar(50) not null,
@@ -900,7 +900,7 @@ create table `testeeaccommodations`  (
 	`valuecount`         	int null,
 	`recordusage`        	bit not null default 0,
 	constraint `pk_testeeaccommodations` primary key clustered(`_fk_testopportunity`,`acctype`,`acccode`,`segment`)
-) default charset = UTF8;
+);
 
 create table `testeeattribute`  ( 
 	`_fk_testopportunity`	varbinary(16) null,
@@ -908,7 +908,7 @@ create table `testeeattribute`  (
 	`attributevalue`     	varchar(400) null,
 	`context`            	varchar(50) not null,
 	`_date`              	datetime(3) not null -- constraint `df__testeeatt___date__7b113988`  default (now()) 
-	) default charset = latin1;
+	);
 
 create table `testeecomment`  ( 
 	`clientname`         	varchar(100) not null,
@@ -920,7 +920,7 @@ create table `testeecomment`  (
 	`context`            	varchar(200) null,
 	`_fk_session`        	varbinary(16) null,
 	`groupid`            	varchar(50) null 
-	) default charset = UTF8;
+	);
 
 create table `testeehistory`  ( 
 	`clientname`         	varchar(100) not null,
@@ -938,7 +938,7 @@ create table `testeehistory`  (
 	`itemgroupstring`    	text null,
 	`initialabilitydelim`   varchar(400) null,
 	constraint `pk_testeehistory` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `testeeitemhistory`  ( 
 	`clientname`         	varchar(100) not null,
@@ -951,7 +951,7 @@ create table `testeeitemhistory`  (
 	`itempage`           	int null,
 	`itemcount`          	int null,
 	`_date`              	datetime(3) null -- constraint `df__testeeite___date__23d42350`  default (now()) 
-	) default charset = UTF8;
+	);
 
 create table `testeerelationship`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -961,7 +961,7 @@ create table `testeerelationship`  (
 	`_date`              	datetime(3) not null, -- constraint `df__testeerel___date__28d80438`  default (now()),
 	`attributevalue`     	varchar(500) null,
 	`relationship`       	varchar(100) null 
-	) default charset = UTF8;
+	);
 
 create table `testeeresponse`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -1015,7 +1015,7 @@ create table `testeeresponse`  (
 	`satellite`          	varchar(200) null, -- default (serverproperty('machinename')),
 	`scoredimensions`       varchar(4096) null,
 	constraint `pk_testoppresponse` primary key clustered(`_fk_testopportunity`,`position`)
-) default charset = UTF8;
+);
 
 create table `testeeresponsearchive`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -1062,7 +1062,7 @@ create table `testeeresponsearchive`  (
 	`segmentid`          	varchar(100) null,
 	`abilityestimate`    	float null,
 	constraint `pk_testeeresponsearchive` primary key clustered(`_fk_testopportunity`,`position`,`responsesequence`)
-) default charset = UTF8;
+);
 
 create table `testeeresponseaudit`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -1082,7 +1082,7 @@ create table `testeeresponseaudit`  (
 	`_efk_item`          	varchar(50) null,
 	`geosyncid`          	varbinary(16) null,
 	`satellite`          	varchar(200) null -- constraint `df__testeeres__satel__66a0f7de`  default (serverproperty('machinename')) 
-	) default charset = UTF8;
+	);
 
 create table `testeeresponsescore`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -1094,7 +1094,7 @@ create table `testeeresponsescore`  (
 	`scoreattempts`      	int not null,
 	`responsesequence`   	int not null,
 	constraint `pk_responsescore` primary key clustered(`_fk_testopportunity`,`position`)
-) default charset = UTF8;
+);
 
 create table `testoppabilityestimate`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -1104,7 +1104,7 @@ create table `testoppabilityestimate`  (
 	`info`               	float not null default 0.2,
 	`lambda`             	float not null default 0.00632,
 	`_date`              	datetime(3) not null -- constraint `df__testoppab___date__48076225`  default (now()) 
-	) default charset = UTF8;
+	);
 
 create table `testopprequest`  ( 
 	`_key`               	varbinary(16) not null, -- constraint `df__testoppreq___key__6932806f`  default (newid()),
@@ -1121,7 +1121,7 @@ create table `testopprequest`  (
 	`requestdescription` 	varchar(255) null,
 	`datedenied`         	datetime(3) null,
 	constraint `pk_testopprequest` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `testopptoolsused`  ( 
 	`_fk_testopportunity`	varbinary(16) not null,
@@ -1129,14 +1129,14 @@ create table `testopptoolsused`  (
 	`tooltype`           	varchar(100) not null,
 	`toolcode`           	varchar(100) not null,
 	`groupid`            	varchar(50) not null 
-	) default charset = UTF8;
+	);
 
 create table `_anonymoustestee`  ( 
 	`_key`       	bigint not null auto_increment,
 	`datecreated`	datetime(3) not null, -- constraint `df__anonymoustestee_datecreated`  default (now()),
 	`clientname` 	varchar(100) not null,
 	constraint `pk__anonymoustestee` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `_externs`  ( 
 	`clientname`      	varchar(100) not null,
@@ -1148,13 +1148,13 @@ create table `_externs`  (
 	`shiftftstart`    	int not null default 0,
 	`shiftftend`      	int not null default 0,
 	constraint `pk__externs` primary key clustered(`clientname`)
-) default charset = UTF8;
+);
 
 create table `_maxtestopps`  ( 
 	`numopps`   	int not null,
 	`_time`     	datetime(3) not null,
 	`clientname`	varchar(100) not null 
-	) default charset = UTF8;
+	);
 
 create table `_missingmessages`  ( 
 	`context`    	varchar(200) not null,
@@ -1162,7 +1162,7 @@ create table `_missingmessages`  (
 	`appkey`     	varchar(255) not null,
 	`message`    	text not null,
 	`application`	varchar(200) null 
-	) default charset = UTF8;
+	);
 
 create table `_sb_errorlog`  ( 
 	`id`                	varbinary(16) not null,
@@ -1172,13 +1172,13 @@ create table `_sb_errorlog`  (
 	`procname`          	varchar(100) null,
 	`_date`             	datetime(3) not null, -- constraint `df___sb_error___date__7dee718a`  default (now()),
 	constraint `pk_sb_errorlog_7cfa4d51` primary key clustered(`id`)
-) default charset = UTF8;
+);
 
 create table `_sb_messagehandler`  ( 
 	`messagetype`	varchar(200) not null,
 	`handlerproc`	varchar(200) not null,
 	constraint `pk_sb_messagehandl_7b1204df` primary key clustered(`messagetype`)
-) default charset = UTF8;
+);
 
 create table `_sb_messages`  ( 
 	`_key`              	varbinary(16) not null,
@@ -1195,7 +1195,7 @@ create table `_sb_messages`  (
 	`processingerror`   	text null,
 	`dateresponded`     	datetime(3) null,
 	constraint `pk_sb_messages_7fd6b9fc` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `_sb_messagesarchive`  ( 
 	`_key`              	varbinary(16) not null,
@@ -1212,7 +1212,7 @@ create table `_sb_messagesarchive`  (
 	`processingerror`   	text null,
 	`_datearchived`     	datetime(3) not null, -- constraint `df___sb_messa___date__14d1d6e2`  default (now()),
 	constraint `pk_sb_messagesarch_13ddb2a9` primary key clustered(`_key`)
-) default charset = UTF8;
+);
 
 create table `_sitelatency`  ( 
 	`n`             	int null,
@@ -1225,14 +1225,14 @@ create table `_sitelatency`  (
 	`sitename`      	varchar(200) null,
 	`startdate`     	datetime(3) null,
 	constraint `pk_schoollatency` primary key clustered(`clientname`,`sitekey`)
-) default charset = UTF8;
+);
 
 create table `_synonyms`  ( 
 	`dbname`	varchar(200) not null,
 	`_date` 	datetime(3) not null, -- constraint `df_dbo__synonyms__date`  default (now()),
 	`prefix`	varchar(200) not null,
 	constraint `pk_synonyms` primary key clustered(`prefix`)
-) default charset = UTF8;
+);
 
 create table `tblclsclientsessionstatus`  ( 
 	`clsserversessionkey`  	bigint not null,
@@ -1242,7 +1242,7 @@ create table `tblclsclientsessionstatus`  (
 	`lastactivitytimestamp`	datetime(3) not null,
 	`clientkey`            	bigint not null,
 	constraint `pk_tblclsclientsessionstatus` primary key clustered(`clsserversessionkey`,`clientkey`)
-) default charset = UTF8;
+);
 
 CREATE TABLE `tbluser` (
   `userid` varchar(50) NOT NULL,
@@ -1252,5 +1252,5 @@ CREATE TABLE `tbluser` (
   `clientname` varchar(225) NULL,
   PRIMARY KEY (`userid`),
    key `userkey`(`userkey`)
-)  DEFAULT CHARSET=utf8;
+);
 

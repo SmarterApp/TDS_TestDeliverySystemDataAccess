@@ -5,6 +5,7 @@ import org.opentestsystem.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import tds.dll.common.diagnostic.domain.Level;
 import tds.dll.common.diagnostic.domain.Rating;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Controller
 public abstract class AbstractStatusController {
     @Autowired
     DiagnosticSystemService diagnosticSystemService;
@@ -48,7 +50,7 @@ public abstract class AbstractStatusController {
     }
 
 
-    @RequestMapping(value = "status", method = RequestMethod.GET)
+    @RequestMapping(value = "/status", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public Status getStatus(@RequestParam(value = "level", required = false, defaultValue = "0") Integer level,
